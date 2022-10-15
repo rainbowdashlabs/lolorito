@@ -175,3 +175,14 @@ FROM (SELECT wis.world,
                LEFT JOIN lolorito.world_sales ws ON wis.world = ws.world
                LEFT JOIN lolorito.world_views wv ON wv.world = wis.world
                LEFT JOIN lolorito.world_item_views wiv ON wis.world = wiv.world AND wis.item = wiv.item) pre;
+
+CREATE TABLE lolorito.worlds
+(
+    region_name      TEXT,
+    data_center      INTEGER NOT NULL,
+    data_center_name TEXT,
+    world            INTEGER NOT NULL,
+    world_name       TEXT,
+    CONSTRAINT worlds_pk
+        PRIMARY KEY (world, data_center)
+);
