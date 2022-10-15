@@ -70,9 +70,9 @@ CREATE OR REPLACE FUNCTION lolorito.listings_updated()
 AS
 $BODY$
 BEGIN
-    INSERT INTO lolorito.listings_updated as l (item, world, updated)
+    INSERT INTO lolorito.listings_updated AS l (item, world, updated)
     VALUES (new.item, new.world, NOW())
-    ON CONFLICT(item,world) DO UPDATE SET updated = now();
+    ON CONFLICT(item,world) DO UPDATE SET updated = NOW();
     RETURN new;
 END;
 $BODY$;
@@ -83,9 +83,9 @@ CREATE OR REPLACE FUNCTION lolorito.sales_updated()
 AS
 $BODY$
 BEGIN
-    INSERT INTO lolorito.sales_updated as l (item, world, updated)
+    INSERT INTO lolorito.sales_updated AS l (item, world, updated)
     VALUES (new.item, new.world, NOW())
-    ON CONFLICT(item,world) DO UPDATE SET updated = now();
+    ON CONFLICT(item,world) DO UPDATE SET updated = NOW();
     RETURN new;
 END;
 $BODY$;
@@ -118,8 +118,60 @@ CREATE TABLE lolorito.listings_viewed
 (
     world INTEGER NOT NULL,
     item  INTEGER NOT NULL,
-    day   DATE    NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    day   DATE    NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
     count INTEGER NOT NULL DEFAULT 1,
     CONSTRAINT listings_viewed_pk
         PRIMARY KEY (world, item, day)
 );
+
+CREATE OR REPLACE VIEW lolorito.world_item_views AS
+SELECT world,
+       item,
+       SUM(count) OVER (PARTITION BY world, item) AS views
+FROM lolorito.listings_viewed v
+WHERE v.day > NOW() - INTERVAL '7 DAYS'
+GROUP BY world, item, count;
+
+CREATE OR REPLACE VIEW lolorito.world_views AS
+SELECT world,
+       MAX(v.views) AS max_viewed,
+       SUM(v.views) AS total_views
+FROM lolorito.world_item_views v
+GROUP BY world;
+
+CREATE OR REPLACE VIEW lolorito.world_item_sales AS
+SELECT world,
+       item,
+       hq,
+       SUM(s.quantity) AS quantity
+FROM lolorito.sales s
+WHERE s.sold > NOW() - INTERVAL '7 DAYS'
+GROUP BY world, item, hq;
+
+CREATE OR REPLACE VIEW lolorito.world_sales AS
+SELECT world,
+       SUM(quantity) AS total_sales,
+       MAX(quantity) AS max_sales
+FROM lolorito.world_item_sales s
+GROUP BY world;
+
+CREATE OR REPLACE VIEW lolorito.world_item_popularity AS
+SELECT world,
+       item,
+       hq,
+       market_volume,
+       interest,
+       ROUND((market_volume + interest) / 2, 4) AS popularity,
+       sales,
+       views
+FROM (SELECT wis.world,
+             wis.hq,
+             wis.item,
+             ROUND(wis.quantity / ws.max_sales::NUMERIC * 100, 4)            AS market_volume,
+             COALESCE(ROUND(wiv.views / wv.max_viewed::NUMERIC * 100, 4), 0) AS interest,
+             wis.quantity as sales,
+             wiv.views
+      FROM lolorito.world_item_sales wis
+               LEFT JOIN lolorito.world_sales ws ON wis.world = ws.world
+               LEFT JOIN lolorito.world_views wv ON wv.world = wis.world
+               LEFT JOIN lolorito.world_item_views wiv ON wis.world = wiv.world AND wis.item = wiv.item) pre;

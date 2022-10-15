@@ -5,11 +5,16 @@ import de.chojo.logutil.marker.LogNotify;
 import de.chojo.lolorito.config.Configuration;
 import de.chojo.lolorito.dao.Listings;
 import de.chojo.lolorito.dao.Sales;
+import de.chojo.sadu.base.QueryFactory;
 import de.chojo.sadu.databases.PostgreSql;
 import de.chojo.sadu.datasource.DataSourceCreator;
 import de.chojo.sadu.updater.QueryReplacement;
 import de.chojo.sadu.updater.SqlUpdater;
 import de.chojo.sadu.wrapper.QueryBuilderConfig;
+import de.chojo.universalis.worlds.DataCenter;
+import de.chojo.universalis.worlds.Region;
+import de.chojo.universalis.worlds.World;
+import de.chojo.universalis.worlds.Worlds;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -50,10 +55,34 @@ public class Data {
     private void updateDatabase() throws IOException, SQLException {
         var schema = configuration.database().schema();
         SqlUpdater.builder(dataSource, PostgreSql.get())
-                .setReplacements(new QueryReplacement("repbot_schema", schema))
+                .setReplacements(new QueryReplacement("lolorito", schema))
                 .setVersionTable(schema + ".lolorito_version")
                 .setSchemas(schema)
                 .execute();
+        log.info("Updating worlds");
+
+        QueryFactory factory = new QueryFactory(dataSource);
+        for (Region region : Worlds.regions()) {
+            for (World world : region.worlds()) {
+                DataCenter dataCenter = world.dataCenter();
+                factory.builder()
+                        .query("""
+                               INSERT INTO lolorito.worlds(region_name, data_center, data_center_name, world, world_name)
+                               VALUES(?,?,?,?,?)
+                               ON CONFLICT (data_center, world)
+                                    DO UPDATE SET region_name = excluded.region_name,
+                                                  data_center_name = excluded.data_center_name,
+                                                  world_name = excluded.world_name
+                               """)
+                        .parameter(stmt -> stmt.setString(region.name())
+                                               .setInt(dataCenter.id())
+                                               .setString(dataCenter.name())
+                                               .setInt(world.id())
+                                               .setString(world.name())
+                        ).insert()
+                        .send();
+            }
+        }
     }
 
     private void configure() {

@@ -4,10 +4,9 @@ plugins {
 }
 
 group = "de.chojo"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://eldonexus.de/repository/maven-public")
     maven("https://eldonexus.de/repository/maven-proxies")
@@ -19,7 +18,7 @@ dependencies {
         exclude(group = "club.minnced", module = "opus-java")
     }
 
-    implementation("de.chojo.universalis", "universalis", "1.2.0")
+    implementation("de.chojo.universalis", "universalis", "1.2.1")
 
     // database
     implementation("org.postgresql", "postgresql", "42.5.0")
