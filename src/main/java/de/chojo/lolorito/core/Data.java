@@ -67,7 +67,7 @@ public class Data {
                 DataCenter dataCenter = world.dataCenter();
                 factory.builder()
                         .query("""
-                               INSERT INTO lolorito.worlds(region_name, data_center, data_center_name, world, world_name)
+                               INSERT INTO worlds(region_name, data_center, data_center_name, world, world_name)
                                VALUES(?,?,?,?,?)
                                ON CONFLICT (data_center, world)
                                     DO UPDATE SET region_name = excluded.region_name,

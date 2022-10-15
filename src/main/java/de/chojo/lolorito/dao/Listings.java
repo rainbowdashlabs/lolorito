@@ -34,7 +34,7 @@ public class Listings extends QueryFactory {
             int totalPrice = listing.price().total();
             LocalDateTime reviewTime = listing.lastReviewTime();
             builder.query("""
-                          INSERT INTO lolorito.listings(world, item, hq, review_time, unit_price, quantity, total)
+                          INSERT INTO listings(world, item, hq, review_time, unit_price, quantity, total)
                           VALUES(?,?,?,?,?,?,?);
                           """).parameter(stmt -> stmt.setInt(worldId).setInt(itemId).setBoolean(hq)
                                                      .setTimestamp(Timestamp.valueOf(reviewTime))
@@ -42,7 +42,7 @@ public class Listings extends QueryFactory {
                    .append();
         }
         builder.query("""
-                      INSERT INTO lolorito.listings_viewed AS l (world, item)
+                      INSERT INTO listings_viewed AS l (world, item)
                       VALUES(?,?)
                       ON CONFLICT(world,item, day)
                         DO UPDATE SET count = l.count + 1;
@@ -54,7 +54,7 @@ public class Listings extends QueryFactory {
 
     public void clearListings(Item item, World world) {
         builder().query("""
-                                DELETE FROM lolorito.listings WHERE item = ? AND world = ?;
+                        DELETE FROM listings WHERE item = ? AND world = ?;
                         """)
                  .parameter(stmt -> stmt.setInt(item.id()).setInt(world.id()))
                  .delete()

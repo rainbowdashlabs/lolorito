@@ -76,7 +76,7 @@ tasks {
     shadowJar {
         mergeServiceFiles()
         manifest {
-            attributes(mapOf("Main-Class" to "de.chojo.repbot.ReputationBot"))
+            attributes(mapOf("Main-Class" to "de.chojo.lolorito.Lolorito"))
         }
     }
 

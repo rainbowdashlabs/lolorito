@@ -28,9 +28,9 @@ public class Items extends QueryFactory {
                                    quantity,
                                    total,
                                    review_time
-                            FROM lolorito.listings l
-                            LEFT JOIN lolorito.listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                            LEFT JOIN lolorito.world_item_popularity wip ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
+                            FROM listings l
+                            LEFT JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
+                            LEFT JOIN world_item_popularity wip ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
                             WHERE l.world = ?
                               AND unit_price > ?
                               AND lu.updated > NOW() - INTERVAL ?
@@ -48,9 +48,9 @@ public class Items extends QueryFactory {
                                    quantity,
                                    total,
                                    lu.updated
-                            FROM lolorito.listings l
-                            LEFT JOIN lolorito.worlds w ON l.world = w.world
-                            LEFT JOIN lolorito.listings_updated lu ON l.world = lu.world AND l.item = lu.item
+                            FROM listings l
+                            LEFT JOIN worlds w ON l.world = w.world
+                            LEFT JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
                             WHERE l.world != ?
                               AND lu.updated > NOW() - INTERVAL ?
                               AND %s = ?
