@@ -77,9 +77,25 @@ public class Items extends QueryFactory {
                             FROM homeworld h LEFT JOIN other_worlds o ON h.item = o.item AND h.hq = o.hq
                             WHERE (h.unit_price::numeric / o.unit_price) * 100 > ?
                               AND (h.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?
+                        ),
+                        ranked AS (
+                            SELECT rank() OVER (PARTITION BY world, item, hq ORDER BY profit) as world_rank,
+                                   rank() OVER (PARTITION BY item, hq ORDER BY profit) as global_rank,
+                                   world,
+                                   item,
+                                   hq,
+                                   unit_price,
+                                   quantity,
+                                   total,
+                                   updated,
+                                   ROUND(profit_perc, 4) AS profit_perc,
+                                   profit
+                            FROM filtered
+                            ORDER BY profit DESC                                                
                         )
                         SELECT world, item, hq, unit_price, quantity, total, updated, ROUND(profit_perc, 4) AS profit_perc, profit
-                        FROM filtered
+                        FROM ranked
+                        WHERE world_rank <= 10 AND global_rank < 100
                         ORDER BY profit DESC
                         LIMIT ?;
                        """, filter.target().columnName())
