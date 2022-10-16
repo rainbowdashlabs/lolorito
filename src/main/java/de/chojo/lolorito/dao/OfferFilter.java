@@ -200,15 +200,15 @@ public class OfferFilter extends QueryFactory {
         String descr = """
                        World: %s
                        Limit: %d
-                       Unit Price: >%d
-                       Profit %%: >%d%%
-                       Profit: >%d
+                       Unit Price: %d
+                       Profit %%: %d%%
+                       Profit: %d
                        Freshness: %d hours
-                       Popularity: >%d
-                       Market Volume: >%d
-                       Interest: >%d
-                       Sales: >%d
-                       Views: >%d
+                       Popularity: %f
+                       Market Volume: %f
+                       Interest: %f
+                       Sales: %d
+                       Views: %d
                        Target: %s
                        """.formatted(world.name(), limit, minUnitPrice, minProfitPercentage,minProfit, minRefreshHours, minPopularity,
                 minMarketVolume, minInterest, minSales, minViews, target.name()).stripIndent();
