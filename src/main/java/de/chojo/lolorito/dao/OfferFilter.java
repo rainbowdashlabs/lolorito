@@ -18,9 +18,9 @@ public class OfferFilter extends QueryFactory {
     private int minUnitPrice = 1000;
     private int minProfitPercentage = 10;
     private int minRefreshHours = 1;
-    private int minPopularity = 0;
-    private int minMarketVolume = 0;
-    private int minInterest = 0;
+    private double minPopularity = 0;
+    private double minMarketVolume = 0;
+    private double minInterest = 0;
     private int minSales = 0;
     private int minViews = 0;
     private Target target = Target.DATA_CENTER;
@@ -71,15 +71,15 @@ public class OfferFilter extends QueryFactory {
         return minProfitPercentage;
     }
 
-    public int minPopularity() {
+    public double minPopularity() {
         return minPopularity;
     }
 
-    public int minMarketVolume() {
+    public double minMarketVolume() {
         return minMarketVolume;
     }
 
-    public int minInterest() {
+    public double minInterest() {
         return minInterest;
     }
 
@@ -127,20 +127,20 @@ public class OfferFilter extends QueryFactory {
         }
     }
 
-    public void minPopularity(int minPopularity) {
-        if (set("min_popularity", stmt -> stmt.setInt(minPopularity))) {
+    public void minPopularity(double minPopularity) {
+        if (set("min_popularity", stmt -> stmt.setDouble(minPopularity))) {
             this.minPopularity = minPopularity;
         }
     }
 
-    public void minMarketVolume(int minMarketVolume) {
-        if (set("min_market_volume", stmt -> stmt.setInt(minMarketVolume))) {
+    public void minMarketVolume(double minMarketVolume) {
+        if (set("min_market_volume", stmt -> stmt.setDouble(minMarketVolume))) {
             this.minMarketVolume = minMarketVolume;
         }
     }
 
-    public void minInterest(int minInterest) {
-        if (set("world", stmt -> stmt.setInt(minInterest))) {
+    public void minInterest(double minInterest) {
+        if (set("world", stmt -> stmt.setDouble(minInterest))) {
             this.minInterest = minInterest;
         }
     }

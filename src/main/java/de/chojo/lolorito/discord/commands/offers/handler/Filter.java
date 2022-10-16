@@ -55,7 +55,7 @@ public class Filter implements SlashHandler {
         option = event.getOption("min_popularity");
 
         if (option != null) {
-            filter.minPopularity(option.getAsInt());
+            filter.minPopularity(option.getAsDouble());
         }
 
         option = event.getOption("min_refresh_hours");
@@ -67,13 +67,13 @@ public class Filter implements SlashHandler {
         option = event.getOption("min_market_volume");
 
         if (option != null) {
-            filter.minMarketVolume(option.getAsInt());
+            filter.minMarketVolume(option.getAsDouble());
         }
 
         option = event.getOption("min_interest");
 
         if (option != null) {
-            filter.minInterest(option.getAsInt());
+            filter.minInterest(option.getAsDouble());
         }
 
         option = event.getOption("min_sales");
