@@ -48,4 +48,8 @@ public class Threading {
     public ThreadGroup hikariGroup() {
         return hikariGroup;
     }
+
+    public ThreadGroup jdaGroup() {
+        return jdaGroup;
+    }
 }

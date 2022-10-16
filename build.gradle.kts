@@ -14,11 +14,11 @@ repositories {
 
 dependencies {
     //discord
-    implementation("de.chojo", "cjda-util", "2.7.5+alpha.20") {
+    implementation("de.chojo", "cjda-util", "2.7.6+alpha.21-DEV") {
         exclude(group = "club.minnced", module = "opus-java")
     }
 
-    implementation("de.chojo.universalis", "universalis", "1.2.1")
+    implementation("de.chojo.universalis", "universalis", "1.2.2")
 
     // database
     implementation("org.postgresql", "postgresql", "42.5.0")
@@ -31,7 +31,9 @@ dependencies {
     implementation("org.slf4j", "slf4j-api", "2.0.3")
     implementation("org.apache.logging.log4j", "log4j-core", "2.19.0")
     implementation("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.19.0")
-    implementation("de.chojo", "log-util", "1.0.0")
+    implementation("de.chojo", "log-util", "1.0.0"){
+        exclude("org.apache.logging.log4j")
+    }
 
     // unit testing
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

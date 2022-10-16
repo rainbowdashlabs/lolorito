@@ -2,6 +2,7 @@ package de.chojo.lolorito;
 
 import de.chojo.lolorito.config.Configuration;
 import de.chojo.lolorito.core.Data;
+import de.chojo.lolorito.core.Discord;
 import de.chojo.lolorito.core.Threading;
 import de.chojo.lolorito.core.Universalis;
 
@@ -23,5 +24,7 @@ public class Lolorito {
         Data data = Data.create(threading, configuration);
 
         Universalis.create(threading, data);
+
+        Discord.create(data, threading, configuration);
     }
 }

@@ -3,14 +3,18 @@ package de.chojo.lolorito.core;
 import com.zaxxer.hikari.HikariDataSource;
 import de.chojo.logutil.marker.LogNotify;
 import de.chojo.lolorito.config.Configuration;
+import de.chojo.lolorito.dao.Items;
 import de.chojo.lolorito.dao.Listings;
 import de.chojo.lolorito.dao.Sales;
+import de.chojo.lolorito.dao.Users;
 import de.chojo.sadu.base.QueryFactory;
 import de.chojo.sadu.databases.PostgreSql;
 import de.chojo.sadu.datasource.DataSourceCreator;
+import de.chojo.sadu.mapper.RowMapperRegistry;
 import de.chojo.sadu.updater.QueryReplacement;
 import de.chojo.sadu.updater.SqlUpdater;
 import de.chojo.sadu.wrapper.QueryBuilderConfig;
+import de.chojo.universalis.provider.NameSupplier;
 import de.chojo.universalis.worlds.DataCenter;
 import de.chojo.universalis.worlds.Region;
 import de.chojo.universalis.worlds.World;
@@ -29,23 +33,31 @@ public class Data {
     private HikariDataSource dataSource;
     private Listings listings;
     private Sales sales;
+    private Items items;
+    private NameSupplier itemNameSupplier;
+    private Users users;
 
     private Data(Threading threading, Configuration configuration) {
         this.threading = threading;
         this.configuration = configuration;
     }
 
-    public static Data create(Threading threading, Configuration configuration) throws SQLException, IOException {
+    public static Data create(Threading threading, Configuration configuration) throws SQLException, IOException, InterruptedException {
         var data = new Data(threading, configuration);
         data.init();
         return data;
     }
 
-    public void init() throws SQLException, IOException {
+    public void init() throws SQLException, IOException, InterruptedException {
+        initItems();
         configure();
         initConnection();
         updateDatabase();
         initDao();
+    }
+
+    private void initItems() throws IOException, InterruptedException {
+        itemNameSupplier = de.chojo.universalis.provider.items.Items.create();
     }
 
     public void initConnection() {
@@ -86,6 +98,7 @@ public class Data {
     }
 
     private void configure() {
+        RowMapperRegistry registry = new RowMapperRegistry();
         log.info("Configuring QueryBuilder");
         var logger = getLogger("DbLogger");
         QueryBuilderConfig.setDefault(QueryBuilderConfig.builder()
@@ -98,6 +111,8 @@ public class Data {
         log.info("Creating DAOs");
         listings = new Listings(dataSource);
         sales = new Sales(dataSource);
+        items = new Items(dataSource, itemNameSupplier);
+        users = new Users(dataSource);
     }
 
     private HikariDataSource getConnectionPool() {
@@ -127,5 +142,13 @@ public class Data {
 
     public Sales sales() {
         return sales;
+    }
+
+    public Items items() {
+        return items;
+    }
+
+    public Users users() {
+        return users;
     }
 }
