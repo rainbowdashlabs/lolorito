@@ -204,9 +204,9 @@ public class OfferFilter extends QueryFactory {
                        Profit %%: %d%%
                        Profit: %d
                        Freshness: %d hours
-                       Popularity: %f
-                       Market Volume: %f
-                       Interest: %f
+                       Popularity: %.2f
+                       Market Volume: %.2f
+                       Interest: %.2f
                        Sales: %d
                        Views: %d
                        Target: %s
