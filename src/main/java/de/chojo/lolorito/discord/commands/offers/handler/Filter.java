@@ -34,55 +34,55 @@ public class Filter implements SlashHandler {
             filter.world(Worlds.worldByName(option.getAsString()));
         }
 
-        option = event.getOption("min_unit_price");
+        option = event.getOption("unit_price");
 
         if (option != null) {
             filter.unitPrice(option.getAsInt());
         }
 
-        option = event.getOption("min_profit_perc");
+        option = event.getOption("factor");
 
         if (option != null) {
-            filter.factor(option.getAsInt());
+            filter.factor(option.getAsDouble());
         }
 
-        option = event.getOption("min_profit");
+        option = event.getOption("profit");
 
         if (option != null) {
             filter.profit(option.getAsInt());
         }
 
-        option = event.getOption("min_popularity");
+        option = event.getOption("popularity");
 
         if (option != null) {
             filter.popularity(option.getAsDouble());
         }
 
-        option = event.getOption("min_refresh_hours");
+        option = event.getOption("refresh_hours");
 
         if (option != null) {
             filter.refreshHours(option.getAsInt());
         }
 
-        option = event.getOption("min_market_volume");
+        option = event.getOption("market_volume");
 
         if (option != null) {
             filter.marketVolume(option.getAsDouble());
         }
 
-        option = event.getOption("min_interest");
+        option = event.getOption("interest");
 
         if (option != null) {
             filter.interest(option.getAsDouble());
         }
 
-        option = event.getOption("min_sales");
+        option = event.getOption("sales");
 
         if (option != null) {
             filter.sales(option.getAsInt());
         }
 
-        option = event.getOption("min_views");
+        option = event.getOption("views");
 
         if (option != null) {
             filter.views(option.getAsInt());

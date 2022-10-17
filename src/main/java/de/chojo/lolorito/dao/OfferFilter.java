@@ -16,7 +16,7 @@ public class OfferFilter extends QueryFactory {
     private World world = World.of("", -1, null);
     private int limit = 1000;
     private int unitPrice = 1000;
-    private int factor = 2;
+    private double factor = 2;
     private int refreshHours = 1;
     private double popularity = 0;
     private double marketVolume = 0;
@@ -115,8 +115,8 @@ public class OfferFilter extends QueryFactory {
         }
     }
 
-    public void factor(int factor) {
-        if (set("factor", stmt -> stmt.setInt(factor))) {
+    public void factor(double factor) {
+        if (set("factor", stmt -> stmt.setDouble(factor))) {
             this.factor = factor;
         }
     }
@@ -202,7 +202,7 @@ public class OfferFilter extends QueryFactory {
                        World:         %s
                        Limit:         %d
                        Unit Price:    %d
-                       Factor:        %d
+                       Factor:        %.2f
                        Profit:        %d
                        Freshness:     %d hours
                        Popularity:    %.2f
