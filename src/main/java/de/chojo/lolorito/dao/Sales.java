@@ -3,23 +3,25 @@ package de.chojo.lolorito.dao;
 import de.chojo.sadu.base.QueryFactory;
 import de.chojo.sadu.wrapper.stage.QueryStage;
 import de.chojo.sadu.wrapper.stage.UpdateStage;
+import de.chojo.universalis.entities.Item;
 import de.chojo.universalis.entities.Sale;
-import de.chojo.universalis.events.sales.impl.SalesAddEvent;
+import de.chojo.universalis.worlds.World;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 public class Sales extends QueryFactory {
     public Sales(DataSource dataSource) {
         super(dataSource);
     }
 
-    public void logSalesEvent(SalesAddEvent event) {
+    public void addSales(World world, Item item, Collection<Sale> sales) {
         QueryStage<Void> builder = builder();
-        int worldId = event.world().id();
-        int itemId = event.item().id();
-        for (Sale sale : event.sales()) {
+        int worldId = world.id();
+        int itemId = item.id();
+        for (Sale sale : sales) {
             int unitPrice = sale.price().pricePerUnit();
             int quantity = sale.price().quantity();
             int total = sale.price().total();

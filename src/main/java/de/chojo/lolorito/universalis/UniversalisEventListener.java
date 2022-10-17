@@ -17,11 +17,12 @@ public class UniversalisEventListener extends ListenerAdapter {
 
     @Override
     public void onListingAdd(ListingAddEvent event) {
-        listings.logListingsEvent(event);
+        listings.clearListings(event.item(), event.world());
+        listings.addListings(event.item(), event.world(), event.listings());
     }
 
     @Override
     public void onSalesAdd(SalesAddEvent event) {
-        sales.logSalesEvent(event);
+        sales.addSales(event.world(), event.item(), event.sales());
     }
 }

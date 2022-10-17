@@ -4,7 +4,6 @@ import de.chojo.sadu.base.QueryFactory;
 import de.chojo.sadu.wrapper.stage.QueryStage;
 import de.chojo.universalis.entities.Item;
 import de.chojo.universalis.entities.Listing;
-import de.chojo.universalis.events.listings.impl.ListingAddEvent;
 import de.chojo.universalis.worlds.World;
 
 import javax.sql.DataSource;
@@ -15,11 +14,6 @@ import java.util.List;
 public class Listings extends QueryFactory {
     public Listings(DataSource dataSource) {
         super(dataSource);
-    }
-
-    public void logListingsEvent(ListingAddEvent event) {
-        clearListings(event.item(), event.world());
-        addListings(event.item(), event.world(), event.listings());
     }
 
     public void addListings(Item item, World world, List<Listing> listings) {

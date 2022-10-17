@@ -10,9 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 public record Offer(ItemStat stats, Map<World, List<ItemListing>> offers) {
+    public String universalisUrl() {
+        return "https://universalis.app/market/%d".formatted(stats.item().id());
+    }
+
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(stats.item().name().english());
+        builder.setTitle(stats.item().name().english(),universalisUrl());
         String stats = """
                        ```
                        High Quality:  %s

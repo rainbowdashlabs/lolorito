@@ -11,7 +11,7 @@ import java.io.IOException;
 public class Universalis {
     private final Threading threading;
     private final Data data;
-    UniversalisWs universalisWs;
+    private UniversalisWs universalisWs;
 
     private Universalis(Threading threading, Data data) {
         this.threading = threading;
