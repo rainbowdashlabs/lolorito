@@ -32,90 +32,99 @@ public class Items extends QueryFactory {
         }
         List<ItemListing> itemListings = builder(ItemListing.class)
                 .query("""
-                        WITH homeworld AS (
-                            SELECT l.world,
-                                   l.item,
-                                   l.hq,
-                                   l.min_price AS unit_price
-                            FROM world_item_listings l
-                            LEFT JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                            LEFT JOIN world_item_popularity wip ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
-                            WHERE l.world = ?
-                              AND l.min_price > ?
-                              AND lu.updated > NOW() - ?::INTERVAL
-                              AND popularity > ?
-                              AND market_volume > ?
-                              AND interest > ?
-                              AND sales > ?
-                              AND views > ?
-                            ),
-                        other_worlds AS (
-                            SELECT l.world,
-                                   l.item,
-                                   hq,
-                                   unit_price,
-                                   quantity,
-                                   total,
-                                   lu.updated
-                            FROM listings l
-                            LEFT JOIN worlds w ON l.world = w.world
-                            LEFT JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                            WHERE l.world != ?
-                              AND lu.updated > NOW() - ?::INTERVAL
-                              AND data_center = ?
-                        ),
-                        filtered AS (
-                            SELECT o.world,
-                                   o.item,
-                                   o.hq,
-                                   o.unit_price,
-                                   o.quantity,
-                                   o.total,
-                                   o.updated,
-                                   h.unit_price::numeric / o.unit_price * 100 AS profit_perc,
-                                   (h.unit_price * o.quantity) - (o.unit_price * o.quantity) as profit
-                            FROM homeworld h LEFT JOIN other_worlds o ON h.item = o.item AND h.hq = o.hq
-                            WHERE (h.unit_price::numeric / o.unit_price) * 100 > ?
-                              AND (h.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?
-                        ),
-                        ranked AS (
-                            SELECT rank() OVER (PARTITION BY world, item, hq ORDER BY profit) as world_rank,
-                                   rank() OVER (PARTITION BY item, hq ORDER BY profit) as global_rank,
-                                   world,
-                                   item,
-                                   hq,
-                                   unit_price,
-                                   quantity,
-                                   total,
-                                   updated,
-                                   ROUND(profit_perc, 4) AS profit_perc,
-                                   profit
-                            FROM filtered
-                            ORDER BY profit DESC                                                
-                        )
-                        SELECT world, item, hq, unit_price, quantity, total, updated, ROUND(profit_perc, 4) AS profit_perc, profit
-                        FROM ranked
-                        WHERE world_rank <= 10 AND global_rank < 100
+                        WITH homeworld AS (SELECT l.world,
+                                                  l.item,
+                                                  l.hq,
+                                                  LEAST(l.min_price, wis.avg_sales) AS unit_price
+                                           FROM world_item_listings l
+                                                    LEFT JOIN listings_updated lu
+                                                              ON l.world = lu.world AND l.item = lu.item
+                                                    LEFT JOIN world_item_popularity wip
+                                                              ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
+                                                    LEFT JOIN world_item_sales wis
+                                                              ON l.world = wis.world AND l.item = wis.item AND l.hq = wis.hq
+                                           WHERE l.world = ?
+                                             AND l.min_price > ?
+                                             AND lu.updated > NOW() - ?::INTERVAL
+                                             AND popularity > ?
+                                             AND market_volume > ?
+                                             AND interest > ?
+                                             AND sales > ?
+                                             AND views > ?),
+                             other_worlds AS (SELECT l.world,
+                                                     l.item,
+                                                     hq,
+                                                     unit_price,
+                                                     quantity,
+                                                     total,
+                                                     lu.updated
+                                              FROM listings l
+                                                       LEFT JOIN worlds w
+                                                                 ON l.world = w.world
+                                                       LEFT JOIN listings_updated lu
+                                                                 ON l.world = lu.world AND l.item = lu.item
+                                              WHERE l.world != ?
+                                                AND lu.updated > NOW() - ?::INTERVAL
+                                                AND data_center = ?),
+                             filtered AS (SELECT o.world,
+                                                 o.item,
+                                                 o.hq,
+                                                 o.unit_price,
+                                                 o.quantity,
+                                                 o.total,
+                                                 o.updated,
+                                                 h.unit_price::NUMERIC / o.unit_price                      AS factor,
+                                                 (h.unit_price * o.quantity) - (o.unit_price * o.quantity) AS profit
+                                          FROM homeworld h
+                                                   LEFT JOIN other_worlds o
+                                                             ON h.item = o.item AND h.hq = o.hq
+                                          WHERE (h.unit_price::NUMERIC / o.unit_price) > ?
+                                            AND (h.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?),
+                             ranked AS (SELECT RANK() OVER (PARTITION BY world, item, hq ORDER BY profit) AS world_rank,
+                                               RANK() OVER (PARTITION BY item, hq ORDER BY profit)        AS global_rank,
+                                               world,
+                                               item,
+                                               hq,
+                                               unit_price,
+                                               quantity,
+                                               total,
+                                               updated,
+                                               ROUND(factor, 4)                                           AS factor,
+                                               profit
+                                        FROM filtered
+                                        ORDER BY profit DESC)
+                        SELECT r.world,
+                               r.item,
+                               r.hq,
+                               r.unit_price,
+                               quantity,
+                               total,
+                               r.updated,
+                               ROUND(factor, 2) AS factor,
+                               profit
+                        FROM ranked r
+                        WHERE world_rank <= 10
+                          AND global_rank < 100
                         ORDER BY profit DESC
                         LIMIT ?;
                        """, filter.target().columnName())
                 .parameter(stmt -> {
                             stmt.setInt(filter.world().id())
-                                .setInt(filter.minUnitPrice())
-                                .setString(filter.minRefreshHours())
-                                .setDouble(filter.minPopularity())
-                                .setDouble(filter.minMarketVolume())
-                                .setDouble(filter.minInterest())
-                                .setInt(filter.minSales())
-                                .setInt(filter.minViews())
+                                .setInt(filter.unitPrice())
+                                .setString(filter.refreshHours())
+                                .setDouble(filter.popularity())
+                                .setDouble(filter.marketVolume())
+                                .setDouble(filter.interest())
+                                .setInt(filter.sales())
+                                .setInt(filter.views())
                                 .setInt(filter.world().id())
-                                .setString(filter.minRefreshHours());
+                                .setString(filter.refreshHours());
                             switch (filter.target()) {
                                 case REGION -> stmt.setString(filter.world().dataCenter().region().name());
                                 case DATA_CENTER -> stmt.setInt(filter.world().dataCenter().id());
                             }
-                            stmt.setDouble(filter.minProfitPercentage())
-                                .setInt(filter.minProfit())
+                            stmt.setDouble(filter.factor())
+                                .setInt(filter.profit())
                                 .setInt(filter.limit());
                         }
                 ).readRow(row -> ItemListing.build(row, itemNameSupplier))
@@ -152,7 +161,10 @@ public class Items extends QueryFactory {
                                min_price,
                                avg_price,
                                listings,
-                               updated
+                               updated,
+                               min_sales,
+                               max_sales,
+                               avg_sales
                         FROM world_item_popularity WHERE world = ? AND item = ?;
                        """).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()))
                 .readRow(row -> ItemStat.build(row, itemNameSupplier))

@@ -15,35 +15,35 @@ public class OfferFilter extends QueryFactory {
     private final BotUser user;
     private World world = World.of("", -1, null);
     private int limit = 1000;
-    private int minUnitPrice = 1000;
-    private int minProfitPercentage = 10;
-    private int minRefreshHours = 1;
-    private double minPopularity = 0;
-    private double minMarketVolume = 0;
-    private double minInterest = 0;
-    private int minSales = 0;
-    private int minViews = 0;
+    private int unitPrice = 1000;
+    private int factor = 2;
+    private int refreshHours = 1;
+    private double popularity = 0;
+    private double marketVolume = 0;
+    private double interest = 0;
+    private int sales = 0;
+    private int views = 0;
     private Target target = Target.DATA_CENTER;
-    private int minProfit = 100;
+    private int profit = 100;
 
     public OfferFilter(BotUser user) {
         super(user);
         this.user = user;
     }
 
-    public OfferFilter(BotUser botUser, World world, int limit, int minUnitPrice, int minProfitPercentage, int minRefreshHours, int minPopularity, int minMarketVolume, int minInterest, int minSales, int minViews, int minProfit, Target target) {
+    public OfferFilter(BotUser botUser, World world, int limit, int unitPrice, int factor, int refreshHours, int popularity, int marketVolume, int interest, int sales, int views, int profit, Target target) {
         this(botUser);
         this.world = world;
         this.limit = limit;
-        this.minUnitPrice = minUnitPrice;
-        this.minProfitPercentage = minProfitPercentage;
-        this.minRefreshHours = minRefreshHours;
-        this.minPopularity = minPopularity;
-        this.minMarketVolume = minMarketVolume;
-        this.minInterest = minInterest;
-        this.minSales = minSales;
-        this.minViews = minViews;
-        this.minProfit = minProfit;
+        this.unitPrice = unitPrice;
+        this.factor = factor;
+        this.refreshHours = refreshHours;
+        this.popularity = popularity;
+        this.marketVolume = marketVolume;
+        this.interest = interest;
+        this.sales = sales;
+        this.views = views;
+        this.profit = profit;
         this.target = target;
     }
 
@@ -55,45 +55,45 @@ public class OfferFilter extends QueryFactory {
         return world;
     }
 
-    public int minUnitPrice() {
-        return minUnitPrice;
+    public int unitPrice() {
+        return unitPrice;
     }
 
-    public String minRefreshHours() {
-        return "%d HOURS".formatted(minRefreshHours);
+    public String refreshHours() {
+        return "%d HOURS".formatted(refreshHours);
     }
 
     public Target target() {
         return target;
     }
 
-    public double minProfitPercentage() {
-        return minProfitPercentage;
+    public double factor() {
+        return factor;
     }
 
-    public double minPopularity() {
-        return minPopularity;
+    public double popularity() {
+        return popularity;
     }
 
-    public double minMarketVolume() {
-        return minMarketVolume;
+    public double marketVolume() {
+        return marketVolume;
     }
 
-    public double minInterest() {
-        return minInterest;
+    public double interest() {
+        return interest;
     }
 
-    public int minSales() {
-        return minSales;
+    public int sales() {
+        return sales;
     }
 
-    public int minViews() {
-        return minViews;
+    public int views() {
+        return views;
     }
 
-    public void minProfit(int minProfit) {
-        if (set("min_profit", stmt -> stmt.setInt(minProfit))) {
-            this.minProfit = minProfit;
+    public void profit(int profit) {
+        if (set("profit", stmt -> stmt.setInt(profit))) {
+            this.profit = profit;
         }
     }
 
@@ -103,9 +103,9 @@ public class OfferFilter extends QueryFactory {
         }
     }
 
-    public void minUnitPrice(int minUnitPrice) {
-        if (set("min_unit_price", stmt -> stmt.setInt(minUnitPrice))) {
-            this.minUnitPrice = minUnitPrice;
+    public void unitPrice(int unitPrice) {
+        if (set("unit_price", stmt -> stmt.setInt(unitPrice))) {
+            this.unitPrice = unitPrice;
         }
     }
 
@@ -115,45 +115,45 @@ public class OfferFilter extends QueryFactory {
         }
     }
 
-    public void minProfitPercentage(int minProfitPercentage) {
-        if (set("min_profit_percentage", stmt -> stmt.setInt(minProfitPercentage))) {
-            this.minProfitPercentage = minProfitPercentage;
+    public void factor(int factor) {
+        if (set("factor", stmt -> stmt.setInt(factor))) {
+            this.factor = factor;
         }
     }
 
-    public void minRefreshHours(int minRefreshHours) {
-        if (set("min_refresh_hours", stmt -> stmt.setInt(minRefreshHours))) {
-            this.minRefreshHours = minRefreshHours;
+    public void refreshHours(int refreshHours) {
+        if (set("refresh_hours", stmt -> stmt.setInt(refreshHours))) {
+            this.refreshHours = refreshHours;
         }
     }
 
-    public void minPopularity(double minPopularity) {
-        if (set("min_popularity", stmt -> stmt.setDouble(minPopularity))) {
-            this.minPopularity = minPopularity;
+    public void popularity(double popularity) {
+        if (set("popularity", stmt -> stmt.setDouble(popularity))) {
+            this.popularity = popularity;
         }
     }
 
-    public void minMarketVolume(double minMarketVolume) {
-        if (set("min_market_volume", stmt -> stmt.setDouble(minMarketVolume))) {
-            this.minMarketVolume = minMarketVolume;
+    public void marketVolume(double marketVolume) {
+        if (set("market_volume", stmt -> stmt.setDouble(marketVolume))) {
+            this.marketVolume = marketVolume;
         }
     }
 
-    public void minInterest(double minInterest) {
-        if (set("world", stmt -> stmt.setDouble(minInterest))) {
-            this.minInterest = minInterest;
+    public void interest(double interest) {
+        if (set("world", stmt -> stmt.setDouble(interest))) {
+            this.interest = interest;
         }
     }
 
-    public void minSales(int minSales) {
-        if (set("world", stmt -> stmt.setInt(minSales))) {
-            this.minSales = minSales;
+    public void sales(int sales) {
+        if (set("world", stmt -> stmt.setInt(sales))) {
+            this.sales = sales;
         }
     }
 
-    public void minViews(int minViews) {
-        if (set("world", stmt -> stmt.setInt(minViews))) {
-            this.minViews = minViews;
+    public void views(int views) {
+        if (set("world", stmt -> stmt.setInt(views))) {
+            this.views = views;
         }
     }
 
@@ -182,44 +182,46 @@ public class OfferFilter extends QueryFactory {
     public static OfferFilter build(BotUser botUser, Row row) throws SQLException {
         World world = Worlds.worldById(row.getInt("world"));
         int limit = row.getInt("offer_limit");
-        int minUnitPrice = row.getInt("min_unit_price");
-        int minProfitPercentage = row.getInt("min_profit_percentage");
-        int minProfit = row.getInt("min_profit");
-        int minRefreshHours = row.getInt("min_refresh_hours");
-        int minPopularity = row.getInt("min_popularity");
-        int minMarketVolume = row.getInt("min_market_volume");
-        int minInterest = row.getInt("min_interest");
-        int minSales = row.getInt("min_sales");
-        int minViews = row.getInt("min_views");
+        int unitPrice = row.getInt("unit_price");
+        int factor = row.getInt("factor");
+        int profit = row.getInt("profit");
+        int refreshHours = row.getInt("refresh_hours");
+        int popularity = row.getInt("popularity");
+        int marketVolume = row.getInt("market_volume");
+        int interest = row.getInt("interest");
+        int sales = row.getInt("sales");
+        int views = row.getInt("views");
         Target target = Target.valueOf(row.getString("target"));
-        return new OfferFilter(botUser, world, limit, minUnitPrice, minProfitPercentage, minRefreshHours,
-                minPopularity, minMarketVolume, minInterest, minSales, minViews, minProfit, target);
+        return new OfferFilter(botUser, world, limit, unitPrice, factor, refreshHours,
+                popularity, marketVolume, interest, sales, views, profit, target);
     }
 
     public MessageEmbed embed() {
         String descr = """
-                       World: %s
-                       Limit: %d
-                       Unit Price: %d
-                       Profit %%: %d%%
-                       Profit: %d
-                       Freshness: %d hours
-                       Popularity: %.2f
+                       ```
+                       World:         %s
+                       Limit:         %d
+                       Unit Price:    %d
+                       Factor:        %d
+                       Profit:        %d
+                       Freshness:     %d hours
+                       Popularity:    %.2f
                        Market Volume: %.2f
-                       Interest: %.2f
-                       Sales: %d
-                       Views: %d
-                       Target: %s
-                       """.formatted(world.name(), limit, minUnitPrice, minProfitPercentage,minProfit, minRefreshHours, minPopularity,
-                minMarketVolume, minInterest, minSales, minViews, target.name()).stripIndent();
+                       Interest:      %.2f
+                       Sales:         %d
+                       Views:         %d
+                       Target:        %s
+                       ```
+                       """.formatted(world.name(), limit, unitPrice, factor, profit, refreshHours, popularity,
+                marketVolume, interest, sales, views, target.name()).stripIndent();
         return new EmbedBuilder()
                 .setTitle("Filter")
                 .setDescription(descr)
                 .build();
     }
 
-    public int minProfit() {
-        return minProfit;
+    public int profit() {
+        return profit;
     }
 
     public enum Target {

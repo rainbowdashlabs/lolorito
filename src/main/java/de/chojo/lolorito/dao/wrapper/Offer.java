@@ -6,7 +6,6 @@ import de.chojo.universalis.worlds.World;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -24,20 +23,24 @@ public record Offer(ItemStat stats, Map<World, List<ItemListing>> offers) {
                        Views:         %,d
                        Min Price:     %,d
                        Average Price: %,d
+                       Min Sold:      %,d
+                       Average Sold:  %,d
+                       Max Sold:      %,d
                        Listings:      %,d
                        ```
                        """.formatted(this.stats.hq(), this.stats.marketVolume(), this.stats.interest(), this.stats.popularity(),
-                this.stats.sales(), this.stats.views(), this.stats.minPrice(), this.stats.avgPrice(), this.stats.listings());
+                this.stats.sales(), this.stats.views(), this.stats.minPrice(), this.stats.avgPrice(), this.stats.minSales(),
+                this.stats.avgSales(), this.stats.maxSales(), this.stats.listings());
         builder.setDescription(stats);
         for (var entry : offers.entrySet()) {
-            var table = TextFormatting.getTableBuilder(entry.getValue(), "Price", "Amount", "Total", "Profit %", "Profit");
+            var table = TextFormatting.getTableBuilder(entry.getValue(), "Price", "Amount", "Total", "Factor", "Profit");
             for (ItemListing item : entry.getValue()) {
                 Price price = item.price();
                 table.setNextRow(
                         full(price.pricePerUnit()),
                         full(price.quantity()),
                         full(price.total()),
-                        numeric(item.profitPerc(), 2) + "%",
+                        numeric(item.factor(), 2),
                         full(item.profit()));
             }
             builder.addField(entry.getKey().name(), table.toString(), false);

@@ -28,7 +28,7 @@ public class Filter implements SlashHandler {
         OfferFilter filter = data.users().user(event.getUser()).offerFilter();
         OptionMapping option = event.getOption("world");
 
-        event.deferReply(true).queue();
+        event.deferReply(true).complete();
 
         if (option != null) {
             filter.world(Worlds.worldByName(option.getAsString()));
@@ -37,55 +37,55 @@ public class Filter implements SlashHandler {
         option = event.getOption("min_unit_price");
 
         if (option != null) {
-            filter.minUnitPrice(option.getAsInt());
+            filter.unitPrice(option.getAsInt());
         }
 
         option = event.getOption("min_profit_perc");
 
         if (option != null) {
-            filter.minProfitPercentage(option.getAsInt());
+            filter.factor(option.getAsInt());
         }
 
         option = event.getOption("min_profit");
 
         if (option != null) {
-            filter.minProfit(option.getAsInt());
+            filter.profit(option.getAsInt());
         }
 
         option = event.getOption("min_popularity");
 
         if (option != null) {
-            filter.minPopularity(option.getAsDouble());
+            filter.popularity(option.getAsDouble());
         }
 
         option = event.getOption("min_refresh_hours");
 
         if (option != null) {
-            filter.minRefreshHours(option.getAsInt());
+            filter.refreshHours(option.getAsInt());
         }
 
         option = event.getOption("min_market_volume");
 
         if (option != null) {
-            filter.minMarketVolume(option.getAsDouble());
+            filter.marketVolume(option.getAsDouble());
         }
 
         option = event.getOption("min_interest");
 
         if (option != null) {
-            filter.minInterest(option.getAsDouble());
+            filter.interest(option.getAsDouble());
         }
 
         option = event.getOption("min_sales");
 
         if (option != null) {
-            filter.minSales(option.getAsInt());
+            filter.sales(option.getAsInt());
         }
 
         option = event.getOption("min_views");
 
         if (option != null) {
-            filter.minViews(option.getAsInt());
+            filter.views(option.getAsInt());
         }
 
         option = event.getOption("limit");
