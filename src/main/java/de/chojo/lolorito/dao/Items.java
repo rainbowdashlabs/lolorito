@@ -45,12 +45,14 @@ public class Items extends QueryFactory {
                                                               ON l.world = wis.world AND l.item = wis.item AND l.hq = wis.hq
                                            WHERE l.world = ?
                                              AND l.min_price > ?
-                                             AND lu.updated > NOW() - ?::INTERVAL
+                                             AND lu.updated > NOW() - ?::interval
                                              AND popularity > ?
                                              AND market_volume > ?
                                              AND interest > ?
                                              AND sales > ?
-                                             AND views > ?),
+                                             AND views > ?
+                                             AND wip.world IS NOT NULL
+                                             ),
                              other_worlds AS (SELECT l.world,
                                                      l.item,
                                                      hq,
@@ -64,7 +66,7 @@ public class Items extends QueryFactory {
                                                        LEFT JOIN listings_updated lu
                                                                  ON l.world = lu.world AND l.item = lu.item
                                               WHERE l.world != ?
-                                                AND lu.updated > NOW() - ?::INTERVAL
+                                                AND lu.updated > NOW() - ?::interval
                                                 AND data_center = ?),
                              filtered AS (SELECT o.world,
                                                  o.item,
@@ -73,12 +75,12 @@ public class Items extends QueryFactory {
                                                  o.quantity,
                                                  o.total,
                                                  o.updated,
-                                                 h.unit_price::NUMERIC / o.unit_price                      AS factor,
+                                                 h.unit_price::numeric / o.unit_price                      AS factor,
                                                  (h.unit_price * o.quantity) - (o.unit_price * o.quantity) AS profit
                                           FROM homeworld h
                                                    LEFT JOIN other_worlds o
                                                              ON h.item = o.item AND h.hq = o.hq
-                                          WHERE (h.unit_price::NUMERIC / o.unit_price) > ?
+                                          WHERE (h.unit_price::numeric / o.unit_price) > ?
                                             AND (h.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?),
                              ranked AS (SELECT RANK() OVER (PARTITION BY world, item, hq ORDER BY profit) AS world_rank,
                                                RANK() OVER (PARTITION BY item, hq ORDER BY profit)        AS global_rank,
@@ -130,10 +132,11 @@ public class Items extends QueryFactory {
                 ).readRow(row -> ItemListing.build(row, itemNameSupplier))
                 .allSync();
 
-        Map<ItemKey, Map<World, List<ItemListing>>> listings = new HashMap<>();
+        Map<ItemKey, Map<World, WorldListings>> listings = new HashMap<>();
         for (ItemListing listing : itemListings) {
             listings.computeIfAbsent(new ItemKey(listing.hq(), listing.item()), i -> new HashMap<>())
-                    .computeIfAbsent(listing.world(), w -> new ArrayList<>())
+                    .computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item()).get(), new ArrayList<>()))
+                    .listings()
                     .add(listing);
         }
 
@@ -171,5 +174,10 @@ public class Items extends QueryFactory {
                 .firstSync();
     }
 
-    private record ItemKey(boolean hq, Item item){}
+    public record WorldListings(ItemStat itemStat, List<ItemListing> listings) {
+
+    }
+
+    private record ItemKey(boolean hq, Item item) {
+    }
 }

@@ -18,7 +18,7 @@ dependencies {
         exclude(group = "club.minnced", module = "opus-java")
     }
 
-    implementation("de.chojo.universalis", "universalis", "1.2.2")
+    implementation("de.chojo.universalis", "universalis", "1.2.3")
 
     // database
     implementation("org.postgresql", "postgresql", "42.5.0")
