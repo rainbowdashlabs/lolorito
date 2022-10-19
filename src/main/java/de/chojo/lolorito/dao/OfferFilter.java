@@ -140,19 +140,19 @@ public class OfferFilter extends QueryFactory {
     }
 
     public void interest(double interest) {
-        if (set("world", stmt -> stmt.setDouble(interest))) {
+        if (set("interest", stmt -> stmt.setDouble(interest))) {
             this.interest = interest;
         }
     }
 
     public void sales(int sales) {
-        if (set("world", stmt -> stmt.setInt(sales))) {
+        if (set("sales", stmt -> stmt.setInt(sales))) {
             this.sales = sales;
         }
     }
 
     public void views(int views) {
-        if (set("world", stmt -> stmt.setInt(views))) {
+        if (set("views", stmt -> stmt.setInt(views))) {
             this.views = views;
         }
     }
