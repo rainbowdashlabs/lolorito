@@ -7,6 +7,7 @@ import de.chojo.lolorito.dao.Items;
 import de.chojo.lolorito.dao.Listings;
 import de.chojo.lolorito.dao.Sales;
 import de.chojo.lolorito.dao.Users;
+import de.chojo.lolorito.service.DataRefreshWorker;
 import de.chojo.sadu.base.QueryFactory;
 import de.chojo.sadu.databases.PostgreSql;
 import de.chojo.sadu.datasource.DataSourceCreator;
@@ -54,6 +55,11 @@ public class Data {
         initConnection();
         updateDatabase();
         initDao();
+        initServices();
+    }
+
+    private void initServices() {
+        DataRefreshWorker.create(threading, dataSource);
     }
 
     private void initItems() throws IOException, InterruptedException {
@@ -150,5 +156,9 @@ public class Data {
 
     public Users users() {
         return users;
+    }
+
+    public HikariDataSource dataSource() {
+        return dataSource;
     }
 }
