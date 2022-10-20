@@ -27,7 +27,7 @@ public class DataRefreshWorker extends QueryFactory implements Runnable {
 
     public static DataRefreshWorker create(Threading threading, DataSource dataSource) {
         var worker = new DataRefreshWorker(dataSource);
-        threading.botWorker().scheduleAtFixedRate(worker, 5, 1, TimeUnit.MINUTES);
+        threading.botWorker().scheduleAtFixedRate(worker, 1, 5, TimeUnit.MINUTES);
         return worker;
     }
 
