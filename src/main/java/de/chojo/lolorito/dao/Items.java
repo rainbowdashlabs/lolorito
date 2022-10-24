@@ -35,7 +35,9 @@ public class Items extends QueryFactory {
                         WITH homeworld AS (SELECT world,
                                                   item,
                                                   hq,
-                                                  unit_price
+                                                  unit_price,
+                                                  sales / 7 as daily_sales,
+                                                  sales / 7 * unit_price AS daily_win
                                            FROM world_items
                                            WHERE world = ?
                                              AND min_price > ?
@@ -61,6 +63,20 @@ public class Items extends QueryFactory {
                                               WHERE l.world != ?
                                                 AND lu.updated > NOW() - ?::interval
                                                 AND data_center = ?),
+                             other_worlds_stats AS(SELECT o.item,
+                                                          o.hq,
+                                                          MIN(o.unit_price) as min_price,
+                                                          MAX(o.unit_price) as max_price
+                                                   FROM other_worlds o
+                                                   GROUP BY o.item, o.hq
+                                                ),
+                             effective_profit AS (SELECT o.item,
+                                                         o.hq,
+                                                         daily_sales * home.unit_price - daily_sales * min_price as max_effective_profit,
+                                                         daily_sales * home.unit_price - daily_sales * max_price as min_effective_profit
+                                                  FROM other_worlds_stats o
+                                                  LEFT JOIN homeworld home ON o.item = home.item AND o.hq = home.hq
+                             ),
                              filtered AS (SELECT o.world,
                                                  o.item,
                                                  o.hq,
@@ -73,8 +89,11 @@ public class Items extends QueryFactory {
                                           FROM homeworld home
                                                    LEFT JOIN other_worlds o
                                                              ON home.item = o.item AND home.hq = o.hq
+                                                   LEFT JOIN other_worlds_stats s ON o.item = s.item AND o.hq = s.hq
+                                                   LEFT JOIN effective_profit p ON o.item = p.item AND o.hq = p.hq
                                           WHERE (home.unit_price::numeric / o.unit_price) > ? -- factor
-                                            AND (home.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?), --profit
+                                            AND (home.unit_price * o.quantity) - (o.unit_price * o.quantity) > ? -- profit
+                                            AND max_effective_profit > ?), --profit
                              ranked AS (SELECT RANK() OVER (PARTITION BY world, item, hq ORDER BY profit) AS world_rank,
                                                RANK() OVER (PARTITION BY item, hq ORDER BY profit)        AS global_rank,
                                                world,
@@ -120,6 +139,7 @@ public class Items extends QueryFactory {
                             }
                             stmt.setDouble(filter.factor())
                                 .setInt(filter.profit())
+                                    .setInt(filter.effectiveProfit())
                                 .setInt(filter.limit());
                         }
                 ).readRow(row -> ItemListing.build(row, itemNameSupplier))
@@ -128,14 +148,14 @@ public class Items extends QueryFactory {
         Map<ItemKey, Map<World, WorldListings>> listings = new HashMap<>();
         for (ItemListing listing : itemListings) {
             listings.computeIfAbsent(new ItemKey(listing.hq(), listing.item()), i -> new HashMap<>())
-                    .computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item()).get(), new ArrayList<>()))
+                    .computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
                     .listings()
                     .add(listing);
         }
 
         List<Offer> offers = new ArrayList<>();
         for (var entry : listings.entrySet()) {
-            Optional<ItemStat> stats = getStats(filter.world(), entry.getKey().item());
+            Optional<ItemStat> stats = getStats(filter.world(), entry.getKey().item(), entry.getKey().hq());
             if (stats.isEmpty()) continue;
             offers.add(new Offer(stats.get(), listings.get(entry.getKey())));
         }
@@ -143,7 +163,7 @@ public class Items extends QueryFactory {
         return offers;
     }
 
-    private Optional<ItemStat> getStats(World world, Item item) {
+    private Optional<ItemStat> getStats(World world, Item item, boolean hq) {
         return builder(ItemStat.class)
                 .query("""
                         SELECT world,
@@ -161,8 +181,8 @@ public class Items extends QueryFactory {
                                min_sales,
                                max_sales,
                                avg_sales
-                        FROM world_item_popularity WHERE world = ? AND item = ?;
-                       """).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()))
+                        FROM world_item_popularity WHERE world = ? AND item = ? AND hq = ?;
+                       """).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()).setBoolean(hq))
                 .readRow(row -> ItemStat.build(row, itemNameSupplier))
                 .firstSync();
     }

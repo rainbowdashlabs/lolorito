@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 
 public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
@@ -39,12 +40,16 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
                 stats.sales(), stats.views(), stats.minPrice(), stats.avgPrice(), stats.minSales(),
                 stats.avgSales(), stats.maxSales(), stats.listings());
         builder.setDescription(description);
+        var saleCount = stats.sales() / 7;
+        var minPrice = stats.avgSales() != 0 ? Math.min(stats.avgSales(), stats.minPrice()) : stats.minPrice();
         String comm = """
                            ```
-                           Buy:      %d to %d
-                           Sell for: %d
+                           Buy:                  %d
+                           Sell for:             %d
+                           Min effective profit: %d
+                           Max effective profit: %d
                            ```
-                           """.formatted(stats.sales() / 2, stats.sales(), stats.avgSales() != 0 ? Math.min(stats.avgSales(), stats.minPrice()) : stats.minPrice());
+                           """.formatted(saleCount, minPrice, minPrice * saleCount - saleCount * maxListingPrice(), minPrice * saleCount - saleCount * minListingPrice());
         builder.addField("Recommendation:", comm, false);
         for (var entry : offers.entrySet()) {
             var table = TextFormatting.getTableBuilder(entry.getValue().listings(), "Price", "Amount", "Total", "Factor", "Profit");
@@ -66,6 +71,22 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
         }
         builder.setFooter("Last updated").setTimestamp(this.stats.updated());
         return builder.build();
+    }
+
+    private int minListingPrice(){
+        return offers.values().stream()
+                     .flatMap(list -> list.listings().stream())
+                     .mapToInt(listing -> listing.price().pricePerUnit())
+                     .min()
+                     .orElse(0);
+    }
+
+    private int maxListingPrice(){
+        return offers.values().stream()
+                     .flatMap(list -> list.listings().stream())
+                     .mapToInt(listing -> listing.price().pricePerUnit())
+                     .max()
+                     .orElse(0);
     }
 
     private String numeric(double d, int decimals) {

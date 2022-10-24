@@ -25,13 +25,14 @@ public class OfferFilter extends QueryFactory {
     private int views = 0;
     private Target target = Target.DATA_CENTER;
     private int profit = 100;
+    private int effectiveProfit = 10000;
 
     public OfferFilter(BotUser user) {
         super(user);
         this.user = user;
     }
 
-    public OfferFilter(BotUser botUser, World world, int limit, int unitPrice, int factor, int refreshHours, int popularity, int marketVolume, int interest, int sales, int views, int profit, Target target) {
+    public OfferFilter(BotUser botUser, World world, int limit, int unitPrice, int factor, int refreshHours, int popularity, int marketVolume, int interest, int sales, int views, int profit, int effectiveProfit, Target target) {
         this(botUser);
         this.world = world;
         this.limit = limit;
@@ -44,6 +45,7 @@ public class OfferFilter extends QueryFactory {
         this.sales = sales;
         this.views = views;
         this.profit = profit;
+        this.effectiveProfit = effectiveProfit;
         this.target = target;
     }
 
@@ -97,6 +99,13 @@ public class OfferFilter extends QueryFactory {
         }
     }
 
+    public void effectioveProfit(int effectiveProfit) {
+        if (set("effective_profit", stmt -> stmt.setInt(effectiveProfit))) {
+            this.profit = effectiveProfit;
+        }
+    }
+
+    
     public void world(World world) {
         if (set("world", stmt -> stmt.setInt(world.id()))) {
             this.world = world;
@@ -185,6 +194,7 @@ public class OfferFilter extends QueryFactory {
         int unitPrice = row.getInt("unit_price");
         int factor = row.getInt("factor");
         int profit = row.getInt("profit");
+        int effectiveProfit = row.getInt("effective_profit");
         int refreshHours = row.getInt("refresh_hours");
         int popularity = row.getInt("popularity");
         int marketVolume = row.getInt("market_volume");
@@ -193,7 +203,7 @@ public class OfferFilter extends QueryFactory {
         int views = row.getInt("views");
         Target target = Target.valueOf(row.getString("target"));
         return new OfferFilter(botUser, world, limit, unitPrice, factor, refreshHours,
-                popularity, marketVolume, interest, sales, views, profit, target);
+                popularity, marketVolume, interest, sales, views, profit, effectiveProfit, target);
     }
 
     public MessageEmbed embed() {
@@ -222,6 +232,10 @@ public class OfferFilter extends QueryFactory {
 
     public int profit() {
         return profit;
+    }
+
+    public int effectiveProfit() {
+        return effectiveProfit;
     }
 
     public enum Target {

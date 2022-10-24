@@ -86,8 +86,7 @@ FROM lolorito.world_item_listings l
                    ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
          LEFT JOIN lolorito.world_item_sales wis
                    ON l.world = wis.world AND l.item = wis.item AND l.hq = wis.hq
-WHERE wip.world IS NOT NULL
-  AND  l.item = 36213 AND l.world = 66;
+WHERE wip.world IS NOT NULL;
 
 CREATE INDEX world_items_world_item_hq_index
     ON lolorito.world_items (world, item, hq);
