@@ -32,26 +32,19 @@ public class Items extends QueryFactory {
         }
         List<ItemListing> itemListings = builder(ItemListing.class)
                 .query("""
-                        WITH homeworld AS (SELECT l.world,
-                                                  l.item,
-                                                  l.hq,
-                                                  LEAST(l.min_price, wis.avg_sales) AS unit_price
-                                           FROM world_item_listings l
-                                                    LEFT JOIN listings_updated lu
-                                                              ON l.world = lu.world AND l.item = lu.item
-                                                    LEFT JOIN world_item_popularity wip
-                                                              ON l.world = wip.world AND l.item = wip.item AND l.hq = wip.hq
-                                                    LEFT JOIN world_item_sales wis
-                                                              ON l.world = wis.world AND l.item = wis.item AND l.hq = wis.hq
-                                           WHERE l.world = ?
-                                             AND l.min_price > ?
-                                             AND lu.updated > NOW() - ?::interval
+                        WITH homeworld AS (SELECT world,
+                                                  item,
+                                                  hq,
+                                                  unit_price
+                                           FROM world_items
+                                           WHERE world = ?
+                                             AND min_price > ?
+                                             AND updated > NOW() - ?::interval
                                              AND popularity > ?
                                              AND market_volume > ?
                                              AND interest > ?
                                              AND sales > ?
                                              AND views > ?
-                                             AND wip.world IS NOT NULL
                                              ),
                              other_worlds AS (SELECT l.world,
                                                      l.item,
@@ -75,13 +68,13 @@ public class Items extends QueryFactory {
                                                  o.quantity,
                                                  o.total,
                                                  o.updated,
-                                                 h.unit_price::numeric / o.unit_price                      AS factor,
-                                                 (h.unit_price * o.quantity) - (o.unit_price * o.quantity) AS profit
-                                          FROM homeworld h
+                                                 home.unit_price::numeric / o.unit_price                      AS factor,
+                                                 (home.unit_price * o.quantity) - (o.unit_price * o.quantity) AS profit
+                                          FROM homeworld home
                                                    LEFT JOIN other_worlds o
-                                                             ON h.item = o.item AND h.hq = o.hq
-                                          WHERE (h.unit_price::numeric / o.unit_price) > ?
-                                            AND (h.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?),
+                                                             ON home.item = o.item AND home.hq = o.hq
+                                          WHERE (home.unit_price::numeric / o.unit_price) > ? -- factor
+                                            AND (home.unit_price * o.quantity) - (o.unit_price * o.quantity) > ?), --profit
                              ranked AS (SELECT RANK() OVER (PARTITION BY world, item, hq ORDER BY profit) AS world_rank,
                                                RANK() OVER (PARTITION BY item, hq ORDER BY profit)        AS global_rank,
                                                world,

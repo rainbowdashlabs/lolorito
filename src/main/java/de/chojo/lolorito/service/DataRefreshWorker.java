@@ -18,7 +18,8 @@ public class DataRefreshWorker extends QueryFactory implements Runnable {
             "world_item_views",
             "world_sales", // depends on world_item_sales
             "world_views", // depends on world_item_views
-            "world_item_popularity" // depends on all other views
+            "world_item_popularity", // depends on all other views
+            "world_items" // depends on all other views
     );
 
     private DataRefreshWorker(DataSource dataSource) {
