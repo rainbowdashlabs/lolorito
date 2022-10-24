@@ -209,20 +209,21 @@ public class OfferFilter extends QueryFactory {
     public MessageEmbed embed() {
         String descr = """
                        ```
-                       World:         %s
-                       Limit:         %d
-                       Unit Price:    %d
-                       Factor:        %.2f
-                       Profit:        %d
-                       Freshness:     %d hours
-                       Popularity:    %.2f
-                       Market Volume: %.2f
-                       Interest:      %.2f
-                       Sales:         %d
-                       Views:         %d
-                       Target:        %s
+                       World:            %s
+                       Limit:            %d
+                       Unit Price:       %d
+                       Factor:           %.2f
+                       Profit:           %d
+                       Effective Profit: %d
+                       Freshness:        %d hours
+                       Popularity:       %.2f
+                       Market Volume:    %.2f
+                       Interest:         %.2f
+                       Sales:            %d
+                       Views:            %d
+                       Target:           %s
                        ```
-                       """.formatted(world.name(), limit, unitPrice, factor, profit, refreshHours, popularity,
+                       """.formatted(world.name(), limit, unitPrice, factor, profit, effectiveProfit, refreshHours, popularity,
                 marketVolume, interest, sales, views, target.name()).stripIndent();
         return new EmbedBuilder()
                 .setTitle("Filter")

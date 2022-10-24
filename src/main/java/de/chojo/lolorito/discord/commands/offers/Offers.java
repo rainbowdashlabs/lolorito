@@ -25,6 +25,8 @@ public class Offers extends SlashCommand {
                                           .min(1))
                         .argument(Argument.integer("profit", "The min profit")
                                           .min(1).max(1000000))
+                        .argument(Argument.integer("effective_profit", "The min effective profit")
+                                          .min(1).max(1000000))
                         .argument(Argument.number("popularity", "The min popularity")
                                           .min(0).max(100))
                         .argument(Argument.integer("refresh_hours", "The max age of the listing")

@@ -50,6 +50,12 @@ public class Filter implements SlashHandler {
 
         if (option != null) {
             filter.profit(option.getAsInt());
+
+        }
+        option = event.getOption("effective_profit");
+
+        if (option != null) {
+            filter.effectioveProfit(option.getAsInt());
         }
 
         option = event.getOption("popularity");
