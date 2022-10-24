@@ -5,12 +5,10 @@ import de.chojo.lolorito.dao.Items.WorldListings;
 import de.chojo.universalis.entities.Price;
 import de.chojo.universalis.worlds.World;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Map;
 
 public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
@@ -20,39 +18,40 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
 
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(stats.item().name().english(),universalisUrl());
+        builder.setTitle(stats.item().name().english(), universalisUrl());
         String description = """
-                       ```
-                       High Quality:  %s
-                       Market Volume: %.02f%%
-                       Interest:      %.02f%%
-                       Popularity:    %.02f%%
-                       Sales:         %,d
-                       Views:         %,d
-                       Min Price:     %,d
-                       Average Price: %,d
-                       Min Sold:      %,d
-                       Average Sold:  %,d
-                       Max Sold:      %,d
-                       Listings:      %,d
-                       ```
-                       """.formatted(stats.hq(), stats.marketVolume(), stats.interest(), stats.popularity(),
+                             ```
+                             High Quality:  %s
+                             Market Volume: %.02f%%
+                             Interest:      %.02f%%
+                             Popularity:    %.02f%%
+                             Sales:         %,d
+                             Views:         %,d
+                             Min Price:     %,d
+                             Average Price: %,d
+                             Min Sold:      %,d
+                             Average Sold:  %,d
+                             Max Sold:      %,d
+                             Listings:      %,d
+                             ```
+                             """.formatted(stats.hq(), stats.marketVolume(), stats.interest(), stats.popularity(),
                 stats.sales(), stats.views(), stats.minPrice(), stats.avgPrice(), stats.minSales(),
                 stats.avgSales(), stats.maxSales(), stats.listings());
         builder.setDescription(description);
-        var saleCount = stats.sales() / 7;
+        var saleCount = Math.min(stats.sales() / 7, listingVolume());
         var minPrice = stats.avgSales() != 0 ? Math.min(stats.avgSales(), stats.minPrice()) : stats.minPrice();
         String comm = """
-                           ```
-                           Buy:                  %d
-                           Sell for:             %d
-                           Min effective profit: %d
-                           Max effective profit: %d
-                           ```
-                           """.formatted(saleCount, minPrice, minPrice * saleCount - saleCount * maxListingPrice(), minPrice * saleCount - saleCount * minListingPrice());
+                      ```
+                      Buy:                  %d
+                      Sell for:             %d
+                      Min effective profit: %d
+                      Max effective profit: %d
+                      ```
+                      """.formatted(saleCount, minPrice, minPrice * saleCount - saleCount * maxListingPrice(), minPrice * saleCount - saleCount * minListingPrice());
         builder.addField("Recommendation:", comm, false);
         for (var entry : offers.entrySet()) {
-            var table = TextFormatting.getTableBuilder(entry.getValue().listings(), "Price", "Amount", "Total", "Factor", "Profit");
+            var table = TextFormatting.getTableBuilder(entry.getValue()
+                                                            .listings(), "Price", "Amount", "Total", "Factor", "Profit");
             for (var item : entry.getValue().listings()) {
                 Price price = item.price();
                 table.setNextRow(
@@ -63,17 +62,20 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
                         full(item.profit()));
             }
             String offer = """
-                               %s
-                               Last update: %s
-                               """.formatted(table.toString(), TimeFormat.RELATIVE.format(entry.getValue().itemStat()
-                                                                                               .updated().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                           %s
+                           Last update: %s
+                           """.formatted(table.toString(), TimeFormat.RELATIVE.format(entry.getValue().itemStat()
+                                                                                           .updated()
+                                                                                           .atZone(ZoneId.systemDefault())
+                                                                                           .toInstant()
+                                                                                           .toEpochMilli()));
             builder.addField(entry.getKey().name(), offer, false);
         }
         builder.setFooter("Last updated").setTimestamp(this.stats.updated());
         return builder.build();
     }
 
-    private int minListingPrice(){
+    private int minListingPrice() {
         return offers.values().stream()
                      .flatMap(list -> list.listings().stream())
                      .mapToInt(listing -> listing.price().pricePerUnit())
@@ -81,12 +83,19 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
                      .orElse(0);
     }
 
-    private int maxListingPrice(){
+    private int maxListingPrice() {
         return offers.values().stream()
                      .flatMap(list -> list.listings().stream())
                      .mapToInt(listing -> listing.price().pricePerUnit())
                      .max()
                      .orElse(0);
+    }
+
+    private int listingVolume() {
+        return offers.values().stream()
+                .flatMap(list -> list.listings().stream())
+                .mapToInt(listing -> listing.price().quantity())
+                .sum();
     }
 
     private String numeric(double d, int decimals) {

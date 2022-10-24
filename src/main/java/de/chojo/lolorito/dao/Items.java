@@ -65,15 +65,16 @@ public class Items extends QueryFactory {
                                                 AND data_center = ?),
                              other_worlds_stats AS(SELECT o.item,
                                                           o.hq,
-                                                          MIN(o.unit_price) as min_price,
-                                                          MAX(o.unit_price) as max_price
+                                                          MIN(o.unit_price) AS min_price,
+                                                          MAX(o.unit_price) AS max_price,
+                                                          sum(o.quantity) AS volume
                                                    FROM other_worlds o
                                                    GROUP BY o.item, o.hq
                                                 ),
                              effective_profit AS (SELECT o.item,
                                                          o.hq,
-                                                         daily_sales * home.unit_price - daily_sales * min_price as max_effective_profit,
-                                                         daily_sales * home.unit_price - daily_sales * max_price as min_effective_profit
+                                                         least(daily_sales, volume) * home.unit_price - least(daily_sales, volume) * min_price as max_effective_profit,
+                                                         least(daily_sales, volume) * home.unit_price - least(daily_sales, volume) * max_price as min_effective_profit
                                                   FROM other_worlds_stats o
                                                   LEFT JOIN homeworld home ON o.item = home.item AND o.hq = home.hq
                              ),
