@@ -18,6 +18,9 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
 
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
+        if(stats.hq()){
+            builder.setAuthor("HQ",null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
+        }
         builder.setTitle(stats.item().name().english(), universalisUrl());
         String description = """
                              ```
@@ -42,12 +45,15 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
         var minPrice = stats.avgSales() != 0 ? Math.min(stats.avgSales(), stats.minPrice()) : stats.minPrice();
         String comm = """
                       ```
-                      Buy:                  %d
-                      Sell for:             %d
-                      Min effective profit: %d
-                      Max effective profit: %d
+                      Buy:                  %s
+                      Sell for:             %s
+                      Min effective profit: %s
+                      Max effective profit: %s
                       ```
-                      """.formatted(saleCount, minPrice, minPrice * saleCount - saleCount * maxListingPrice(), minPrice * saleCount - saleCount * minListingPrice());
+                      """.formatted(full(saleCount),
+                full(minPrice),
+                full(minPrice * saleCount - saleCount * maxListingPrice()),
+                full(minPrice * saleCount - saleCount * minListingPrice()));
         builder.addField("Recommendation:", comm, false);
         for (var entry : offers.entrySet()) {
             var table = TextFormatting.getTableBuilder(entry.getValue()
