@@ -28,7 +28,7 @@ dependencies {
     implementation("de.chojo.sadu", "sadu-datasource", "1.2.0")
 
     // Logging
-    implementation("org.slf4j", "slf4j-api", "2.0.3")
+    implementation("org.slf4j", "slf4j-api", "2.0.4")
     implementation("org.apache.logging.log4j", "log4j-core", "2.19.0")
     implementation("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.19.0")
     implementation("de.chojo", "log-util", "1.0.1"){
