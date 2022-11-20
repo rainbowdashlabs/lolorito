@@ -32,7 +32,7 @@ public class OfferFilter extends QueryFactory {
         this.user = user;
     }
 
-    public OfferFilter(BotUser botUser, World world, int limit, int unitPrice, int factor, int refreshHours, int popularity, int marketVolume, int interest, int sales, int views, int profit, int effectiveProfit, Target target) {
+    public OfferFilter(BotUser botUser, World world, int limit, int unitPrice, double factor, int refreshHours, double popularity, double marketVolume, double interest, int sales, int views, int profit, int effectiveProfit, Target target) {
         this(botUser);
         this.world = world;
         this.limit = limit;
@@ -192,13 +192,13 @@ public class OfferFilter extends QueryFactory {
         World world = Worlds.worldById(row.getInt("world"));
         int limit = row.getInt("offer_limit");
         int unitPrice = row.getInt("unit_price");
-        int factor = row.getInt("factor");
+        float factor = row.getFloat("factor");
         int profit = row.getInt("profit");
         int effectiveProfit = row.getInt("effective_profit");
         int refreshHours = row.getInt("refresh_hours");
-        int popularity = row.getInt("popularity");
-        int marketVolume = row.getInt("market_volume");
-        int interest = row.getInt("interest");
+        float popularity = row.getFloat("popularity");
+        float marketVolume = row.getFloat("market_volume");
+        float interest = row.getFloat("interest");
         int sales = row.getInt("sales");
         int views = row.getInt("views");
         Target target = Target.valueOf(row.getString("target"));
