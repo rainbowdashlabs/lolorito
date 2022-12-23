@@ -9,7 +9,10 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
     public String universalisUrl() {
@@ -18,8 +21,8 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
 
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
-        if(stats.hq()){
-            builder.setAuthor("HQ",null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
+        if (stats.hq()) {
+            builder.setAuthor("HQ", null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
         }
         builder.setTitle(stats.item().name().english(), universalisUrl());
         String description = """
@@ -67,14 +70,24 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
                         numeric(item.factor(), 2),
                         full(item.profit()));
             }
+            var joiner = new StringJoiner("\n");
+
+            List<String> lines = Arrays.stream(table.toString().split("\n")).toList();
+            for (String line : lines) {
+                if (joiner.length() + line.length() > MessageEmbed.VALUE_MAX_LENGTH) {
+                    break;
+                }
+                joiner.add(line);
+            }
+
             String offer = """
                            %s
                            Last update: %s
-                           """.formatted(table.toString(), TimeFormat.RELATIVE.format(entry.getValue().itemStat()
-                                                                                           .updated()
-                                                                                           .atZone(ZoneId.systemDefault())
-                                                                                           .toInstant()
-                                                                                           .toEpochMilli()));
+                           """.formatted(joiner.toString(), TimeFormat.RELATIVE.format(entry.getValue().itemStat()
+                                                                                 .updated()
+                                                                                 .atZone(ZoneId.systemDefault())
+                                                                                 .toInstant()
+                                                                                 .toEpochMilli()));
             builder.addField(entry.getKey().name(), offer, false);
         }
         builder.setFooter("Last updated").setTimestamp(this.stats.updated());
@@ -99,9 +112,9 @@ public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
 
     private int listingVolume() {
         return offers.values().stream()
-                .flatMap(list -> list.listings().stream())
-                .mapToInt(listing -> listing.price().quantity())
-                .sum();
+                     .flatMap(list -> list.listings().stream())
+                     .mapToInt(listing -> listing.price().quantity())
+                     .sum();
     }
 
     private String numeric(double d, int decimals) {

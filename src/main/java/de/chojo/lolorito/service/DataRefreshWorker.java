@@ -3,6 +3,7 @@ package de.chojo.lolorito.service;
 import de.chojo.lolorito.core.Threading;
 import de.chojo.sadu.base.QueryFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.List;
