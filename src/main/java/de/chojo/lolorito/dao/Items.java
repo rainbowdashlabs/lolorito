@@ -140,7 +140,7 @@ public class Items extends QueryFactory {
                             }
                             stmt.setDouble(filter.factor())
                                 .setInt(filter.profit())
-                                    .setInt(filter.effectiveProfit())
+                                .setInt(filter.effectiveProfit())
                                 .setInt(filter.limit());
                         }
                 ).readRow(row -> ItemListing.build(row, itemNameSupplier))
