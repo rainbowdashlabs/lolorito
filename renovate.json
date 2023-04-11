@@ -1,6 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
   "extends": [
     "config:base"
+  ],
+  "packageRules": [
+    {
+      "groupName": "log4j",
+      "matchPackagePrefixes": ["org.apache.logging.log4j"]
+    },
+    {
+      "groupName": "sadu",
+      "matchPackagePrefixes": ["de.chojo.sadu"]
+    }
   ]
 }
