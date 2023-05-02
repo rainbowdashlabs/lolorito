@@ -15,16 +15,12 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
-    public String universalisUrl() {
-        return "https://universalis.app/market/%d".formatted(stats.item().id());
-    }
-
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
         if (stats.hq()) {
             builder.setAuthor("HQ", null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
         }
-        builder.setTitle(stats.item().name().english(), universalisUrl());
+        builder.setTitle(stats.item().name().english(), stats.universalisUrl());
         String description = """
                              ```
                              High Quality:  %s

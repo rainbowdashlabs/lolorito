@@ -3,6 +3,7 @@ package de.chojo.lolorito.universalis;
 import de.chojo.lolorito.dao.Listings;
 import de.chojo.lolorito.dao.Sales;
 import de.chojo.universalis.events.listings.impl.ListingAddEvent;
+import de.chojo.universalis.events.listings.impl.ListingUpdateEvent;
 import de.chojo.universalis.events.sales.impl.SalesAddEvent;
 import de.chojo.universalis.listener.ListenerAdapter;
 
