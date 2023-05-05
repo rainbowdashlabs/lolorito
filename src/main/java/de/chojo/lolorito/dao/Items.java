@@ -12,12 +12,12 @@ import de.chojo.universalis.worlds.World;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class Items extends QueryFactory {
 
@@ -79,12 +79,12 @@ public class Items extends QueryFactory {
 
         Map<World, WorldListings> listings = new HashMap<>();
         for (ItemListing listing : itemItemListings) {
-            listings.computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
+            listings.computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item(), listing.hq()), new ArrayList<>()))
                     .listings()
                     .add(listing);
         }
 
-        return new Listing(getStats(botUser.offerFilter().world(), itemItemListings.get(0).item(), hq).get(), listings);
+        return new Listing(getStats(botUser.offerFilter().world(), new Item(itemId, itemNameSupplier.fromId(itemId)), hq), listings);
     }
 
     public List<Offer> bestOffers(BotUser botUser) {
@@ -211,46 +211,46 @@ public class Items extends QueryFactory {
         Map<ItemKey, Map<World, WorldOffers>> listings = new HashMap<>();
         for (OfferListing listing : offerListings) {
             listings.computeIfAbsent(new ItemKey(listing.hq(), listing.item()), i -> new HashMap<>())
-                    .computeIfAbsent(listing.world(), w -> new WorldOffers(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
+                    .computeIfAbsent(listing.world(), w -> new WorldOffers(getStats(w, listing.item(), listing.hq()), new ArrayList<>()))
                     .listings()
                     .add(listing);
         }
 
         List<Offer> offers = new ArrayList<>();
         for (var entry : listings.entrySet()) {
-            Optional<ItemStat> stats = getStats(filter.world(), entry.getKey().item(), entry.getKey().hq());
-            if (stats.isEmpty()) continue;
-            offers.add(new Offer(stats.get(), listings.get(entry.getKey())));
+            ItemStat stats = getStats(filter.world(), entry.getKey().item(), entry.getKey().hq());
+            offers.add(new Offer(stats, listings.get(entry.getKey())));
         }
 
         return offers;
     }
 
-    private Optional<ItemStat> getStats(World world, Item item, Boolean hq) {
+    private ItemStat getStats(World world, Item item, Boolean hq) {
         @Language("postgresql")
         var query = """
                  SELECT world,
                         item,
-                        min(hq::INT)::BOOLEAN as hq,
-                        avg(market_volume) as market_volume,
-                        avg(interest) as interest,
-                        avg(popularity) as popularity,
-                        sum(sales) as sales,
-                        max(views) as views,
-                        min(min_price) as min_price,
-                        avg(avg_price) as avg_price,
-                        sum(listings) as listings,
-                        max(updated) as updated,
-                        min(min_sales) as min_sales,
-                        max(max_sales) as max_sales,
-                        avg(avg_sales) as avg_sales
+                        min(hq::INT)::BOOLEAN AS hq,
+                        avg(market_volume) AS market_volume,
+                        avg(interest) AS interest,
+                        avg(popularity) AS popularity,
+                        sum(sales) AS sales,
+                        max(views) AS views,
+                        min(min_price) AS min_price,
+                        avg(avg_price) AS avg_price,
+                        sum(listings) AS listings,
+                        max(updated) AS updated,
+                        min(min_sales) AS min_sales,
+                        max(max_sales) AS max_sales,
+                        avg(avg_sales) AS avg_sales
                  FROM world_item_popularity WHERE world = ? AND item = ? AND (hq = ? OR ? IS NULL )
                  GROUP BY world, item;
                 """;
         return builder(ItemStat.class)
                 .query(query).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()).setBoolean(hq).setBoolean(hq))
                 .readRow(row -> ItemStat.build(row, itemNameSupplier))
-                .firstSync();
+                .firstSync()
+                .orElse(new ItemStat(world, item, hq != null && hq, LocalDateTime.now(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 
     public List<ItemStat> topItems(BotUser botUser, TopFilter topFilter) {
@@ -314,6 +314,7 @@ public class Items extends QueryFactory {
     public record WorldOffers(ItemStat itemStat, List<OfferListing> listings) {
 
     }
+
     public record WorldListings(ItemStat itemStat, List<ItemListing> listings) {
 
     }
