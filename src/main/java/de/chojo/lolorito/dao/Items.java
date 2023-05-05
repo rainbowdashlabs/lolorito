@@ -56,9 +56,8 @@ public class Items extends QueryFactory {
                             
                         FROM
                             listings l
-                                LEFT JOIN worlds w
-                                ON l.world = w.world
-                                LEFT JOIN listings_updated u ON l.item = u.item
+                                LEFT JOIN worlds w ON l.world = w.world
+                                LEFT JOIN listings_updated u ON l.world = u.world AND l.item = u.item
                         WHERE l.item = ?
                         AND data_center = ?
                     ) a
