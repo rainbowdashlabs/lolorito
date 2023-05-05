@@ -142,6 +142,7 @@ public class Data {
                         .database(data.database())
                         .applicationName("Lolorito"))
                 .create()
+                .withMinimumIdle(2)
                 .withMaximumPoolSize(data.poolSize())
                 .withThreadFactory(Threading.createThreadFactory(threading.hikariGroup()))
                 .forSchema(data.schema())
