@@ -1,7 +1,7 @@
 package de.chojo.lolorito.dao.wrapper;
 
 import de.chojo.jdautil.text.TextFormatting;
-import de.chojo.lolorito.dao.Items.WorldListings;
+import de.chojo.lolorito.dao.Items.WorldOffers;
 import de.chojo.universalis.entities.Price;
 import de.chojo.universalis.worlds.World;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public record Offer(ItemStat stats, Map<World, WorldListings> offers) {
+public record Offer(ItemStat stats, Map<World, WorldOffers> offers) {
     public MessageEmbed embed() {
         EmbedBuilder builder = new EmbedBuilder();
         if (stats.hq()) {

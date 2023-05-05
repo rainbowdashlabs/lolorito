@@ -15,11 +15,11 @@ public class Top extends SlashCommand {
                 .argument(Argument.text("order", "Sort order").withAutoComplete())
                 .argument(Argument.bool("hq", "High quality"))
                 .argument(Argument.integer("min_sales", "Minimum amount of sales"))
-                .argument(Argument.number("min_popularity", "some"))
-                .argument(Argument.number("min_interest", "some"))
-                .argument(Argument.number("min_market_volume", "some"))
-                .argument(Argument.number("min_price", "some"))
-                .argument(Argument.number("min_avg_price", "some"))
+                .argument(Argument.number("min_popularity", "Min popularity"))
+                .argument(Argument.number("min_interest", "min interest"))
+                .argument(Argument.number("min_market_volume", "min market volume"))
+                .argument(Argument.number("min_price", "min price"))
+                .argument(Argument.number("min_avg_price", "min average price"))
         );
     }
 }

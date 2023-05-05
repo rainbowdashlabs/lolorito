@@ -2,7 +2,9 @@ package de.chojo.lolorito.dao;
 
 import de.chojo.lolorito.dao.wrapper.ItemListing;
 import de.chojo.lolorito.dao.wrapper.ItemStat;
+import de.chojo.lolorito.dao.wrapper.Listing;
 import de.chojo.lolorito.dao.wrapper.Offer;
+import de.chojo.lolorito.dao.wrapper.OfferListing;
 import de.chojo.sadu.base.QueryFactory;
 import de.chojo.universalis.entities.Item;
 import de.chojo.universalis.provider.NameSupplier;
@@ -26,12 +28,71 @@ public class Items extends QueryFactory {
         this.itemNameSupplier = itemNameSupplier;
     }
 
+    public Listing offers(BotUser botUser, int itemId, Boolean hq) {
+        @Language("postgresql")
+        var query = """
+                SELECT
+                    world_rank,
+                    global_rank,
+                    world,
+                    item,
+                    hq,
+                    unit_price,
+                    quantity,
+                    total,
+                    updated
+                FROM
+                    (
+                        SELECT
+                            row_number() OVER (PARTITION BY l.world ORDER BY unit_price) AS world_rank,
+                            row_number() OVER (ORDER BY unit_price)                      AS global_rank,
+                            l.world,
+                            l.item,
+                            hq,
+                            unit_price,
+                            quantity,
+                            total,
+                            updated
+                            
+                        FROM
+                            listings l
+                                LEFT JOIN worlds w
+                                ON l.world = w.world
+                                LEFT JOIN listings_updated u ON l.item = u.item
+                        WHERE l.item = ?
+                        AND data_center = ?
+                    ) a
+                WHERE world_rank <= 10
+                  AND global_rank < 100
+                  AND ( hq = ? OR ? IS NULL )
+                ORDER BY world, world_rank
+                LIMIT 100
+                                 """;
+
+        List<ItemListing> itemItemListings = builder(ItemListing.class)
+                .query(query)
+                .parameter(stmt -> stmt.setInt(itemId)
+                        .setInt(botUser.offerFilter().world().dataCenter().id())
+                        .setBoolean(hq).setBoolean(hq))
+                .readRow(row -> ItemListing.build(row, itemNameSupplier))
+                .allSync();
+
+        Map<World, WorldListings> listings = new HashMap<>();
+        for (ItemListing listing : itemItemListings) {
+            listings.computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
+                    .listings()
+                    .add(listing);
+        }
+
+        return new Listing(getStats(botUser.offerFilter().world(), itemItemListings.get(0).item(), hq).get(), listings);
+    }
+
     public List<Offer> bestOffers(BotUser botUser) {
         OfferFilter filter = botUser.offerFilter();
         if (filter.world().dataCenter() == null) {
             return Collections.emptyList();
         }
-        List<ItemListing> itemListings = builder(ItemListing.class)
+        List<OfferListing> offerListings = builder(OfferListing.class)
                 .query("""
                          WITH homeworld AS (SELECT world,
                                                    item,
@@ -144,13 +205,13 @@ public class Items extends QueryFactory {
                                     .setInt(filter.effectiveProfit())
                                     .setInt(filter.limit());
                         }
-                ).readRow(row -> ItemListing.build(row, itemNameSupplier))
+                ).readRow(row -> OfferListing.build(row, itemNameSupplier))
                 .allSync();
 
-        Map<ItemKey, Map<World, WorldListings>> listings = new HashMap<>();
-        for (ItemListing listing : itemListings) {
+        Map<ItemKey, Map<World, WorldOffers>> listings = new HashMap<>();
+        for (OfferListing listing : offerListings) {
             listings.computeIfAbsent(new ItemKey(listing.hq(), listing.item()), i -> new HashMap<>())
-                    .computeIfAbsent(listing.world(), w -> new WorldListings(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
+                    .computeIfAbsent(listing.world(), w -> new WorldOffers(getStats(w, listing.item(), listing.hq()).get(), new ArrayList<>()))
                     .listings()
                     .add(listing);
         }
@@ -165,28 +226,29 @@ public class Items extends QueryFactory {
         return offers;
     }
 
-    private Optional<ItemStat> getStats(World world, Item item, boolean hq) {
+    private Optional<ItemStat> getStats(World world, Item item, Boolean hq) {
         @Language("postgresql")
         var query = """
                  SELECT world,
                         item,
-                        hq,
-                        market_volume,
-                        interest,
-                        popularity,
-                        sales,
-                        views,
-                        min_price,
-                        avg_price,
-                        listings,
-                        updated,
-                        min_sales,
-                        max_sales,
-                        avg_sales
-                 FROM world_item_popularity WHERE world = ? AND item = ? AND hq = ?;
+                        min(hq::INT)::BOOLEAN as hq,
+                        avg(market_volume) as market_volume,
+                        avg(interest) as interest,
+                        avg(popularity) as popularity,
+                        sum(sales) as sales,
+                        max(views) as views,
+                        min(min_price) as min_price,
+                        avg(avg_price) as avg_price,
+                        sum(listings) as listings,
+                        max(updated) as updated,
+                        min(min_sales) as min_sales,
+                        max(max_sales) as max_sales,
+                        avg(avg_sales) as avg_sales
+                 FROM world_item_popularity WHERE world = ? AND item = ? AND (hq = ? OR ? IS NULL )
+                 GROUP BY world, item;
                 """;
         return builder(ItemStat.class)
-                .query(query).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()).setBoolean(hq))
+                .query(query).parameter(stmt -> stmt.setInt(world.id()).setInt(item.id()).setBoolean(hq).setBoolean(hq))
                 .readRow(row -> ItemStat.build(row, itemNameSupplier))
                 .firstSync();
     }
@@ -249,6 +311,9 @@ public class Items extends QueryFactory {
                 .allSync();
     }
 
+    public record WorldOffers(ItemStat itemStat, List<OfferListing> listings) {
+
+    }
     public record WorldListings(ItemStat itemStat, List<ItemListing> listings) {
 
     }

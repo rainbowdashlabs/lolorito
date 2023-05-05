@@ -3,6 +3,7 @@ package de.chojo.lolorito.core;
 import de.chojo.jdautil.interactions.dispatching.InteractionHub;
 import de.chojo.logutil.marker.LogNotify;
 import de.chojo.lolorito.config.Configuration;
+import de.chojo.lolorito.discord.commands.check.Check;
 import de.chojo.lolorito.discord.commands.offers.Offers;
 import de.chojo.lolorito.discord.commands.top.Top;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -59,7 +60,7 @@ public class Discord {
                 .withGuildCommandMapper(cmd -> Collections.singletonList(configuration.baseSettings().botGuild()))
                 .withDefaultMenuService()
                 .withPagination(builder -> builder.previousText("Previous").nextText("Next"))
-                .withCommands(new Offers(data), new Top(data))
+                .withCommands(new Offers(data), new Top(data), new Check(data))
                 .build();
     }
 }

@@ -167,6 +167,10 @@ public class Data {
         return users;
     }
 
+    public NameSupplier itemNameSupplier() {
+        return itemNameSupplier;
+    }
+
     public HikariDataSource dataSource() {
         return dataSource;
     }
