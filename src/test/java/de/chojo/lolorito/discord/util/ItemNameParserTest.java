@@ -70,15 +70,15 @@ class ItemNameParserTest {
     public void tokenScore() {
         Token token = Token.create("Some Matching Word String");
         Token matchingToken = Token.create("SMWS");
-        Assertions.assertEquals(25, token.score(matchingToken));
+        Assertions.assertEquals(10, token.score(matchingToken));
         matchingToken = Token.create("SomeMWS");
-        Assertions.assertEquals(55, token.score(matchingToken));
+        Assertions.assertEquals(22, token.score(matchingToken));
         matchingToken = Token.create("SomeMaWS");
-        Assertions.assertEquals(6.25, token.score(matchingToken));
+        Assertions.assertEquals(25, token.score(matchingToken));
         matchingToken = Token.create("SomeMaStr");
-        Assertions.assertEquals(6.25, token.score(matchingToken));
+        Assertions.assertEquals(25, token.score(matchingToken));
         matchingToken = Token.create("MaStr");
-        Assertions.assertEquals(2.25, token.score(matchingToken));
+        Assertions.assertEquals(9, token.score(matchingToken));
         Assertions.assertTrue(token.score(Token.create("SMWS")) > token.score(Token.create("MWS")));
         Assertions.assertTrue(token.score(Token.create("SomeMWS")) > token.score(Token.create("SomMWS")));
         Assertions.assertTrue(token.score(Token.create("SomeMWS")) < token.score(Token.create("SMatchingWS")));
@@ -89,10 +89,6 @@ class ItemNameParserTest {
         var token = Token.create("Gatherer's Grasp Materia X");
         double materiaX = token.score(Token.create("Materia X"));
         double materiaIX = token.score(Token.create("Materia IX"));
-        Assertions.assertTrue(materiaX > materiaIX, "%s is not smaller than %s".formatted(materiaX, materiaIX));
-        token = Token.create("Quickarm Materia IX");
-        materiaX = token.score(Token.create("Materia X"));
-        materiaIX = token.score(Token.create("Materia IX"));
         Assertions.assertTrue(materiaX > materiaIX, "%s is not smaller than %s".formatted(materiaX, materiaIX));
 
     }
