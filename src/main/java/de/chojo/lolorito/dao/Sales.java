@@ -28,14 +28,24 @@ public class Sales extends QueryFactory {
             boolean hq = sale.hq();
             LocalDateTime timestamp = sale.timestamp();
             builder.query("""
-                          INSERT INTO sales(world, item, hq, sold, unit_price, quantity, total)
-                          VALUES (?,?,?,?,?,?,?)
-                          """)
-                   .parameter(stmt -> stmt.setInt(worldId).setInt(itemId).setBoolean(hq)
-                                          .setTimestamp(Timestamp.valueOf(timestamp))
-                                          .setInt(unitPrice).setInt(quantity).setInt(total))
-                   .append();
+                            INSERT INTO sales(world, item, hq, sold, unit_price, quantity, total)
+                            VALUES (?,?,?,?,?,?,?)
+                            """)
+                    .parameter(stmt -> stmt.setInt(worldId).setInt(itemId).setBoolean(hq)
+                            .setTimestamp(Timestamp.valueOf(timestamp))
+                            .setInt(unitPrice).setInt(quantity).setInt(total))
+                    .append();
         }
         ((UpdateStage) builder).send();
+    }
+
+    public int clean() {
+        return builder().query("""
+                        DELETE FROM sales WHERE sold < now() - '60 DAYS'::INTERVAL
+                        """)
+                .emptyParams()
+                .delete()
+                .sendSync()
+                .rows();
     }
 }

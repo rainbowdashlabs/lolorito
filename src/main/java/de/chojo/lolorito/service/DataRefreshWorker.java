@@ -1,9 +1,9 @@
 package de.chojo.lolorito.service;
 
 import de.chojo.lolorito.core.Threading;
+import de.chojo.lolorito.dao.Sales;
 import de.chojo.sadu.base.QueryFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -22,9 +22,11 @@ public class DataRefreshWorker extends QueryFactory implements Runnable {
             "world_item_popularity", // depends on all other views
             "world_items" // depends on all other views
     );
+    private final Sales sales;
 
     private DataRefreshWorker(DataSource dataSource) {
         super(dataSource);
+        sales = new Sales(dataSource);
     }
 
     public static DataRefreshWorker create(Threading threading, DataSource dataSource) {
@@ -35,13 +37,15 @@ public class DataRefreshWorker extends QueryFactory implements Runnable {
 
     @Override
     public void run() {
+        int clean = sales.clean();
+        log.debug("Deleted {} sales", clean);
         log.debug("Refreshing views");
         for (String view : views) {
             long start = System.currentTimeMillis();
             builder().query("REFRESH MATERIALIZED VIEW %s", view)
-                     .emptyParams()
-                     .update()
-                     .sendSync();
+                    .emptyParams()
+                    .update()
+                    .sendSync();
             log.debug("View {} refreshed. Took {} ms", view, System.currentTimeMillis() - start);
         }
     }
