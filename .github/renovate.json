@@ -1,10 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "baseBranch": ["main"]
+  "baseBranches": ["main"]
   "extends": [
     "github>rainbowdashlabs/rainbowdashlabs//.github/renovate_default"
-  ]
-
+  ],
   "packageRules": [
     {
       "groupName": "log4j",
