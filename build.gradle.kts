@@ -21,7 +21,7 @@ dependencies {
     implementation("de.chojo.universalis", "universalis", "1.3.1")
 
     // database
-    implementation("org.postgresql", "postgresql", "42.7.1")
+    implementation("org.postgresql", "postgresql", "42.7.2")
     implementation("de.chojo.sadu", "sadu-queries", "1.4.1")
     implementation("de.chojo.sadu", "sadu-updater", "1.4.1")
     implementation("de.chojo.sadu", "sadu-postgresql", "1.4.1")
