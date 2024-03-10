@@ -29,8 +29,8 @@ dependencies {
 
     // Logging
     implementation("org.slf4j", "slf4j-api", "2.0.11")
-    implementation("org.apache.logging.log4j", "log4j-core", "2.23.0")
-    implementation("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.23.0")
+    implementation("org.apache.logging.log4j", "log4j-core", "2.23.1")
+    implementation("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.23.1")
     implementation("de.chojo", "log-util", "1.0.1"){
         exclude("org.apache.logging.log4j")
     }
