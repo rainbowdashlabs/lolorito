@@ -22,10 +22,10 @@ dependencies {
 
     // database
     implementation("org.postgresql", "postgresql", "42.7.3")
-    implementation("de.chojo.sadu", "sadu-queries", "1.4.1")
-    implementation("de.chojo.sadu", "sadu-updater", "1.4.1")
-    implementation("de.chojo.sadu", "sadu-postgresql", "1.4.1")
-    implementation("de.chojo.sadu", "sadu-datasource", "1.4.1")
+    implementation("de.chojo.sadu", "sadu-queries", "2.2.2")
+    implementation("de.chojo.sadu", "sadu-updater", "2.2.2")
+    implementation("de.chojo.sadu", "sadu-postgresql", "2.2.2")
+    implementation("de.chojo.sadu", "sadu-datasource", "2.2.2")
 
     // Logging
     implementation("org.slf4j", "slf4j-api", "2.0.11")
