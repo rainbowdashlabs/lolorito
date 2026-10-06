@@ -584,6 +584,17 @@ export default {
     theme: 'Theme',
     github: 'GitHub',
   },
+  homeWorld: {
+    title: 'Heimatwelt',
+    notSet: 'Noch keine Heimatwelt — wähl eine im Angebotsfilter oder in den Einstellungen.',
+    gilInPocket: 'Gil in der Tasche',
+    planRun: 'Runde planen',
+    last24h: 'Verkäufe auf deiner Welt, letzte 24 h',
+    totals: '{units} Stück',
+    noActivity: 'Noch keine Verkaufsdaten für die letzten 24 Stunden.',
+    sparklineLabel: 'Verkaufte Stück pro Stunde in den letzten 24 Stunden',
+    hourTooltip: '{hour}: {units} Stück · {gil} Gil',
+  },
   dashboard: {
     title: 'Übersicht',
     subtitle: 'Modell-Zustand, Kapazität und Worker-Takt auf einen Blick.',

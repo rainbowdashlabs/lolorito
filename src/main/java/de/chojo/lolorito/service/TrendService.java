@@ -29,6 +29,8 @@ import java.util.List;
 @Singleton
 public class TrendService {
 
+    private static final int ACTIVITY_HOURS = 24;
+
     /** Ignore keys with almost no volume — a 2-sale week fits a "trend" of pure noise. */
     private static final int MIN_UNITS_IN_WINDOW = 5;
     /** Below this fit quality the regression line explains little; the UI badges these rows. */
@@ -37,6 +39,7 @@ public class TrendService {
     private final SalesTrends repo;
     private final NameSupplier itemNames;
     private final ResponseCache<CacheKey, TrendBoard> cache;
+    private final ResponseCache<Integer, WorldActivity> activityCache;
 
     @Inject
     public TrendService(File config, SalesTrends repo, NameSupplier itemNames) {
@@ -44,6 +47,18 @@ public class TrendService {
         this.itemNames = itemNames;
         this.cache = new ResponseCache<>(
                 config.value().responseCacheSeconds(), config.value().responseCacheMaxSize());
+        this.activityCache = new ResponseCache<>(
+                config.value().responseCacheSeconds(), config.value().responseCacheMaxSize());
+    }
+
+    /** Hourly sales on one world over the last 24 hours, with totals. */
+    public WorldActivity last24h(int worldId) {
+        return activityCache.get(worldId, id -> {
+            var buckets = repo.hourly(id, ACTIVITY_HOURS);
+            long units = buckets.stream().mapToLong(SalesTrends.HourBucket::units).sum();
+            long gil = buckets.stream().mapToLong(SalesTrends.HourBucket::gil).sum();
+            return new WorldActivity(id, units, gil, buckets);
+        });
     }
 
     public TrendBoard board(int homeWorldId, int windowDays, int limit, Language language) {
@@ -136,4 +151,7 @@ public class TrendService {
             int homeWorldId, int windowDays, int fittedKeys, List<TrendRow> trending, List<TrendRow> losing) {}
 
     public record CacheKey(int homeWorldId, int windowDays, int limit, Language language) {}
+
+    /** Sales on one world over the last day: totals plus one bucket per hour, oldest first. */
+    public record WorldActivity(int worldId, long totalUnits, long totalGil, List<SalesTrends.HourBucket> hours) {}
 }

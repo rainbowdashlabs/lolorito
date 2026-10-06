@@ -11,6 +11,7 @@ import de.chojo.lolorito.service.TrendService;
 import de.chojo.lolorito.service.UserPreferencesService;
 import de.chojo.lolorito.web.Routes;
 import de.chojo.lolorito.web.auth.SessionResolver;
+import de.chojo.universalis.worlds.World;
 import de.chojo.universalis.worlds.Worlds;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
@@ -40,6 +41,25 @@ public class TrendRoutes implements Routes {
     public void register(JavalinDefaultRoutingApi routes) {
         routes.get("/api/v1/trends", this::board);
         routes.get("/api/v1/items/{id}/trend", this::itemTrend);
+        routes.get("/api/v1/worlds/{id}/sales/24h", this::worldActivity);
+    }
+
+    /** Hourly sales on one world over the last 24 hours. */
+    private void worldActivity(Context ctx) {
+        var world = parseWorld(ctx.pathParam("id"));
+        if (world == null) {
+            ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "unknown world"));
+            return;
+        }
+        ctx.json(trends.last24h(world.id()));
+    }
+
+    private static World parseWorld(String raw) {
+        try {
+            return Worlds.worldById(Integer.parseInt(raw));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /** Single-key trend for the item page. 204 when the item has no sales in the window. */

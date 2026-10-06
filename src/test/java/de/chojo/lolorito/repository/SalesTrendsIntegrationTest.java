@@ -115,4 +115,25 @@ class SalesTrendsIntegrationTest extends RepositoryTestBase {
                 """).single(call()).insert();
         assertThat(repo.fit(WORLD, 7, 1)).isEmpty();
     }
+
+    @Test
+    void hourlyZeroFillsAndSumsPerHourOnOneWorld() {
+        query("""
+                INSERT INTO sales(world, item, hq, sold, unit_price, quantity, total)
+                VALUES (66, 500, false, date_trunc('hour', now()) + INTERVAL '1 minute', 100, 2, 200),
+                       (66, 501, true,  date_trunc('hour', now()) + INTERVAL '2 minutes', 50, 4, 200),
+                       (66, 500, false, date_trunc('hour', now()) - INTERVAL '150 minutes', 100, 1, 100),
+                       (66, 500, false, now() - INTERVAL '30 hours', 100, 9, 900),
+                       (402, 500, false, date_trunc('hour', now()) + INTERVAL '1 minute', 100, 7, 700)
+                """).single(call()).insert();
+
+        var hours = repo.hourly(WORLD, 24);
+
+        assertThat(hours).hasSize(24);
+        assertThat(hours.getLast().units()).isEqualTo(6);
+        assertThat(hours.getLast().gil()).isEqualTo(400);
+        assertThat(hours.get(20).units()).isEqualTo(1);
+        assertThat(hours.stream().mapToLong(SalesTrends.HourBucket::units).sum()).isEqualTo(7);
+        assertThat(hours.getFirst().hourStart()).isBefore(hours.getLast().hourStart());
+    }
 }

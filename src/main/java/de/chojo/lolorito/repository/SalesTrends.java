@@ -8,12 +8,14 @@ package de.chojo.lolorito.repository;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import java.time.Instant;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
+import static de.chojo.sadu.queries.converter.StandardValueConverter.INSTANT_TIMESTAMP;
 
 /**
  * Per-(item, hq) sales-trend regression on one world. Buckets the sales
@@ -122,6 +124,39 @@ public class SalesTrends {
                         row.getLong("total_units"),
                         row.getDouble("avg_units"),
                         row.getLong("last_day_units")))
+                .all();
+    }
+
+    /** Units and gil sold on one world inside one clock hour starting at {@code hourStart}. */
+    public record HourBucket(Instant hourStart, long units, long gil) {}
+
+    /**
+     * Sales on {@code worldId} over the last {@code hours} clock hours, one
+     * bucket per hour (the current, partial hour last). Hours without sales
+     * are present as zero buckets.
+     */
+    public List<HourBucket> hourly(int worldId, int hours) {
+        return query("""
+                WITH g AS (
+                    SELECT generate_series(
+                               date_trunc('hour', now()) - ((:hours::int - 1) || ' hours')::INTERVAL,
+                               date_trunc('hour', now()),
+                               INTERVAL '1 hour') AS h
+                )
+                SELECT g.h                              AS hour_start,
+                       coalesce(sum(s.quantity), 0)::bigint AS units,
+                       coalesce(sum(s.total), 0)::bigint    AS gil
+                  FROM g
+                  LEFT JOIN sales s
+                    ON s.world = :world
+                   AND s.sold >= g.h
+                   AND s.sold < g.h + INTERVAL '1 hour'
+                 GROUP BY g.h
+                 ORDER BY g.h
+                """)
+                .single(call().bind("world", worldId).bind("hours", Math.max(1, hours)))
+                .map(row -> new HourBucket(
+                        row.get("hour_start", INSTANT_TIMESTAMP), row.getLong("units"), row.getLong("gil")))
                 .all();
     }
 }

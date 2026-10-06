@@ -52,3 +52,23 @@ export async function itemTrend(
   const { data, status } = await apiClient.get<TrendRow | null>(`/items/${itemId}/trend`, { params: q })
   return status === 204 ? null : data
 }
+
+/** Units and gil sold on one world inside one clock hour. */
+export interface HourBucket {
+  hourStart: string
+  units: number
+  gil: number
+}
+
+/** Sales on one world over the last 24 hours, oldest hour first. */
+export interface WorldActivity {
+  worldId: number
+  totalUnits: number
+  totalGil: number
+  hours: HourBucket[]
+}
+
+export async function worldActivity(worldId: number): Promise<WorldActivity> {
+  const { data } = await apiClient.get<WorldActivity>(`/worlds/${worldId}/sales/24h`)
+  return data
+}

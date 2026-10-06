@@ -584,6 +584,17 @@ export default {
     theme: 'Theme',
     github: 'GitHub',
   },
+  homeWorld: {
+    title: 'Home world',
+    notSet: 'No home world yet — pick one in the offers filter or in settings.',
+    gilInPocket: 'Gil in pocket',
+    planRun: 'Plan a run',
+    last24h: 'Sales on your world, last 24 h',
+    totals: '{units} units',
+    noActivity: 'No sales data for the last 24 hours yet.',
+    sparklineLabel: 'Units sold per hour over the last 24 hours',
+    hourTooltip: '{hour}: {units} units · {gil} gil',
+  },
   dashboard: {
     title: 'Dashboard',
     subtitle: 'Model health, capacity and worker cadence in one glance.',

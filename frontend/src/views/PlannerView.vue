@@ -5,6 +5,7 @@
  */
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import PageHeader from '@/components/typography/PageHeader.vue'
 import MutedText from '@/components/typography/MutedText.vue'
@@ -29,6 +30,7 @@ type Params = Required<Omit<PlanRequest, 'homeWorld' | 'refreshHours'>> & {
 
 const { t } = useI18n()
 const filter = useFilter()
+const route = useRoute()
 const plan = ref<Plan | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -197,6 +199,8 @@ onMounted(async () => {
   if (saved) {
     form.value = { ...form.value, ...saved }
   }
+  const budgetFromLink = Number(route.query.budget)
+  if (budgetFromLink > 0) form.value = { ...form.value, budget: Math.floor(budgetFromLink) }
 })
 
 </script>

@@ -16,6 +16,7 @@ import CalibrationCard from '@/components/ffxiv/CalibrationCard.vue'
 import WorstKeysCard from '@/components/ffxiv/WorstKeysCard.vue'
 import TrendsCard from '@/components/ffxiv/TrendsCard.vue'
 import OpportunityGrid from '@/components/ffxiv/OpportunityGrid.vue'
+import HomeWorldCard from '@/components/ffxiv/HomeWorldCard.vue'
 import CalibrationChart from '@/components/ffxiv/CalibrationChart.vue'
 import PerfChart from '@/components/ffxiv/PerfChart.vue'
 import { dashboardApi } from '@/api'
@@ -95,6 +96,10 @@ onMounted(refresh)
 
 <template>
   <PageHeader :title="t('dashboard.title')" :subtitle="t('dashboard.subtitle')" />
+
+  <div class="mt-4">
+    <HomeWorldCard />
+  </div>
 
   <div class="mt-4">
     <OpportunityGrid />
