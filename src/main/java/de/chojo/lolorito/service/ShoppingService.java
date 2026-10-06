@@ -108,6 +108,8 @@ public class ShoppingService {
      *                     the chosen-quality board; null when unlisted
      * @param craftUnitCost per-unit cost of crafting it instead; null
      *                     when not craftable or unpriceable
+     * @param depthCapped  true when a sub-recipe exists past the explored
+     *                     depth, so the node is offered as a buy only
      */
     public record ShoppingNode(
             int itemId,
@@ -121,7 +123,8 @@ public class ShoppingService {
             Integer craftUnitCost,
             String craftClass,
             Integer craftLevel,
-            List<ShoppingNode> children) {}
+            List<ShoppingNode> children,
+            boolean depthCapped) {}
 
     /**
      * One recipe that produces the requested item, offered so the caller
@@ -396,7 +399,8 @@ public class ShoppingService {
                 chainNode.craftPerUnit(),
                 sub == null ? null : sub.craftClass(),
                 sub == null ? null : sub.level(),
-                List.copyOf(children));
+                List.copyOf(children),
+                chainNode.depthCapped());
     }
 
     private boolean isHqBuy(int itemId, Set<Integer> hqMarked) {

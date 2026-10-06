@@ -59,6 +59,8 @@ export interface ShoppingNode {
   craftClass: string | null
   craftLevel: number | null
   children: ShoppingNode[]
+  /** True when a sub-recipe exists past the explored depth; only buying is offered. */
+  depthCapped: boolean
 }
 
 /**

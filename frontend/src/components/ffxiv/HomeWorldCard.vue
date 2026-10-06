@@ -44,7 +44,7 @@ async function loadActivity() {
 }
 
 function onBudget(v: number | undefined) {
-  filter.patchDebounced({ budget: Math.max(0, Math.floor(v ?? 0)) })
+  filter.patchDebounced({ budget: Math.max(0, Math.floor(v ?? 0)) }).catch(() => {})
 }
 
 function planRun() {

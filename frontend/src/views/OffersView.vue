@@ -169,13 +169,10 @@ async function onRefreshHoursChange(v: string | number | null | undefined) {
   await refresh()
 }
 
-let boundsDebounce: ReturnType<typeof setTimeout> | null = null
 function onBoundsChange(bounds: { budget?: number; inventorySlots?: number }) {
-  if (boundsDebounce) clearTimeout(boundsDebounce)
-  boundsDebounce = setTimeout(async () => {
-    await filter.patch(bounds)
-    await refresh()
-  }, 600)
+  filter.patchDebounced(bounds, 600).then(refresh, (e: unknown) => {
+    error.value = extractError(e)
+  })
 }
 
 async function onScopeChange(v: 'DATA_CENTER' | 'REGION') {

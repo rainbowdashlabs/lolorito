@@ -67,6 +67,9 @@ const childrenDimmed = computed(() => props.dimmed || props.node.decision === 'b
       >
         {{ node.craftClass }} L{{ node.craftLevel }}
       </span>
+      <MutedText v-if="node.depthCapped" size="sm" :title="t('item.depthCappedHint')">
+        {{ t('item.depthCapped') }}
+      </MutedText>
       <div class="ml-auto flex flex-wrap items-center gap-3">
         <MutedText size="sm">
           {{ t('shopping.buyUnit') }}

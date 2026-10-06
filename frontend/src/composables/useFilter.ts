@@ -25,16 +25,31 @@ async function patch(update: FilterPatch): Promise<void> {
 
 let pending: ReturnType<typeof setTimeout> | null = null
 let pendingPatch: FilterPatch = {}
+let waiters: { resolve: () => void; reject: (e: unknown) => void }[] = []
 
-function patchDebounced(update: FilterPatch, delayMs = 400): void {
+/**
+ * Merge `update` into the next save and send it once input has been quiet
+ * for `delayMs`. The returned promise settles when that batched save does,
+ * so callers can refresh afterwards.
+ */
+function patchDebounced(update: FilterPatch, delayMs = 400): Promise<void> {
   pendingPatch = { ...pendingPatch, ...update }
   if (pending) clearTimeout(pending)
+  const settled = new Promise<void>((resolve, reject) => waiters.push({ resolve, reject }))
   pending = setTimeout(async () => {
     const toSend = pendingPatch
+    const batch = waiters
     pendingPatch = {}
+    waiters = []
     pending = null
-    await patch(toSend)
+    try {
+      await patch(toSend)
+      batch.forEach((w) => w.resolve())
+    } catch (e: unknown) {
+      batch.forEach((w) => w.reject(e))
+    }
   }, delayMs)
+  return settled
 }
 
 /** Overwrite the cached filter row without hitting the server. */
