@@ -11,6 +11,7 @@ import de.chojo.lolorito.repository.ListingEpisodes;
 import de.chojo.lolorito.repository.MarketModelResiduals;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.PerfMetrics;
+import de.chojo.lolorito.universalis.WorldNames;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -71,7 +72,7 @@ public class CalibrationService {
                         k.itemId(),
                         itemNameOf(k.itemId()),
                         k.worldId(),
-                        worldNameOf(k.worldId()),
+                        WorldNames.nameOf(k.worldId()),
                         k.hq(),
                         k.count(),
                         k.mean(),
@@ -89,11 +90,6 @@ public class CalibrationService {
         if (name == null) return String.valueOf(itemId);
         String english = name.get(de.chojo.universalis.entities.Language.ENGLISH);
         return english == null || english.isBlank() ? String.valueOf(itemId) : english;
-    }
-
-    private static String worldNameOf(int worldId) {
-        var world = de.chojo.universalis.worlds.Worlds.worldById(worldId);
-        return world == null ? String.valueOf(worldId) : world.name();
     }
 
     /**

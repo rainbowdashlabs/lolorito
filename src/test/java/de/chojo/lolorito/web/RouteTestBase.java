@@ -12,6 +12,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.zaxxer.hikari.HikariDataSource;
+import de.chojo.lolorito.SharedPostgres;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.core.Threading;
 import de.chojo.lolorito.entity.Session;
@@ -62,8 +63,6 @@ import io.javalin.Javalin;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.lang.reflect.Field;
@@ -90,7 +89,6 @@ import static de.chojo.sadu.queries.api.query.Query.query;
  * {@code JavalinTest.test(app(), ...)} without repeating the setup.
  */
 @Tag("database")
-@Testcontainers
 public abstract class RouteTestBase {
 
     protected static final String SESSION_COOKIE_NAME = "lolorito_session";
@@ -101,11 +99,7 @@ public abstract class RouteTestBase {
      */
     protected static final String TEST_ENCRYPTION_KEY = Base64.getEncoder().encodeToString(new byte[32]);
 
-    @Container
-    static final PostgreSQLContainer PG = new PostgreSQLContainer("postgres:17")
-            .withDatabaseName("lolorito_test")
-            .withUsername("test")
-            .withPassword("test");
+    static final PostgreSQLContainer PG = SharedPostgres.container();
 
     private static final AtomicInteger SCHEMA_COUNTER = new AtomicInteger();
     protected static DataSource dataSource;
@@ -297,6 +291,7 @@ public abstract class RouteTestBase {
             routes.addBinding().to(de.chojo.lolorito.web.api.DesynthExplorerRoutes.class);
             routes.addBinding().to(de.chojo.lolorito.web.api.AdminMarketRoutes.class);
             routes.addBinding().to(de.chojo.lolorito.web.api.TrendRoutes.class);
+            routes.addBinding().to(de.chojo.lolorito.web.api.ShoppingRoutes.class);
         }
 
         @Provides

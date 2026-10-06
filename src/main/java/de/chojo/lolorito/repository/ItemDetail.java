@@ -372,36 +372,4 @@ public class ItemDetail {
      * (gil, always).
      */
     public record SalesBucket(Instant day, int sales, int units, int avgPrice, int minPrice, int maxPrice) {}
-
-    /**
-     * Region-wide listings — walks every DC in the region, ordered by
-     * unit price. Powers the "Listings in region" table on the item
-     * detail page. Deliberately region-wide rather than the DC-only
-     * default; the higher volume is worth
-     * the wider join. The {@code worlds} table stores {@code region_name}
-     * denormalised so no extra dimension table is needed.
-     */
-    public List<ListingRow> listingsForRegion(int itemId, String regionName, boolean hq, int cap) {
-        return query("""
-                SELECT l.world, l.unit_price, l.quantity, l.hq, l.review_time
-                  FROM listings l
-                  JOIN worlds w ON l.world = w.world
-                 WHERE l.item = :item
-                   AND l.hq = :hq
-                   AND w.region_name = :region
-                 ORDER BY l.unit_price ASC
-                 LIMIT :cap
-                """)
-                .single(call().bind("item", itemId)
-                        .bind("hq", hq)
-                        .bind("region", regionName)
-                        .bind("cap", cap))
-                .map(row -> new ListingRow(
-                        row.getInt("world"),
-                        row.getInt("unit_price"),
-                        row.getInt("quantity"),
-                        row.getBoolean("hq"),
-                        row.get("review_time", INSTANT_TIMESTAMP)))
-                .all();
-    }
 }

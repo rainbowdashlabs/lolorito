@@ -12,6 +12,7 @@ import de.chojo.lolorito.entity.OfferFilterTarget;
 import de.chojo.lolorito.repository.DesynthResults;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.ComponentPricing;
 import de.chojo.lolorito.value.CraftChainPlanner;
 import de.chojo.lolorito.value.ListingBook;
@@ -71,11 +72,6 @@ public class ItemDetailService {
         this.models = models;
         this.cache = new ResponseCache<>(
                 config.value().responseCacheSeconds(), config.value().responseCacheMaxSize());
-    }
-
-    private static String worldName(int worldId) {
-        var w = Worlds.worldById(worldId);
-        return w == null ? String.valueOf(worldId) : w.name();
     }
 
     private static ModelDto toModelDto(MarketModel m) {
@@ -185,7 +181,7 @@ public class ItemDetailService {
                 listings.stream()
                         .map(l -> new ListingDto(
                                 l.worldId(),
-                                worldName(l.worldId()),
+                                WorldNames.nameOf(l.worldId()),
                                 l.unitPrice(),
                                 l.quantity(),
                                 l.hq(),

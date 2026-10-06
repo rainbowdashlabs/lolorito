@@ -45,4 +45,20 @@ class CalibrationRouteTest extends RouteTestBase {
             assertThat(res.code()).isEqualTo(200);
         });
     }
+
+    @Test
+    void worstKeysAndShelfDrilldownsAnswer() {
+        var cookie = seedSession(1_410L);
+        JavalinTest.test(app(), (server, client) -> {
+            var keys =
+                    client.get("/api/v1/calibration/keys?limit=5", req -> req.header("Cookie", cookieHeader(cookie)));
+            assertThat(keys.code()).isEqualTo(200);
+            assertThat(keys.body().string()).startsWith("[");
+
+            var shelf =
+                    client.get("/api/v1/calibration/shelf?window=7", req -> req.header("Cookie", cookieHeader(cookie)));
+            assertThat(shelf.code()).isEqualTo(200);
+            assertThat(shelf.body().string()).contains("\"windowDays\":7").contains("\"scoredCount\":0");
+        });
+    }
 }

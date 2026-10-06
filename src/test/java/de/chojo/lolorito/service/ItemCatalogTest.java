@@ -8,6 +8,9 @@ package de.chojo.lolorito.service;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Exercises {@link ItemCatalog}'s classpath loader. Whether or not the
@@ -44,5 +47,31 @@ class ItemCatalogTest {
         var a = new ItemCatalog();
         var b = new ItemCatalog();
         assertThat(a.stackSize(5057)).isEqualTo(b.stackSize(5057));
+    }
+
+    @Test
+    void ingestMergesEntriesAndCountsOnlyNewStackSizes() {
+        var catalog = new ItemCatalog();
+        int before = catalog.size();
+        var fresh = new de.chojo.lolorito.catalog.ItemSheetEntry(
+                9_900_001, 4242, 99, 999, "Test Category", "A test item.", true);
+        var bare = new de.chojo.lolorito.catalog.ItemSheetEntry(9_900_002, 0, 0, 0);
+        var invalid = new de.chojo.lolorito.catalog.ItemSheetEntry(0, 1, 1, 1);
+
+        int added = catalog.ingest(java.util.Map.of(1, fresh, 2, bare, 3, invalid));
+
+        assertEquals(1, added);
+        assertEquals(before + 1, catalog.size());
+        assertEquals(999, catalog.stackSize(9_900_001));
+        assertEquals(4242, catalog.iconIdFor(9_900_001));
+        assertEquals(99, catalog.ilvlFor(9_900_001));
+        assertEquals("Test Category", catalog.categoryFor(9_900_001));
+        assertEquals("A test item.", catalog.descriptionFor(9_900_001));
+        assertTrue(catalog.canBeHq(9_900_001), "refreshed entries carry their HQ flag");
+        assertFalse(catalog.canBeHq(9_900_002));
+
+        assertEquals(0, catalog.ingest(java.util.Map.of(1, fresh)), "re-ingesting a known stack size adds nothing");
+        assertEquals(0, catalog.ingest(java.util.Map.of()));
+        assertEquals(0, catalog.ingest(null));
     }
 }

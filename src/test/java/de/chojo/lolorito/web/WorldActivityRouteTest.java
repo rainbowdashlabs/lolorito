@@ -31,6 +31,9 @@ class WorldActivityRouteTest extends RouteTestBase {
         JavalinTest.test(app(), (server, client) -> {
             var res = client.get("/api/v1/worlds/abc/sales/24h", req -> req.header("Cookie", cookieHeader(cookie)));
             assertThat(res.code()).isEqualTo(400);
+            var unknown =
+                    client.get("/api/v1/worlds/9999/sales/24h", req -> req.header("Cookie", cookieHeader(cookie)));
+            assertThat(unknown.code()).isEqualTo(400);
         });
     }
 

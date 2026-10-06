@@ -174,6 +174,7 @@ public class ItemCatalog {
             }
             if (e.category() != null && !e.category().isEmpty()) categoryById.put(e.id(), e.category());
             if (e.description() != null && !e.description().isEmpty()) descriptionById.put(e.id(), e.description());
+            if (e.canBeHq()) canBeHqIds.add(e.id());
         }
         log.info(
                 "ItemCatalog ingested {} entries ({} new stackSize); totals now stackSize={} category={} description={}",

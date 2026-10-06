@@ -24,6 +24,7 @@ import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.Offers;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.ComponentPricing;
 import de.chojo.lolorito.value.CraftChainPlanner;
 import de.chojo.lolorito.value.MarketModel;
@@ -307,8 +308,8 @@ public class PlannerService {
         var prefs = new UserPrefs(config.value().mbTaxFor(params.homeDataCenterId()), params.attentionFraction(), 30.0);
         var crafts = new ArrayList<PlanCraft>(picked.size());
         for (var s : picked) {
-            var bom = CraftBomBuilder.build(
-                    s.recipe(), s.chain(), s.book(), this::nameOf, PlannerService::worldNameOf, ledgerNq);
+            var bom =
+                    CraftBomBuilder.build(s.recipe(), s.chain(), s.book(), this::nameOf, WorldNames::nameOf, ledgerNq);
             var base = s.craft();
             int yield = Math.max(1, base.qty());
             int perProductCost = (int) Math.ceil(bom.materialsCost() / (double) yield);
@@ -749,7 +750,7 @@ public class PlannerService {
                     .orElse(null);
             if (v == null || v.evGross() <= 0) continue;
 
-            var bom = CraftBomBuilder.build(recipe, chain, book, this::nameOf, PlannerService::worldNameOf);
+            var bom = CraftBomBuilder.build(recipe, chain, book, this::nameOf, WorldNames::nameOf);
             // Every world the shopping list touches beyond home — the
             // solver charges their hops when this candidate is picked.
             var materialWorlds = new LinkedHashMap<Integer, WorldNode>();
@@ -807,11 +808,6 @@ public class PlannerService {
                     hqModel));
         }
         return out;
-    }
-
-    private static String worldNameOf(int worldId) {
-        var world = Worlds.worldById(worldId);
-        return world == null ? String.valueOf(worldId) : world.name();
     }
 
     /**

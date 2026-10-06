@@ -39,4 +39,16 @@ class DesynthExplorerRouteTest extends RouteTestBase {
             assertThat(res.body().string()).startsWith("[");
         });
     }
+
+    @Test
+    void classFilterAndRegionScopeAreAccepted() {
+        var cookie = seedSession(50_102L);
+        JavalinTest.test(app(), (server, client) -> {
+            var res = client.get(
+                    "/api/v1/desynth?homeWorld=66&class=Carpenter,%20alc,,&minLevel=10&scope=region",
+                    req -> req.header("Cookie", cookieHeader(cookie)));
+            assertThat(res.code()).isEqualTo(200);
+            assertThat(res.body().string()).startsWith("[");
+        });
+    }
 }

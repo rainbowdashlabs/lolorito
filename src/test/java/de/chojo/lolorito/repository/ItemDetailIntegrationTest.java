@@ -144,4 +144,40 @@ class ItemDetailIntegrationTest extends RepositoryTestBase {
     void cheapestPriceEmptyWhenScopeMissing() {
         assertTrue(repo.cheapestPrice(100, null, null, false).isEmpty());
     }
+
+    @Test
+    void cheapestByItemRegionSpansTheRegionAndFiltersQualityAndStaleness() {
+        insertWorld(80, "Cerberus", 6, "Chaos", "Europe");
+        insertWorld(1001, "Shiva", 9, "Mana", "Japan");
+        seedListing(66, 100, 300, 1, false);
+        seedListing(80, 100, 200, 1, false);
+        seedListing(1001, 100, 50, 1, false);
+        seedListing(66, 100, 100, 1, true);
+        seedListing(402, 101, 700, 1, false);
+        query("UPDATE listings_updated SET updated = now() - INTERVAL '3 DAYS' WHERE world = 402 AND item = 101")
+                .single(call())
+                .update();
+
+        var out = repo.cheapestByItemRegion("Europe", List.of(100, 101), false, 24);
+
+        assertEquals(
+                Map.of(100, 200), out, "cross-DC minimum in the region; other regions, HQ and stale boards ignored");
+        assertTrue(repo.cheapestByItemRegion("Europe", List.of(), false, 24).isEmpty());
+    }
+
+    @Test
+    void cheapBookCoversRegionScopeAndRejectsMissingScope() {
+        insertWorld(80, "Cerberus", 6, "Chaos", "Europe");
+        seedListing(66, 100, 300, 2, false);
+        seedListing(80, 100, 200, 4, false);
+        seedListing(80, 100, 250, 1, false);
+
+        var book = repo.cheapBook(null, "Europe", List.of(100), false, 24, 2).get(100);
+
+        assertEquals(2, book.size(), "capped at the requested number of levels");
+        assertEquals(new ItemDetail.PriceLevel(200, 4, 80), book.get(0));
+        assertEquals(new ItemDetail.PriceLevel(250, 1, 80), book.get(1));
+        assertTrue(repo.cheapBook(null, null, List.of(100), false, 24, 2).isEmpty());
+        assertTrue(repo.cheapBook(7, null, List.of(), false, 24, 2).isEmpty());
+    }
 }

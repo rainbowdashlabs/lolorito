@@ -11,9 +11,9 @@ import de.chojo.lolorito.core.Discord;
 import de.chojo.lolorito.entity.AlertKind;
 import de.chojo.lolorito.entity.AlertRule;
 import de.chojo.lolorito.service.AlertDispatcher;
+import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
-import de.chojo.universalis.worlds.Worlds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class AlertDmDispatcher implements AlertDispatcher {
     private MessageEmbed buildEmbed(AlertRule rule, int observed) {
         String itemName = nameOf(rule.itemId());
         String scope = rule.scope().isWorld()
-                ? worldName(rule.scope().worldId())
+                ? WorldNames.nameOf(rule.scope().worldId())
                 : "DC " + rule.scope().dataCenterId();
         return new EmbedBuilder()
                 .setTitle("Market alert: " + itemName)
@@ -108,10 +108,5 @@ public class AlertDmDispatcher implements AlertDispatcher {
         if (nameSupplier == null) return String.valueOf(itemId);
         var name = nameSupplier.fromId(itemId);
         return name == null ? String.valueOf(itemId) : name.get(Language.ENGLISH);
-    }
-
-    private static String worldName(int worldId) {
-        var w = Worlds.worldById(worldId);
-        return w == null ? String.valueOf(worldId) : w.name();
     }
 }

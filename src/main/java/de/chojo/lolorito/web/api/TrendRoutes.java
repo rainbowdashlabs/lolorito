@@ -56,10 +56,21 @@ public class TrendRoutes implements Routes {
 
     private static World parseWorld(String raw) {
         try {
-            return Worlds.worldById(Integer.parseInt(raw));
+            return knownWorld(Integer.parseInt(raw));
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /**
+     * The world for {@code id}, or null when the id is missing or unknown.
+     * {@link Worlds#worldById} never returns null; an unknown id comes back
+     * without a data center.
+     */
+    private static World knownWorld(Integer id) {
+        if (id == null || id <= 0) return null;
+        var world = Worlds.worldById(id);
+        return world == null || world.dataCenter() == null ? null : world;
     }
 
     /** Single-key trend for the item page. 204 when the item has no sales in the window. */
@@ -75,7 +86,7 @@ public class TrendRoutes implements Routes {
         Integer homeWorldId = QueryParams.optInt(ctx, "home_world");
         if (homeWorldId == null)
             homeWorldId = filters.current(session.discordUserId()).worldId();
-        var world = homeWorldId == null || homeWorldId <= 0 ? null : Worlds.worldById(homeWorldId);
+        var world = knownWorld(homeWorldId);
         if (world == null) {
             ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "home_world not set or unknown"));
             return;
@@ -101,7 +112,7 @@ public class TrendRoutes implements Routes {
                     .json(Map.of("error", "home_world not set — provide ?home_world= or save one via /me/filter"));
             return;
         }
-        var world = Worlds.worldById(homeWorldId);
+        var world = knownWorld(homeWorldId);
         if (world == null) {
             ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "unknown home_world"));
             return;

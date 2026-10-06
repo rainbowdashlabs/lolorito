@@ -6,6 +6,7 @@
 package de.chojo.lolorito.service;
 
 import com.zaxxer.hikari.HikariDataSource;
+import de.chojo.lolorito.SharedPostgres;
 import de.chojo.sadu.core.configuration.DatabaseConfig;
 import de.chojo.sadu.datasource.DataSourceCreator;
 import de.chojo.sadu.mapper.RowMapperRegistry;
@@ -17,8 +18,6 @@ import de.chojo.sadu.updater.SqlUpdater;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,14 +34,9 @@ import static de.chojo.sadu.queries.api.query.Query.query;
  * DataSource} + schema name.
  */
 @Tag("database")
-@Testcontainers
 public abstract class ServiceIntegrationTestBase {
 
-    @Container
-    static final PostgreSQLContainer PG = new PostgreSQLContainer("postgres:17")
-            .withDatabaseName("lolorito_test")
-            .withUsername("test")
-            .withPassword("test");
+    static final PostgreSQLContainer PG = SharedPostgres.container();
 
     private static final AtomicInteger SCHEMA_COUNTER = new AtomicInteger();
     protected static DataSource dataSource;

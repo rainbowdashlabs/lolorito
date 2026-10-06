@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.CraftChainPlanner;
 import de.chojo.lolorito.value.ListingBook;
 import de.chojo.lolorito.value.MarketModel;
@@ -232,7 +233,7 @@ public class ShoppingService {
                     need.getValue(),
                     bookFor(itemId, hqMarked, bookNq, bookHq),
                     this::nameOf,
-                    ShoppingService::worldNameOf,
+                    WorldNames::nameOf,
                     new LinkedHashMap<>());
             for (var m : segments) {
                 linesByWorld
@@ -255,7 +256,7 @@ public class ShoppingService {
             long cost0 =
                     e.getValue().stream().mapToLong(ShoppingLine::totalCost).sum();
             totalCost += cost0;
-            stops.add(new ShoppingStop(e.getKey(), worldNameOf(e.getKey()), cost0, List.copyOf(e.getValue())));
+            stops.add(new ShoppingStop(e.getKey(), WorldNames.nameOf(e.getKey()), cost0, List.copyOf(e.getValue())));
         }
         stops.sort(java.util.Comparator.comparingLong(ShoppingStop::cost).reversed());
 
@@ -439,11 +440,6 @@ public class ShoppingService {
 
     private UserPrefs prefs(int dcId) {
         return new UserPrefs(config.value().mbTaxFor(dcId), 0.25, 30.0);
-    }
-
-    private static String worldNameOf(int worldId) {
-        var world = Worlds.worldById(worldId);
-        return world == null ? String.valueOf(worldId) : world.name();
     }
 
     private String nameOf(int itemId) {

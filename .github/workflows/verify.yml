@@ -21,8 +21,14 @@ jobs:
           node-version: 24
       - name: Build with Gradle
         run: ./gradlew --build-cache build
-      - name: Test with Gradle
-        run: ./gradlew test --info
+      - name: Verify (tests, coverage, license headers)
+        run: ./gradlew verify
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-reports
+          path: build/reports
 
 
   build-docker:

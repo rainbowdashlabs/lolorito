@@ -126,4 +126,18 @@ class MarketModelsIntegrationTest extends RepositoryTestBase {
         var candidates = repo.refitCandidates(now, 30, 10);
         assertTrue(candidates.isEmpty(), "sales outside the fit window don't trigger a refit");
     }
+
+    @Test
+    void expireStaleDemotesOnlyOldSufficientModels() {
+        var now = Instant.now();
+        repo.upsert(model(66, 100, false, true, now.minus(20, ChronoUnit.DAYS)));
+        repo.upsert(model(66, 101, false, true, now.minus(2, ChronoUnit.DAYS)));
+        repo.upsert(model(66, 102, false, false, now.minus(20, ChronoUnit.DAYS)));
+
+        assertEquals(1, repo.expireStale(14));
+
+        assertFalse(repo.find(66, 100, false).orElseThrow().sufficient());
+        assertTrue(repo.find(66, 101, false).orElseThrow().sufficient());
+        assertEquals(0, repo.expireStale(14), "already demoted rows are not counted twice");
+    }
 }
