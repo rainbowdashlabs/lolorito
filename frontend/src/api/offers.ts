@@ -15,6 +15,8 @@ export interface Valuation {
   listRatio: number
 }
 
+export type Confidence = 'HIGH' | 'MEDIUM' | 'LOW'
+
 export interface ScoredOffer {
   sourceWorldId: number
   itemId: number
@@ -35,6 +37,8 @@ export interface ScoredOffer {
   modelSufficient: boolean
   /** True when the home model was fitted from DC-pooled sales — lower confidence. */
   modelPooled: boolean
+  /** Overall trust tier from sample count, pooling, and spread vs margin. */
+  confidence: Confidence
   /**
    * Set by the client-side shelf-horizon projection: when the full
    * quantity wouldn't clear inside the requested window, `quantity`

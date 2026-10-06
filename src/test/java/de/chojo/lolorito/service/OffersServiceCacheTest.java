@@ -21,7 +21,7 @@ class OffersServiceCacheTest {
     @Test
     void repeatedCallsWithSameKeyHitCacheOnce() {
         var repo = new CountingOffers();
-        var service = new OffersService(new File(), repo, NameSupplier.EMPTY);
+        var service = new OffersService(new File(), repo, NameSupplier.EMPTY, new ItemCatalog());
         var prefs = UserPrefs.defaults();
         service.topOffers(66, 7, 6, prefs, 10);
         service.topOffers(66, 7, 6, prefs, 10);
@@ -32,7 +32,7 @@ class OffersServiceCacheTest {
     @Test
     void differentKeysMissTheCache() {
         var repo = new CountingOffers();
-        var service = new OffersService(new File(), repo, NameSupplier.EMPTY);
+        var service = new OffersService(new File(), repo, NameSupplier.EMPTY, new ItemCatalog());
         var prefs = UserPrefs.defaults();
         service.topOffers(66, 7, 6, prefs, 10);
         service.topOffers(66, 7, 6, prefs, 20); // different limit
@@ -43,7 +43,7 @@ class OffersServiceCacheTest {
     @Test
     void invalidateCacheForcesReload() {
         var repo = new CountingOffers();
-        var service = new OffersService(new File(), repo, NameSupplier.EMPTY);
+        var service = new OffersService(new File(), repo, NameSupplier.EMPTY, new ItemCatalog());
         var prefs = UserPrefs.defaults();
         service.topOffers(66, 7, 6, prefs, 10);
         service.invalidateCache();
@@ -54,7 +54,7 @@ class OffersServiceCacheTest {
     @Test
     void uncachedVariantBypassesCache() {
         var repo = new CountingOffers();
-        var service = new OffersService(new File(), repo, NameSupplier.EMPTY);
+        var service = new OffersService(new File(), repo, NameSupplier.EMPTY, new ItemCatalog());
         var prefs = UserPrefs.defaults();
         service.topOffersUncached(66, 7, 6, prefs, 10);
         service.topOffersUncached(66, 7, 6, prefs, 10);

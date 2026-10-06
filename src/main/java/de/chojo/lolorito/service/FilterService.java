@@ -76,7 +76,9 @@ public class FilterService {
                 clamp(orElse(patch.views(), current.views()), 0, Integer.MAX_VALUE),
                 clamp(orElse(patch.profit(), current.profit()), 0, Integer.MAX_VALUE),
                 clamp(orElse(patch.effectiveProfit(), current.effectiveProfit()), 0, Integer.MAX_VALUE),
-                normalise(orElse(patch.target(), current.target())));
+                normalise(orElse(patch.target(), current.target())),
+                clamp(orElse(patch.budget(), current.budget()), 0, Integer.MAX_VALUE),
+                clamp(orElse(patch.inventorySlots(), current.inventorySlots()), 0, 140));
         repo.upsert(userId, next);
         return next;
     }
@@ -103,11 +105,14 @@ public class FilterService {
                         options.views(),
                         options.profit(),
                         options.effectiveProfit(),
-                        target == null ? null : target.name()));
+                        target == null ? null : target.name(),
+                        null,
+                        null));
     }
 
     /**
-     * Every field nullable — the PUT body is a partial patch.
+     * Every field nullable — the PUT body is a partial patch. {@code budget}
+     * and {@code inventorySlots} take {@code 0} to clear the bound.
      */
     public record FilterPatch(
             Integer worldId,
@@ -122,7 +127,9 @@ public class FilterService {
             Integer views,
             Integer profit,
             Integer effectiveProfit,
-            String target) {}
+            String target,
+            Integer budget,
+            Integer inventorySlots) {}
 
     /**
      * Nullable option bundle the Discord {@code /offers filter} handler builds

@@ -15,6 +15,7 @@ import HQMark from '@/components/ffxiv/HQMark.vue'
 import WorldBadge from '@/components/ffxiv/WorldBadge.vue'
 import AddToBasketButton from '@/components/ffxiv/AddToBasketButton.vue'
 import AdversaryBadges from '@/components/ffxiv/AdversaryBadges.vue'
+import ConfidenceChip from '@/components/ffxiv/ConfidenceChip.vue'
 import ItemIcon from '@/components/ffxiv/ItemIcon.vue'
 import OffersRowDetail from '@/components/ffxiv/OffersRowDetail.vue'
 import type { ScoredOffer } from '@/api/offers'
@@ -86,6 +87,11 @@ function toggle(row: ScoredOffer) {
         <Th align="right" class="uppercase text-xs tracking-wider text-(--text-muted)">
           <span :title="t('offers.col.gilPerHourHint')" class="border-b border-dotted border-(--text-muted)">
             {{ t('offers.col.gilPerHour') }}
+          </span>
+        </Th>
+        <Th class="uppercase text-xs tracking-wider text-(--text-muted)">
+          <span :title="t('confidence.hint')" class="border-b border-dotted border-(--text-muted)">
+            {{ t('offers.col.confidence') }}
           </span>
         </Th>
         <Th class="uppercase text-xs tracking-wider text-(--text-muted)" :title="t('offersFilter.flagsColumnTitle')">
@@ -167,6 +173,7 @@ function toggle(row: ScoredOffer) {
           <Td align="right">
             <span class="font-semibold text-(--color-success)"><GilAmount :value="row.valuation.evPerHour" /></span>
           </Td>
+          <Td><ConfidenceChip :confidence="row.confidence" /></Td>
           <Td>
             <AdversaryBadges
               :lambda-undercut="row.lambdaUndercut"
@@ -191,7 +198,7 @@ function toggle(row: ScoredOffer) {
           </Td>
         </TRow>
         <tr v-if="expanded.has(keyOf(row))" class="border-b border-(--border) bg-(--bg-accent)">
-          <td :colspan="11">
+          <td :colspan="12">
             <OffersRowDetail
               :item-id="row.itemId"
               :hq="row.hq"

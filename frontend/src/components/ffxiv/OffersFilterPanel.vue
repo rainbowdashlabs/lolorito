@@ -35,11 +35,14 @@ defineProps<{
   refreshHours: number | undefined
   scope: 'DATA_CENTER' | 'REGION'
   homeWorldOptions: Array<{ id: number; label: string }>
+  budget: number
+  inventorySlots: number
 }>()
 defineEmits<{
   worldChange: [value: string | number | null | undefined]
   refreshHoursChange: [value: string | number | null | undefined]
   scopeChange: [value: 'DATA_CENTER' | 'REGION']
+  boundsChange: [value: { budget?: number; inventorySlots?: number }]
 }>()
 </script>
 
@@ -85,6 +88,33 @@ defineEmits<{
           <option :value="12">{{ t('offersFilter.lastNHours', { n: 12 }) }}</option>
           <option :value="24">{{ t('offersFilter.lastDay') }}</option>
         </SelectInput>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <FieldLabel>{{ t('offersFilter.budget') }}</FieldLabel>
+          <NumberInput
+            :model-value="budget || undefined"
+            :min="0"
+            :step="10000"
+            :placeholder="t('offersFilter.unbounded')"
+            class="mt-1 w-full"
+            @update:model-value="$emit('boundsChange', { budget: Math.max(0, Math.floor($event ?? 0)) })"
+          />
+        </div>
+        <div>
+          <FieldLabel>{{ t('offersFilter.inventorySlots') }}</FieldLabel>
+          <NumberInput
+            :model-value="inventorySlots || undefined"
+            :min="0"
+            :max="140"
+            :placeholder="t('offersFilter.unbounded')"
+            class="mt-1 w-full"
+            @update:model-value="$emit('boundsChange', { inventorySlots: Math.max(0, Math.floor($event ?? 0)) })"
+          />
+        </div>
+        <FieldExplainer class="col-span-2">
+          {{ t('offersFilter.boundsHint') }}
+        </FieldExplainer>
       </div>
       <div>
         <FieldLabel>{{ t('offersFilter.minEvPerHour') }}</FieldLabel>

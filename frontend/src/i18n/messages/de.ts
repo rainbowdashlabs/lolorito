@@ -207,6 +207,12 @@ export default {
     replanDropped: '{names} entfernt',
     replanAdded: '{names} hinzugefügt',
   },
+  confidence: {
+    high: 'Hoch',
+    medium: 'Mittel',
+    low: 'Niedrig',
+    hint: 'Wie sehr du dieser Zeile trauen kannst. Hoch: viele eigene Verkäufe und eine Streuung deutlich innerhalb der Marge. Niedrig: dünnes Modell, oder eine Standardabweichung des Verkaufspreises frisst den Gewinn.',
+  },
   offersFilter: {
     scope: 'Suchbereich',
     scopeDataCenter: 'Datacenter',
@@ -223,6 +229,10 @@ export default {
     hideBot: 'Bot-Unterbieter-Welten ausblenden',
     hideGhost: 'Ghost-vergiftete Keys ausblenden',
     hideThin: 'Unterprobe-Keys ausblenden',
+    budget: 'Budget (Gil)',
+    inventorySlots: 'Freie Plätze',
+    unbounded: 'Kein Limit',
+    boundsHint: 'Begrenzt jede Zeile auf das, was du dir leisten und tragen kannst. Leer lassen für kein Limit.',
     flagsHint: 'Bot = Welten mit einem aktiven Unterbieter, Ghost = Phantom-Angebote, die nur auf dem Marktbrett auftauchen, Thin = Marktmodell hat zu wenige Proben. Werte sind vorerst null, bis die Listing-History-Tabelle live geht.',
     lastHour: 'Letzte Stunde',
     lastNHours: 'Letzte {n} Stunden',
@@ -457,6 +467,7 @@ export default {
       expectedShelfHint: 'Erwartete Wanduhrstunden, bis alle Einheiten zum Listenpreis verkauft sind.',
       gilPerHour: 'Gil pro Stunde',
       gilPerHourHint: 'Gesamtgewinn geteilt durch die benötigten Aufmerksamkeitsstunden (Regalzeit × Aufmerksamkeitsanteil + einmaliger Runanteil).',
+      confidence: 'Vertrauen',
     },
   },
   basket: {

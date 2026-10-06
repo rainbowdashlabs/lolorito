@@ -207,6 +207,12 @@ export default {
     replanDropped: 'Dropped {names}',
     replanAdded: 'Added {names}',
   },
+  confidence: {
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    hint: 'How far to trust this row. High: plenty of own sales and a spread well inside the margin. Low: thin model, or one standard deviation of the sell price eats the profit.',
+  },
   offersFilter: {
     scope: 'Search scope',
     scopeDataCenter: 'Data center',
@@ -223,6 +229,10 @@ export default {
     hideBot: 'Hide bot-undercutter worlds',
     hideGhost: 'Hide ghost-poisoned keys',
     hideThin: 'Hide insufficient-sample keys',
+    budget: 'Budget (gil)',
+    inventorySlots: 'Free slots',
+    unbounded: 'No limit',
+    boundsHint: 'Caps each row to what you can afford and carry. Leave empty for no limit.',
     flagsHint: 'Bot = worlds with an active undercutter, Ghost = phantom listings that appear only on the marketboard, Thin = market model has too few samples to trust. Values ship as zero until the listing-history table lands.',
     lastHour: 'Last hour',
     lastNHours: 'Last {n} hours',
@@ -457,6 +467,7 @@ export default {
       expectedShelfHint: 'Expected wall-clock hours until the last unit clears at your list price.',
       gilPerHour: 'Gil per hour',
       gilPerHourHint: 'Total profit divided by the attention hours it takes to earn it (shelf time × attention fraction + one-shot run share).',
+      confidence: 'Confidence',
     },
   },
   basket: {

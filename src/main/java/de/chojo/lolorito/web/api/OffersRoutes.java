@@ -10,6 +10,7 @@ import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.service.FilterService;
 import de.chojo.lolorito.service.OffersService;
 import de.chojo.lolorito.service.UserPreferencesService;
+import de.chojo.lolorito.value.OfferBounds;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.lolorito.web.Routes;
 import de.chojo.lolorito.web.auth.SessionResolver;
@@ -77,7 +78,15 @@ public class OffersRoutes implements Routes {
         var userPrefs = new UserPrefs(config.value().mbTaxFor(world.dataCenter().id()), attentionFraction, 30.0);
         var language = this.prefs.languageFor(session.discordUserId());
         var rows = offers.topOffers(
-                world.id(), world.dataCenter().id(), regionName, scope, refreshHours, userPrefs, limit, language);
+                world.id(),
+                world.dataCenter().id(),
+                regionName,
+                scope,
+                refreshHours,
+                userPrefs,
+                new OfferBounds(saved.budget(), saved.inventorySlots()),
+                limit,
+                language);
 
         ctx.json(Map.of(
                 "homeWorld", world.name(),

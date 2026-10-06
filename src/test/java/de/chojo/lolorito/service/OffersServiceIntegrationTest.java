@@ -14,6 +14,9 @@ import de.chojo.lolorito.value.SaleRate;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.universalis.provider.NameSupplier;
 import org.junit.jupiter.api.BeforeEach;
+import de.chojo.lolorito.entity.OfferFilterTarget;
+import de.chojo.lolorito.value.OfferBounds;
+import de.chojo.universalis.entities.Language;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -21,6 +24,7 @@ import java.time.Instant;
 import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
 import static de.chojo.sadu.queries.converter.StandardValueConverter.INSTANT_TIMESTAMP;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +56,7 @@ class OffersServiceIntegrationTest extends ServiceIntegrationTestBase {
     @BeforeEach
     void setUp() {
         marketModels = new MarketModels(dataSource);
-        service = new OffersService(new File(), new Offers(dataSource), NameSupplier.EMPTY);
+        service = new OffersService(new File(), new Offers(dataSource), NameSupplier.EMPTY, new ItemCatalog());
         query("DELETE FROM listings").single().delete();
         query("DELETE FROM listings_updated").single().delete();
         query("DELETE FROM market_model").single().delete();
@@ -131,5 +135,33 @@ class OffersServiceIntegrationTest extends ServiceIntegrationTestBase {
     void topOffersReturnsEmptyWhenNoCandidateFound() {
         var prefs = new UserPrefs(0.05, 0.25, 30.0);
         assertTrue(service.topOffers(66, 7, 6, prefs, 10).isEmpty());
+    }
+
+    @Test
+    void budgetClampsQuantityAndDropsRowsThatDoNotFit() {
+        marketModels.upsert(new MarketModel(
+                100,
+                66,
+                false,
+                new PriceDistribution(6.9, 0.3, 100),
+                new SaleRate(1.5, 1.0, 0.6),
+                0.0,
+                0.0,
+                100,
+                true,
+                false,
+                Instant.now()));
+        seedListing(402, 100, 100, 10, false);
+        var prefs = new UserPrefs(0.05, 0.25, 30.0);
+
+        var clamped = service.topOffers(
+                66, 7, "Europe", OfferFilterTarget.DATA_CENTER, 6, prefs, new OfferBounds(350, 0), 10, Language.ENGLISH);
+        assertEquals(1, clamped.size());
+        assertEquals(3, clamped.getFirst().quantity());
+        assertNotNull(clamped.getFirst().confidence());
+
+        var none = service.topOffers(
+                66, 7, "Europe", OfferFilterTarget.DATA_CENTER, 6, prefs, new OfferBounds(99, 0), 10, Language.ENGLISH);
+        assertTrue(none.isEmpty());
     }
 }

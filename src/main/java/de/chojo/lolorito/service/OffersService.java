@@ -10,6 +10,8 @@ import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.entity.OfferFilterTarget;
 import de.chojo.lolorito.repository.Offers;
+import de.chojo.lolorito.value.Confidence;
+import de.chojo.lolorito.value.OfferBounds;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.lolorito.value.Valuation;
 import de.chojo.lolorito.value.ValueEngine;
@@ -31,14 +33,18 @@ import java.util.List;
 public class OffersService {
     private final Offers repo;
     private final NameSupplier itemNames;
+    private final ItemCatalog catalog;
     private final de.chojo.lolorito.config.file.elements.Planner planner;
+    private final int minSamplesPerKey;
     private final ResponseCache<CacheKey, List<ScoredOffer>> cache;
 
     @Inject
-    public OffersService(File config, Offers repo, NameSupplier itemNames) {
+    public OffersService(File config, Offers repo, NameSupplier itemNames, ItemCatalog catalog) {
         this.repo = repo;
         this.itemNames = itemNames;
+        this.catalog = catalog;
         this.planner = config.planner();
+        this.minSamplesPerKey = config.value().minSamplesPerKey();
         this.cache = new ResponseCache<>(
                 config.value().responseCacheSeconds(), config.value().responseCacheMaxSize());
     }
@@ -58,14 +64,16 @@ public class OffersService {
                 OfferFilterTarget.DATA_CENTER,
                 refreshHours,
                 prefs,
+                OfferBounds.NONE,
                 limit,
                 Language.ENGLISH);
     }
 
     /**
      * Same as {@link #topOffers(int, int, int, UserPrefs, int)} but resolves
-     * item names in the caller's preferred language. Falls back to English
-     * whenever the localized string is missing.
+     * item names in the caller's preferred language (falling back to English
+     * when the localized string is missing) and clamps each row's quantity
+     * to {@code bounds}; rows where not even one unit fits are dropped.
      */
     public List<ScoredOffer> topOffers(
             int homeWorldId,
@@ -74,9 +82,11 @@ public class OffersService {
             OfferFilterTarget scope,
             int refreshHours,
             UserPrefs prefs,
+            OfferBounds bounds,
             int limit,
             Language language) {
-        var key = new CacheKey(homeWorldId, homeDataCenterId, regionName, scope, refreshHours, prefs, limit, language);
+        var key = new CacheKey(
+                homeWorldId, homeDataCenterId, regionName, scope, refreshHours, prefs, bounds, limit, language);
         return cache.get(
                 key,
                 k -> compute(
@@ -86,6 +96,7 @@ public class OffersService {
                         k.scope(),
                         k.refreshHours(),
                         k.prefs(),
+                        k.bounds(),
                         k.limit(),
                         k.language()));
     }
@@ -102,6 +113,7 @@ public class OffersService {
                 OfferFilterTarget.DATA_CENTER,
                 refreshHours,
                 prefs,
+                OfferBounds.NONE,
                 limit,
                 Language.ENGLISH);
     }
@@ -127,11 +139,12 @@ public class OffersService {
             OfferFilterTarget scope,
             int refreshHours,
             UserPrefs prefs,
+            OfferBounds bounds,
             int limit,
             Language language) {
         var candidates = repo.candidates(homeWorldId, homeDataCenterId, regionName, scope, refreshHours, limit * 4);
         var ranked = candidates.stream()
-                .map(c -> score(c, prefs, homeDataCenterId, language))
+                .map(c -> score(c, prefs, bounds, homeDataCenterId, language))
                 .filter(o -> o != null && o.valuation().evPerHour() > 0)
                 .sorted(Comparator.comparingDouble(
                                 (ScoredOffer o) -> o.valuation().evPerHour())
@@ -151,7 +164,10 @@ public class OffersService {
         return List.copyOf(out);
     }
 
-    private ScoredOffer score(Offers.Candidate c, UserPrefs prefs, int homeDataCenterId, Language language) {
+    private ScoredOffer score(
+            Offers.Candidate c, UserPrefs prefs, OfferBounds bounds, int homeDataCenterId, Language language) {
+        int qty = bounds.clamp(c.quantity(), c.buyPrice(), catalog.stackSize(c.itemId()));
+        if (qty <= 0) return null;
         // Review 2.7: a cross-DC hop costs more wall-clock than a same-DC
         // one — spread the planner's hop constants onto the candidate's run
         // share instead of pretending every source is 30 s away.
@@ -162,7 +178,7 @@ public class OffersService {
         double hopSeconds = sameDc ? planner.tDcSeconds() : planner.tRegionSeconds();
         var hopPrefs = new UserPrefs(prefs.mbTax(), prefs.attentionFraction(), prefs.tRunShareSeconds() + hopSeconds);
 
-        var v = ValueEngine.value(c.model(), c.buyPrice(), c.quantity(), c.depthAhead(), hopPrefs)
+        var v = ValueEngine.value(c.model(), c.buyPrice(), qty, c.depthAhead(), hopPrefs)
                 .orElse(null);
         if (v == null) return null;
         // Adversary flags live on the market model — surface them on the
@@ -173,14 +189,15 @@ public class OffersService {
                 c.itemId(),
                 itemNameOf(c.itemId(), language),
                 c.hq(),
-                c.quantity(),
+                qty,
                 c.buyPrice(),
                 c.depthAhead(),
                 v,
                 c.model().lambdaUndercut(),
                 c.model().ghostFraction(),
                 c.model().sufficient(),
-                c.model().pooled());
+                c.model().pooled(),
+                Confidence.of(c.model(), v, c.buyPrice(), minSamplesPerKey));
     }
 
     private String itemNameOf(int itemId, Language language) {
@@ -196,7 +213,8 @@ public class OffersService {
     /**
      * One scored row — the shape the /offers endpoint serializes.
      * {@code depthAhead} is the home-queue depth the units would join;
-     * {@code modelPooled} marks lower-confidence DC-pooled fits.
+     * {@code modelPooled} marks lower-confidence DC-pooled fits;
+     * {@code confidence} is the overall trust tier of the valuation.
      */
     public record ScoredOffer(
             int sourceWorldId,
@@ -210,7 +228,8 @@ public class OffersService {
             double lambdaUndercut,
             double ghostFraction,
             boolean modelSufficient,
-            boolean modelPooled) {}
+            boolean modelPooled,
+            Confidence confidence) {}
 
     /**
      * Cache key — the full request shape. Records auto-generate equals/hashCode.
@@ -222,6 +241,7 @@ public class OffersService {
             OfferFilterTarget scope,
             int refreshHours,
             UserPrefs prefs,
+            OfferBounds bounds,
             int limit,
             Language language) {}
 }

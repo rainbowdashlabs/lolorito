@@ -19,6 +19,10 @@ export interface FilterRow {
   profit: number
   effectiveProfit: number
   target: string
+  /** Gil in pocket; 0 = unbounded. */
+  budget: number
+  /** Free inventory slots; 0 = unbounded. */
+  inventorySlots: number
 }
 
 export type FilterPatch = Partial<FilterRow>

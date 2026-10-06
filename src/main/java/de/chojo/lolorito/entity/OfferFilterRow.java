@@ -9,7 +9,9 @@ package de.chojo.lolorito.entity;
  * Persisted shape of {@code offer_filter}. Both the web filter service and
  * the Discord {@code /offers filter} command read/write this record; the
  * legacy embedded-mutator entity has been replaced by
- * {@code FilterService.patch}.
+ * {@code FilterService.patch}. {@code budget} (gil) and
+ * {@code inventorySlots} bound the per-row quantity on the offers feed;
+ * {@code 0} means unbounded.
  */
 public record OfferFilterRow(
         int worldId,
@@ -24,7 +26,31 @@ public record OfferFilterRow(
         int views,
         int profit,
         int effectiveProfit,
-        String target) {
+        String target,
+        int budget,
+        int inventorySlots) {
+
+    /**
+     * Row without quantity bounds — the shape the Discord command and older
+     * callers build.
+     */
+    public OfferFilterRow(
+            int worldId,
+            int offerLimit,
+            int unitPrice,
+            double factor,
+            int refreshHours,
+            double popularity,
+            double marketVolume,
+            double interest,
+            int sales,
+            int views,
+            int profit,
+            int effectiveProfit,
+            String target) {
+        this(worldId, offerLimit, unitPrice, factor, refreshHours, popularity, marketVolume, interest, sales, views,
+                profit, effectiveProfit, target, 0, 0);
+    }
 
     /**
      * Sane defaults when a user has never edited a filter.

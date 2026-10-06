@@ -169,6 +169,15 @@ async function onRefreshHoursChange(v: string | number | null | undefined) {
   await refresh()
 }
 
+let boundsDebounce: ReturnType<typeof setTimeout> | null = null
+function onBoundsChange(bounds: { budget?: number; inventorySlots?: number }) {
+  if (boundsDebounce) clearTimeout(boundsDebounce)
+  boundsDebounce = setTimeout(async () => {
+    await filter.patch(bounds)
+    await refresh()
+  }, 600)
+}
+
 async function onScopeChange(v: 'DATA_CENTER' | 'REGION') {
   await filter.patch({ target: v })
   await refresh()
@@ -216,6 +225,9 @@ useValuationRefresh(
         :refresh-hours="filter.current.value?.refreshHours ?? 6"
         :scope="scope"
         :home-world-options="homeWorldOptions"
+        :budget="filter.current.value?.budget ?? 0"
+        :inventory-slots="filter.current.value?.inventorySlots ?? 0"
+        @bounds-change="onBoundsChange"
         @world-change="onWorldChange"
         @refresh-hours-change="onRefreshHoursChange"
         @scope-change="onScopeChange"

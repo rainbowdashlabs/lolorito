@@ -38,7 +38,7 @@ class FilterServiceTest {
     @Test
     void updateMergesNonNullFieldsAndPersists() {
         var patch = new FilterService.FilterPatch(
-                123, null, null, null, 12, null, null, null, null, null, null, null, "REGION");
+                123, null, null, null, 12, null, null, null, null, null, null, null, "REGION", null, null);
         var updated = service.update(42, patch);
         assertEquals(123, updated.worldId());
         assertEquals(12, updated.refreshHours());
@@ -53,7 +53,7 @@ class FilterServiceTest {
                 null, -5, // offerLimit
                 -100, // unitPrice
                 null, 0, // refreshHours below min
-                null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null);
         var updated = service.update(42, patch);
         assertEquals(1, updated.offerLimit(), "offer_limit clamps to [1, 10000]");
         assertEquals(0, updated.unitPrice(), "unit_price clamps to [0, MAX]");
@@ -63,7 +63,7 @@ class FilterServiceTest {
     @Test
     void updateClampsOutOfRangeDoubles() {
         var patch = new FilterService.FilterPatch(
-                null, null, null, 500.0, null, 200.0, -1.0, 1000.0, null, null, null, null, null);
+                null, null, null, 500.0, null, 200.0, -1.0, 1000.0, null, null, null, null, null, null, null);
         var updated = service.update(42, patch);
         assertEquals(100.0, updated.factor(), 1e-9);
         assertEquals(100.0, updated.popularity(), 1e-9);
@@ -74,7 +74,7 @@ class FilterServiceTest {
     @Test
     void updateNormalisesUnknownTargetToDataCenter() {
         var patch = new FilterService.FilterPatch(
-                null, null, null, null, null, null, null, null, null, null, null, null, "GALAXY");
+                null, null, null, null, null, null, null, null, null, null, null, null, "GALAXY", null, null);
         var updated = service.update(42, patch);
         assertEquals("DATA_CENTER", updated.target());
     }
@@ -84,12 +84,12 @@ class FilterServiceTest {
         var region = service.update(
                 1,
                 new FilterService.FilterPatch(
-                        null, null, null, null, null, null, null, null, null, null, null, null, "region"));
+                        null, null, null, null, null, null, null, null, null, null, null, null, "region", null, null));
         assertEquals("REGION", region.target());
         var dc = service.update(
                 1,
                 new FilterService.FilterPatch(
-                        null, null, null, null, null, null, null, null, null, null, null, null, "data_center"));
+                        null, null, null, null, null, null, null, null, null, null, null, null, "data_center", null, null));
         assertEquals("DATA_CENTER", dc.target());
     }
 
@@ -109,7 +109,7 @@ class FilterServiceTest {
         // World is a JDA-side object; the service unpacks id() into the patch.
         // Rather than build a fake World we go via the patch path directly here.
         var patch = new FilterService.FilterPatch(
-                888, null, null, null, null, null, null, null, null, null, null, null, null);
+                888, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         var updated = service.update(1, patch);
         assertEquals(888, updated.worldId());
     }
@@ -147,5 +147,18 @@ class FilterServiceTest {
             assertNull(null, "upsert accepts any value");
             persisted.put(userId, filter);
         }
+    }
+
+    @Test
+    void updateStoresAndClearsQuantityBounds() {
+        var set = service.update(42, new FilterService.FilterPatch(
+                null, null, null, null, null, null, null, null, null, null, null, null, null, 250_000, 500));
+        assertEquals(250_000, set.budget());
+        assertEquals(140, set.inventorySlots(), "inventory_slots clamps to the 140-slot inventory");
+
+        var cleared = service.update(42, new FilterService.FilterPatch(
+                null, null, null, null, null, null, null, null, null, null, null, null, null, 0, null));
+        assertEquals(0, cleared.budget(), "0 clears the budget bound");
+        assertEquals(140, cleared.inventorySlots(), "null leaves the slot bound alone");
     }
 }

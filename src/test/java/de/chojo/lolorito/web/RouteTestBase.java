@@ -513,7 +513,7 @@ public abstract class RouteTestBase {
         @Provides
         @Singleton
         OffersService offersService(Offers repo, NameSupplier names) {
-            return new OffersService(config, repo, names);
+            return new OffersService(config, repo, names, new de.chojo.lolorito.service.ItemCatalog());
         }
 
         @Provides

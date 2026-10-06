@@ -44,7 +44,9 @@ public class OfferFilters {
                 row.getInt("views"),
                 row.getInt("profit"),
                 row.getInt("effective_profit"),
-                row.getString("target"));
+                row.getString("target"),
+                row.getInt("budget"),
+                row.getInt("inventory_slots"));
     }
 
     public Optional<OfferFilterRow> find(long userId) {
@@ -58,10 +60,12 @@ public class OfferFilters {
         query("""
                 INSERT INTO offer_filter (user_id, world, offer_limit, unit_price, factor,
                                           refresh_hours, popularity, market_volume, interest,
-                                          sales, views, profit, effective_profit, target)
+                                          sales, views, profit, effective_profit, target,
+                                          budget, inventory_slots)
                 VALUES (:user_id, :world, :offer_limit, :unit_price, :factor,
                         :refresh_hours, :popularity, :market_volume, :interest,
-                        :sales, :views, :profit, :effective_profit, :target)
+                        :sales, :views, :profit, :effective_profit, :target,
+                        :budget, :inventory_slots)
                 ON CONFLICT (user_id) DO UPDATE SET
                     world            = excluded.world,
                     offer_limit      = excluded.offer_limit,
@@ -75,7 +79,9 @@ public class OfferFilters {
                     views            = excluded.views,
                     profit           = excluded.profit,
                     effective_profit = excluded.effective_profit,
-                    target           = excluded.target
+                    target           = excluded.target,
+                    budget           = excluded.budget,
+                    inventory_slots  = excluded.inventory_slots
                 """)
                 .single(call().bind("user_id", userId)
                         .bind("world", filter.worldId())
@@ -90,7 +96,9 @@ public class OfferFilters {
                         .bind("views", filter.views())
                         .bind("profit", filter.profit())
                         .bind("effective_profit", filter.effectiveProfit())
-                        .bind("target", filter.target()))
+                        .bind("target", filter.target())
+                        .bind("budget", filter.budget())
+                        .bind("inventory_slots", filter.inventorySlots()))
                 .insert();
     }
 
