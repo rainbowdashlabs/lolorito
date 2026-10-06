@@ -5,6 +5,8 @@
  */
 export default {
   nav: {
+    openMenu: 'Menü öffnen',
+    closeMenu: 'Menü schließen',
     dashboard: 'Übersicht',
     offers: 'Angebote',
     planner: 'Planer',

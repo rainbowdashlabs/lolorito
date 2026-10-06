@@ -20,7 +20,7 @@ export default defineConfig({
   retries: 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.002, animations: 'disabled', caret: 'hide' },
+    toHaveScreenshot: { maxDiffPixels: 50, animations: 'disabled', caret: 'hide' },
   },
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,

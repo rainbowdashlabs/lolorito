@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 
 import {
+  faBars,
   faCoins,
   faHome,
   faBoxes,
@@ -43,6 +44,7 @@ import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons'
 config.autoAddCss = false
 
 library.add(
+  faBars,
   faCoins,
   faHome,
   faBoxes,
