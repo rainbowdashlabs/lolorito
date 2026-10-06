@@ -72,7 +72,7 @@ class CompositeAlertDispatcherTest {
         }
 
         @Override
-        public void dispatch(AlertRule rule, int observedPrice) {
+        public void dispatch(AlertRule rule, int observed) {
             calls.incrementAndGet();
         }
     }
@@ -83,7 +83,7 @@ class CompositeAlertDispatcherTest {
         }
 
         @Override
-        public void dispatch(AlertRule rule, int observedPrice) {
+        public void dispatch(AlertRule rule, int observed) {
             throw new IllegalStateException("boom");
         }
     }
@@ -97,7 +97,7 @@ class CompositeAlertDispatcherTest {
         }
 
         @Override
-        public void dispatch(AlertRule rule, int observedPrice) {
+        public void dispatch(AlertRule rule, int observed) {
             calls.incrementAndGet();
         }
     }
@@ -108,7 +108,7 @@ class CompositeAlertDispatcherTest {
         }
 
         @Override
-        public void dispatch(AlertRule rule, int observedPrice) {
+        public void dispatch(AlertRule rule, int observed) {
             throw new IllegalStateException("boom");
         }
     }

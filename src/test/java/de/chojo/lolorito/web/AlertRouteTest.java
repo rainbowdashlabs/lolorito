@@ -25,7 +25,7 @@ class AlertRouteTest extends RouteTestBase {
         m.put("dataCenterId", dc);
         m.put("hq", hq);
         m.put("kind", kind);
-        m.put("thresholdPrice", threshold);
+        m.put("threshold", threshold);
         m.put("cooldownMinutes", 30);
         return m;
     }

@@ -49,6 +49,23 @@ class AlertRulesIntegrationTest extends RepositoryTestBase {
     }
 
     @Test
+    void storesTheVolumeAndListingCountKinds() {
+        var now = Instant.now();
+        var spike = new AlertRule(
+                UUID.randomUUID(), 1L, 100, AlertScope.forWorld(66), null, AlertKind.SALE_VOLUME_SPIKE, 250, true, 30,
+                null, now);
+        var soldOut = new AlertRule(
+                UUID.randomUUID(), 1L, 100, AlertScope.forWorld(66), null, AlertKind.LISTING_COUNT_DROP, 0, true, 30,
+                null, now);
+        repo.insert(spike);
+        repo.insert(soldOut);
+        assertEquals(AlertKind.SALE_VOLUME_SPIKE, repo.findById(spike.id()).orElseThrow().kind());
+        var loaded = repo.findById(soldOut.id()).orElseThrow();
+        assertEquals(AlertKind.LISTING_COUNT_DROP, loaded.kind());
+        assertEquals(0, loaded.threshold());
+    }
+
+    @Test
     void insertAndReadRoundTripsDataCenterScope() {
         var r = rule(2L, AlertScope.forDataCenter(7), null);
         repo.insert(r);

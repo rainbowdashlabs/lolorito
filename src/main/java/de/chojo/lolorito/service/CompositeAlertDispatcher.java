@@ -33,9 +33,9 @@ public class CompositeAlertDispatcher implements AlertDispatcher {
     }
 
     @Override
-    public void dispatch(AlertRule rule, int observedPrice) {
-        safe("discord-dm", () -> discordDm.dispatch(rule, observedPrice));
-        safe("webhook", () -> webhook.dispatch(rule, observedPrice));
+    public void dispatch(AlertRule rule, int observed) {
+        safe("discord-dm", () -> discordDm.dispatch(rule, observed));
+        safe("webhook", () -> webhook.dispatch(rule, observed));
     }
 
     private static void safe(String name, Runnable r) {

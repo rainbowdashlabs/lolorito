@@ -113,6 +113,40 @@ public class ItemDetail {
     }
 
     /**
+     * Number of current listings per item on a world or a whole data
+     * center, counted only where the board snapshot is younger than
+     * {@code maxAgeHours}. Items with a fresh snapshot and no listings map
+     * to 0; items without a fresh snapshot are absent.
+     */
+    public Map<Integer, Integer> listingCountByKeys(
+            List<Integer> itemIds, Integer worldId, Integer dataCenterId, Boolean hq, int maxAgeHours) {
+        if (itemIds.isEmpty() || (worldId == null && dataCenterId == null)) return Map.of();
+        String scopeClause = worldId != null ? "lu.world = :scope" : "w.data_center = :scope";
+        int scopeValue = worldId != null ? worldId : dataCenterId;
+        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
+        String sql = """
+                SELECT lu.item AS item_id, count(l.item) AS listings
+                  FROM listings_updated lu
+                  JOIN worlds w ON lu.world = w.world
+                  LEFT JOIN listings l
+                    ON l.world = lu.world AND l.item = lu.item AND (:hq IS NULL OR l.hq = :hq)
+                 WHERE lu.item IN (%s)
+                   AND %s
+                   AND lu.updated >= now() - (:hours || ' hours')::INTERVAL
+                 GROUP BY lu.item
+                """.formatted(inList, scopeClause);
+        Map<Integer, Integer> out = new HashMap<>();
+        query(sql)
+                .single(call().bind("hq", hq).bind("scope", scopeValue).bind("hours", String.valueOf(maxAgeHours)))
+                .map(row -> {
+                    out.put(row.getInt("item_id"), row.getInt("listings"));
+                    return null;
+                })
+                .all();
+        return out;
+    }
+
+    /**
      * Cheapest current listing for the given key on either a world or a
      * whole data center. Exactly one of {@code worldId} / {@code dataCenterId}
      * must be non-null. {@code hq} is treated as a filter — {@code null} means

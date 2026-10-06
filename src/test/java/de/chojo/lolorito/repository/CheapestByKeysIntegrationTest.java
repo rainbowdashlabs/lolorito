@@ -74,6 +74,33 @@ class CheapestByKeysIntegrationTest extends RepositoryTestBase {
         assertTrue(repo.cheapestByKeys(List.of(100), 66, null, false, 24).isEmpty());
     }
 
+    @Test
+    void listingCountCountsPerItemAndReportsEmptyFreshBoardsAsZero() {
+        seedListing(66, 100, 200, 1, false);
+        seedListing(66, 100, 250, 3, false);
+        seedListing(66, 100, 400, 1, true);
+        seedListing(66, 101, 900, 1, false);
+        query("DELETE FROM listings WHERE world = 66 AND item = 101").single(call()).delete();
+
+        var out = repo.listingCountByKeys(List.of(100, 101, 102), 66, null, false, 24);
+
+        assertEquals(2, out.get(100), "two NQ listings; the HQ one is filtered out");
+        assertEquals(0, out.get(101), "fresh snapshot with no listings counts as zero");
+        assertTrue(!out.containsKey(102), "no snapshot at all means no data");
+    }
+
+    @Test
+    void listingCountCoversTheDataCenterAndIgnoresStaleBoards() {
+        seedListing(66, 100, 200, 1, false);
+        seedListing(402, 100, 150, 1, false);
+        assertEquals(2, repo.listingCountByKeys(List.of(100), null, 7, null, 24).get(100));
+
+        query("UPDATE listings_updated SET updated = now() - INTERVAL '3 DAYS' WHERE world = 402 AND item = 100")
+                .single(call())
+                .update();
+        assertEquals(1, repo.listingCountByKeys(List.of(100), null, 7, null, 24).get(100));
+    }
+
     private static void seedListing(int worldId, int itemId, int unitPrice, int quantity, boolean hq) {
         query("""
                 INSERT INTO listings(world, item, hq, review_time, unit_price, quantity, total)

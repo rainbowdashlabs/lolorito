@@ -32,7 +32,7 @@ public class AlertRules {
     public void insert(AlertRule rule) {
         query("""
                 INSERT INTO alert_rule (id, user_id, item_id, world_id, data_center_id, hq,
-                                        trigger_kind, threshold_price, enabled,
+                                        trigger_kind, threshold, enabled,
                                         cooldown_minutes, last_triggered_at, created_at)
                 VALUES (:id::uuid, :user, :item, :world, :dc, :hq,
                         :kind, :threshold, :enabled,
@@ -45,7 +45,7 @@ public class AlertRules {
                         .bind("dc", rule.scope().dataCenterId())
                         .bind("hq", rule.hq())
                         .bind("kind", rule.kind().wire())
-                        .bind("threshold", rule.thresholdPrice())
+                        .bind("threshold", rule.threshold())
                         .bind("enabled", rule.enabled())
                         .bind("cooldown", rule.cooldownMinutes())
                         .bind("last", rule.lastTriggeredAt(), INSTANT_TIMESTAMP)
@@ -111,7 +111,7 @@ public class AlertRules {
                 scope,
                 hq,
                 AlertKind.fromWire(row.getString("trigger_kind")),
-                row.getInt("threshold_price"),
+                row.getInt("threshold"),
                 row.getBoolean("enabled"),
                 row.getInt("cooldown_minutes"),
                 nullable(row, "last_triggered_at"),

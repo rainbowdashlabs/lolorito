@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -100,5 +101,34 @@ class AlertMatcherTest {
     void negativePriorKClampsAsZeroCooldown() {
         // Even a nonsensical negative cooldown never blocks — clamps to 0.
         assertTrue(AlertMatcher.cooldownElapsed(Instant.EPOCH, -100, Instant.now()));
+    }
+
+    @Test
+    void thresholdCrossedForVolumeAndCount() {
+        assertTrue(AlertMatcher.thresholdCrossed(AlertKind.SALE_VOLUME_SPIKE, 250, 200));
+        assertFalse(AlertMatcher.thresholdCrossed(AlertKind.SALE_VOLUME_SPIKE, 150, 200));
+        assertTrue(AlertMatcher.thresholdCrossed(AlertKind.LISTING_COUNT_DROP, 0, 0));
+        assertFalse(AlertMatcher.thresholdCrossed(AlertKind.LISTING_COUNT_DROP, 3, 2));
+    }
+
+    @Test
+    void zeroIsAValidObservationForListingCounts() {
+        var r = rule(AlertKind.LISTING_COUNT_DROP, 0, 0, null);
+        assertTrue(AlertMatcher.shouldFire(r, 0, Instant.now()));
+    }
+
+    @Test
+    void spikePercentUsesTheDailyAverageWithAFloor() {
+        assertEquals(300, AlertMatcher.spikePercent(30, 70, 7));
+        assertEquals(500, AlertMatcher.spikePercent(5, 0, 7), "a silent item uses one unit per day as baseline");
+        assertEquals(0, AlertMatcher.spikePercent(0, 70, 7));
+    }
+
+    @Test
+    void syntheticObservationAlwaysCrossesTheThreshold() {
+        for (var kind : AlertKind.values()) {
+            var r = rule(kind, 100, 0, null);
+            assertTrue(AlertMatcher.shouldFire(r, AlertMatcher.syntheticObservation(r), Instant.now()), kind.name());
+        }
     }
 }

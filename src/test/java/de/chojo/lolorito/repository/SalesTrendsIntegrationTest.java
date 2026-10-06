@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
@@ -135,5 +136,27 @@ class SalesTrendsIntegrationTest extends RepositoryTestBase {
         assertThat(hours.get(20).units()).isEqualTo(1);
         assertThat(hours.stream().mapToLong(SalesTrends.HourBucket::units).sum()).isEqualTo(7);
         assertThat(hours.getFirst().hourStart()).isBefore(hours.getLast().hourStart());
+    }
+
+    @Test
+    void volumeByKeysSplitsTheLastDayFromTheBaseline() {
+        insertWorld(66, "Odin", 7, "Light", "Europe");
+        insertWorld(402, "Alpha", 7, "Light", "Europe");
+        query("""
+                INSERT INTO sales(world, item, hq, sold, unit_price, quantity, total)
+                VALUES (66,  500, false, now() - INTERVAL '2 hours',  100, 6, 600),
+                       (402, 500, false, now() - INTERVAL '3 hours',  100, 4, 400),
+                       (66,  500, false, now() - INTERVAL '3 days',   100, 7, 700),
+                       (66,  500, false, now() - INTERVAL '20 days',  100, 50, 5000),
+                       (66,  501, true,  now() - INTERVAL '1 hour',   100, 2, 200)
+                """).single(call()).insert();
+
+        var world = repo.volumeByKeys(List.of(500, 501, 502), 66, null, null, 7);
+        assertThat(world.get(500)).isEqualTo(new SalesTrends.VolumeWindow(6, 7));
+        assertThat(world.get(501)).isEqualTo(new SalesTrends.VolumeWindow(2, 0));
+        assertThat(world).doesNotContainKey(502);
+
+        var dc = repo.volumeByKeys(List.of(500), null, 7, false, 7);
+        assertThat(dc.get(500)).isEqualTo(new SalesTrends.VolumeWindow(10, 7));
     }
 }

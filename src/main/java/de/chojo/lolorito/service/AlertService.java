@@ -44,7 +44,7 @@ public class AlertService {
         }
         AlertScope scope = resolveScope(req.worldId, req.dataCenterId);
         AlertKind kind = AlertKind.fromWire(req.kind);
-        int threshold = Math.max(1, req.thresholdPrice == null ? 1 : req.thresholdPrice);
+        int threshold = Math.max(kind.minThreshold(), req.threshold == null ? kind.minThreshold() : req.threshold);
         int cooldown = clampCooldown(req.cooldownMinutes);
         var rule = new AlertRule(
                 UUID.randomUUID(),
@@ -76,19 +76,16 @@ public class AlertService {
 
     /**
      * Owner-only synthetic dispatch — sends the alert now with a fake
-     * observed price of {@code thresholdPrice - 1} (or {@code + 1} for
-     * price_above kinds) so the user can verify the plumbing without
-     * waiting for the market to move. Returns {@code true} when the
-     * rule was found and the dispatch was attempted; {@code false} for
-     * unknown ids or non-owner callers.
+     * observed value just past the threshold (see
+     * {@link AlertMatcher#syntheticObservation}) so the user can verify the
+     * plumbing without waiting for the market to move. Returns {@code true}
+     * when the rule was found and the dispatch was attempted; {@code false}
+     * for unknown ids or non-owner callers.
      */
     public boolean test(UUID id, long callerUserId) {
         var rule = findOwn(id, callerUserId).orElse(null);
         if (rule == null) return false;
-        int observed = rule.kind() == AlertKind.PRICE_ABOVE
-                ? rule.thresholdPrice() + 1
-                : Math.max(1, rule.thresholdPrice() - 1);
-        dispatcher.dispatch(rule, observed);
+        dispatcher.dispatch(rule, AlertMatcher.syntheticObservation(rule));
         return true;
     }
 
@@ -124,6 +121,6 @@ public class AlertService {
             Integer dataCenterId,
             Boolean hq,
             String kind,
-            Integer thresholdPrice,
+            Integer threshold,
             Integer cooldownMinutes) {}
 }

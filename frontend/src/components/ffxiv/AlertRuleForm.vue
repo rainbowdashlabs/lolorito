@@ -31,9 +31,25 @@ const form = ref({
   dataCenterId: 0,
   hq: 'any' as HqChoice,
   kind: 'price_below' as AlertKind,
-  thresholdPrice: 10_000,
+  threshold: 10_000,
   cooldownMinutes: 60,
 })
+
+const DEFAULT_THRESHOLD: Record<AlertKind, number> = {
+  price_below: 10_000,
+  price_above: 10_000,
+  sale_volume_spike: 200,
+  listing_count_drop: 2,
+}
+
+const thresholdMin = computed(() => (form.value.kind === 'listing_count_drop' ? 0 : 1))
+
+watch(
+  () => form.value.kind,
+  (kind) => {
+    form.value.threshold = DEFAULT_THRESHOLD[kind]
+  },
+)
 
 const pickedItem = ref<ItemSearchHit | null>(null)
 watch(pickedItem, (hit) => {
@@ -66,7 +82,7 @@ function submit() {
     dataCenterId: form.value.scopeMode === 'dataCenter' ? form.value.dataCenterId || null : null,
     hq,
     kind: form.value.kind,
-    thresholdPrice: form.value.thresholdPrice,
+    threshold: form.value.threshold,
     cooldownMinutes: form.value.cooldownMinutes,
   })
 }
@@ -114,16 +130,19 @@ function submit() {
         <SelectInput v-model="form.kind">
           <option value="price_below">{{ t('alerts.triggerBelow') }}</option>
           <option value="price_above">{{ t('alerts.triggerAbove') }}</option>
+          <option value="sale_volume_spike">{{ t('alerts.triggerSpike') }}</option>
+          <option value="listing_count_drop">{{ t('alerts.triggerCount') }}</option>
         </SelectInput>
       </div>
       <div>
-        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-(--text-muted)">{{ t('alerts.threshold') }}</label>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-(--text-muted)">{{ t(`alerts.thresholdLabel.${form.kind}`) }}</label>
         <input
-          v-model.number="form.thresholdPrice"
+          v-model.number="form.threshold"
           type="number"
-          min="1"
+          :min="thresholdMin"
           class="w-full rounded-(--radius-theme) border border-(--border) bg-(--bg) px-2 py-1"
         />
+        <p class="mt-1 text-xs text-(--text-muted)">{{ t(`alerts.thresholdHint.${form.kind}`) }}</p>
       </div>
       <div>
         <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-(--text-muted)">{{ t('alerts.cooldown') }}</label>

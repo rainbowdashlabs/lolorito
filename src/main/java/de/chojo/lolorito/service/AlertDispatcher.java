@@ -21,7 +21,8 @@ public interface AlertDispatcher {
      * the same trigger.
      *
      * @param rule the fired rule
-     * @param observedPrice the cheapest-current price that crossed the threshold
+     * @param observed the value that crossed the threshold: cheapest price,
+     *                 spike percent, or listing count, depending on the kind
      */
-    void dispatch(AlertRule rule, int observedPrice);
+    void dispatch(AlertRule rule, int observed);
 }

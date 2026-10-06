@@ -5,7 +5,12 @@
  */
 import { apiClient } from '@/api/client'
 
-export type AlertKind = 'price_below' | 'price_above'
+/**
+ * What a rule watches. `threshold` is gil for the price kinds, a percent of
+ * the usual daily volume for `sale_volume_spike`, and a listing count for
+ * `listing_count_drop`.
+ */
+export type AlertKind = 'price_below' | 'price_above' | 'sale_volume_spike' | 'listing_count_drop'
 
 export interface AlertRule {
   id: string
@@ -14,7 +19,7 @@ export interface AlertRule {
   dataCenterId: number | null
   hq: boolean | null
   kind: AlertKind
-  thresholdPrice: number
+  threshold: number
   enabled: boolean
   cooldownMinutes: number
   lastTriggeredAt: string | null
@@ -27,7 +32,7 @@ export interface CreateRequest {
   dataCenterId?: number | null
   hq?: boolean | null
   kind: AlertKind
-  thresholdPrice: number
+  threshold: number
   cooldownMinutes?: number
 }
 

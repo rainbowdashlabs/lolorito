@@ -13,7 +13,7 @@ import Spinner from '@/components/feedback/Spinner.vue'
 import Alert from '@/components/feedback/Alert.vue'
 import SecondaryButton from '@/components/button/SecondaryButton.vue'
 import DeleteButton from '@/components/button/DeleteButton.vue'
-import GilAmount from '@/components/ffxiv/GilAmount.vue'
+import AlertCondition from '@/components/ffxiv/AlertCondition.vue'
 import AlertRuleForm from '@/components/ffxiv/AlertRuleForm.vue'
 import { alertsApi, itemSearchApi } from '@/api'
 import { pushToast } from '@/composables/useToasts'
@@ -161,8 +161,8 @@ onMounted(async () => {
               <div class="font-semibold">
                 {{ itemLabel(rule.itemId) }}
                 <MutedText size="sm" class="ml-1">
-                  · {{ scopeLabel(rule) }} · {{ hqLabel(rule) }} · {{ rule.kind === 'price_below' ? t('alerts.below') : t('alerts.above') }}
-                  <GilAmount :value="rule.thresholdPrice" />
+                  · {{ scopeLabel(rule) }} · {{ hqLabel(rule) }} ·
+                  <AlertCondition :kind="rule.kind" :threshold="rule.threshold" />
                 </MutedText>
               </div>
               <MutedText size="sm">

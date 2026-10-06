@@ -12,6 +12,7 @@ import de.chojo.lolorito.entity.AlertRule;
 import de.chojo.lolorito.entity.AlertScope;
 import de.chojo.lolorito.repository.AlertRules;
 import de.chojo.lolorito.repository.ItemDetail;
+import de.chojo.lolorito.repository.SalesTrends;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -45,17 +46,18 @@ class AlertScannerTest {
     void dispatchesAndRecordsWhenThresholdCrossed() {
         var rules = new StubRules();
         var listings = new StubListings();
+        var sales = new StubSales();
         var dispatcher = new StubDispatcher();
 
         var r = rule(1L, 100, 500, AlertKind.PRICE_BELOW, null);
         rules.inserted.put(r.id(), r);
         listings.prices.put(100, 400);
 
-        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, dispatcher);
+        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, sales, dispatcher);
         scanner.run();
 
         assertThat(dispatcher.fired).hasSize(1);
-        assertThat(dispatcher.fired.getFirst().observedPrice).isEqualTo(400);
+        assertThat(dispatcher.fired.getFirst().observed).isEqualTo(400);
         assertThat(rules.triggered).containsKey(r.id());
     }
 
@@ -63,13 +65,14 @@ class AlertScannerTest {
     void skipsWhenThresholdNotCrossed() {
         var rules = new StubRules();
         var listings = new StubListings();
+        var sales = new StubSales();
         var dispatcher = new StubDispatcher();
 
         var r = rule(1L, 100, 500, AlertKind.PRICE_BELOW, null);
         rules.inserted.put(r.id(), r);
         listings.prices.put(100, 800);
 
-        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, dispatcher);
+        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, sales, dispatcher);
         scanner.run();
 
         assertThat(dispatcher.fired).isEmpty();
@@ -80,6 +83,7 @@ class AlertScannerTest {
     void dispatcherExceptionDoesNotAdvanceCooldown() {
         var rules = new StubRules();
         var listings = new StubListings();
+        var sales = new StubSales();
         var dispatcher = new StubDispatcher();
         dispatcher.throwOnDispatch = true;
 
@@ -87,7 +91,7 @@ class AlertScannerTest {
         rules.inserted.put(r.id(), r);
         listings.prices.put(100, 400);
 
-        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, dispatcher);
+        var scanner = new AlertScanner(new Threading(), new File(), rules, listings, sales, dispatcher);
         scanner.run();
 
         assertThat(rules.triggered).isEmpty();
@@ -96,11 +100,98 @@ class AlertScannerTest {
     @Test
     void emptyEnabledListIsANoop() {
         var scanner = new AlertScanner(
-                new Threading(), new File(), new StubRules(), new StubListings(), new StubDispatcher());
+                new Threading(), new File(), new StubRules(), new StubListings(), new StubSales(), new StubDispatcher());
         scanner.run(); // must not throw
     }
 
+    @Test
+    void listingCountDropFiresAtZeroListings() {
+        var rules = new StubRules();
+        var listings = new StubListings();
+        var sales = new StubSales();
+        var dispatcher = new StubDispatcher();
+
+        var r = rule(1L, 100, 2, AlertKind.LISTING_COUNT_DROP, null);
+        rules.inserted.put(r.id(), r);
+        listings.counts.put(100, 0);
+
+        new AlertScanner(new Threading(), new File(), rules, listings, sales, dispatcher).run();
+
+        assertThat(dispatcher.fired).hasSize(1);
+        assertThat(dispatcher.fired.getFirst().observed).isZero();
+    }
+
+    @Test
+    void listingCountDropSkipsItemsWithoutFreshData() {
+        var rules = new StubRules();
+        var dispatcher = new StubDispatcher();
+        var r = rule(1L, 100, 2, AlertKind.LISTING_COUNT_DROP, null);
+        rules.inserted.put(r.id(), r);
+
+        new AlertScanner(new Threading(), new File(), rules, new StubListings(), new StubSales(), dispatcher).run();
+
+        assertThat(dispatcher.fired).isEmpty();
+    }
+
+    @Test
+    void saleVolumeSpikeFiresAgainstTheTrailingAverage() {
+        var rules = new StubRules();
+        var listings = new StubListings();
+        var sales = new StubSales();
+        var dispatcher = new StubDispatcher();
+
+        var spiking = rule(1L, 100, 200, AlertKind.SALE_VOLUME_SPIKE, null);
+        var steady = rule(1L, 101, 200, AlertKind.SALE_VOLUME_SPIKE, null);
+        rules.inserted.put(spiking.id(), spiking);
+        rules.inserted.put(steady.id(), steady);
+        sales.windows.put(100, new SalesTrends.VolumeWindow(30, 70));
+        sales.windows.put(101, new SalesTrends.VolumeWindow(12, 70));
+
+        new AlertScanner(new Threading(), new File(), rules, listings, sales, dispatcher).run();
+
+        assertThat(dispatcher.fired).hasSize(1);
+        assertThat(dispatcher.fired.getFirst().rule().itemId()).isEqualTo(100);
+        assertThat(dispatcher.fired.getFirst().observed).isEqualTo(300);
+    }
+
+    @Test
+    void priceAndCountRulesOnTheSameItemAreMeasuredSeparately() {
+        var rules = new StubRules();
+        var listings = new StubListings();
+        var dispatcher = new StubDispatcher();
+
+        var price = rule(1L, 100, 500, AlertKind.PRICE_BELOW, null);
+        var count = rule(1L, 100, 1, AlertKind.LISTING_COUNT_DROP, null);
+        rules.inserted.put(price.id(), price);
+        rules.inserted.put(count.id(), count);
+        listings.prices.put(100, 400);
+        listings.counts.put(100, 7);
+
+        new AlertScanner(new Threading(), new File(), rules, listings, new StubSales(), dispatcher).run();
+
+        assertThat(dispatcher.fired).extracting(f -> f.rule().kind()).containsExactly(AlertKind.PRICE_BELOW);
+    }
+
     // -- Stubs -------------------------------------------------------------
+
+    private static final class StubSales extends SalesTrends {
+        final Map<Integer, VolumeWindow> windows = new HashMap<>();
+
+        StubSales() {
+            super(null);
+        }
+
+        @Override
+        public Map<Integer, VolumeWindow> volumeByKeys(
+                List<Integer> itemIds, Integer worldId, Integer dcId, Boolean hq, int baselineDays) {
+            Map<Integer, VolumeWindow> out = new HashMap<>();
+            for (int id : itemIds) {
+                var w = windows.get(id);
+                if (w != null) out.put(id, w);
+            }
+            return out;
+        }
+    }
 
     private static final class StubRules extends AlertRules {
         final Map<UUID, AlertRule> inserted = new HashMap<>();
@@ -119,6 +210,18 @@ class AlertScannerTest {
 
     private static final class StubListings extends ItemDetail {
         final Map<Integer, Integer> prices = new HashMap<>();
+        final Map<Integer, Integer> counts = new HashMap<>();
+
+        @Override
+        public Map<Integer, Integer> listingCountByKeys(
+                List<Integer> itemIds, Integer worldId, Integer dcId, Boolean hq, int maxAgeHours) {
+            Map<Integer, Integer> out = new HashMap<>();
+            for (int id : itemIds) {
+                Integer c = counts.get(id);
+                if (c != null) out.put(id, c);
+            }
+            return out;
+        }
 
         @Override
         public Optional<Integer> cheapestPrice(int itemId, Integer worldId, Integer dcId, Boolean hq) {
@@ -142,11 +245,11 @@ class AlertScannerTest {
         boolean throwOnDispatch = false;
 
         @Override
-        public void dispatch(AlertRule rule, int observedPrice) {
+        public void dispatch(AlertRule rule, int observed) {
             if (throwOnDispatch) throw new IllegalStateException("boom");
-            fired.add(new Fired(rule, observedPrice));
+            fired.add(new Fired(rule, observed));
         }
 
-        record Fired(AlertRule rule, int observedPrice) {}
+        record Fired(AlertRule rule, int observed) {}
     }
 }

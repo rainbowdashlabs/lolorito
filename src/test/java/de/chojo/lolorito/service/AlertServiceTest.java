@@ -58,7 +58,7 @@ class AlertServiceTest {
         assertEquals(9L, rule.userId());
         assertEquals(42, rule.itemId());
         assertEquals(AlertKind.PRICE_BELOW, rule.kind()); // default
-        assertEquals(1, rule.thresholdPrice()); // clamped up from 0
+        assertEquals(1, rule.threshold()); // clamped up from 0
         assertEquals(60 * 24 * 7, rule.cooldownMinutes()); // clamped down from 100_000
         assertTrue(rule.enabled());
         assertEquals(1, store.inserted.size());
@@ -71,7 +71,7 @@ class AlertServiceTest {
         var rule = svc.create(1L, req);
         assertEquals(60, rule.cooldownMinutes());
         assertEquals(AlertKind.PRICE_ABOVE, rule.kind());
-        assertEquals(500, rule.thresholdPrice());
+        assertEquals(500, rule.threshold());
     }
 
     @Test
@@ -162,7 +162,7 @@ class AlertServiceTest {
                     r.scope(),
                     r.hq(),
                     r.kind(),
-                    r.thresholdPrice(),
+                    r.threshold(),
                     enabled,
                     r.cooldownMinutes(),
                     r.lastTriggeredAt(),

@@ -40,7 +40,7 @@ public class AlertDmDispatcher implements AlertDispatcher {
     }
 
     @Override
-    public void dispatch(AlertRule rule, int observedPrice) {
+    public void dispatch(AlertRule rule, int observed) {
         var shardManager = discord.shardManager();
         if (shardManager == null) {
             log.warn("Alert {} fired but shard manager is not ready — skipping DM", rule.id());
@@ -52,7 +52,7 @@ public class AlertDmDispatcher implements AlertDispatcher {
                     .queue(
                             user -> user.openPrivateChannel()
                                     .queue(
-                                            channel -> channel.sendMessageEmbeds(buildEmbed(rule, observedPrice))
+                                            channel -> channel.sendMessageEmbeds(buildEmbed(rule, observed))
                                                     .queue(
                                                             ok -> {},
                                                             err -> log.warn(
@@ -71,19 +71,36 @@ public class AlertDmDispatcher implements AlertDispatcher {
         }
     }
 
-    private MessageEmbed buildEmbed(AlertRule rule, int observedPrice) {
+    private MessageEmbed buildEmbed(AlertRule rule, int observed) {
         String itemName = nameOf(rule.itemId());
         String scope = rule.scope().isWorld()
                 ? worldName(rule.scope().worldId())
                 : "DC " + rule.scope().dataCenterId();
-        String direction = rule.kind() == AlertKind.PRICE_BELOW ? "dropped to" : "climbed to";
         return new EmbedBuilder()
                 .setTitle("Market alert: " + itemName)
-                .setDescription("Cheapest listing on **%s** %s **%,d gil**.".formatted(scope, direction, observedPrice))
-                .addField("Threshold", "%,d gil".formatted(rule.thresholdPrice()), true)
+                .setDescription(describe(rule.kind(), scope, observed))
+                .addField("Threshold", thresholdLabel(rule.kind(), rule.threshold()), true)
                 .addField("HQ", rule.hq() == null ? "either" : (rule.hq() ? "high" : "normal"), true)
                 .setFooter("Rule " + rule.id())
                 .build();
+    }
+
+    private static String describe(AlertKind kind, String scope, int observed) {
+        return switch (kind) {
+            case PRICE_BELOW -> "Cheapest listing on **%s** dropped to **%,d gil**.".formatted(scope, observed);
+            case PRICE_ABOVE -> "Cheapest listing on **%s** climbed to **%,d gil**.".formatted(scope, observed);
+            case SALE_VOLUME_SPIKE -> "Sales on **%s** in the last 24 h are at **%,d %%** of the usual daily volume."
+                    .formatted(scope, observed);
+            case LISTING_COUNT_DROP -> "Only **%,d** listing(s) left on **%s**.".formatted(observed, scope);
+        };
+    }
+
+    private static String thresholdLabel(AlertKind kind, int threshold) {
+        return switch (kind) {
+            case PRICE_BELOW, PRICE_ABOVE -> "%,d gil".formatted(threshold);
+            case SALE_VOLUME_SPIKE -> "%,d %% of usual".formatted(threshold);
+            case LISTING_COUNT_DROP -> "%,d listings".formatted(threshold);
+        };
     }
 
     private String nameOf(int itemId) {

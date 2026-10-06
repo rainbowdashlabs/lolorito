@@ -46,7 +46,7 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
     }
 
     @Override
-    public void dispatch(AlertRule rule, int observedPrice) {
+    public void dispatch(AlertRule rule, int observed) {
         // Prefer the caller's per-user webhook when they've configured one;
         // otherwise fall back to the instance-wide URL from config.
         String url = preferences.alertWebhookUrlFor(rule.userId());
@@ -54,7 +54,7 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
         if (url == null || url.isBlank()) return;
         String body = ("{\"ruleId\":\"%s\",\"userId\":%d,\"itemId\":%d,"
                         + "\"worldId\":%s,\"dataCenterId\":%s,\"hq\":%s,"
-                        + "\"kind\":\"%s\",\"threshold\":%d,\"observedPrice\":%d}")
+                        + "\"kind\":\"%s\",\"threshold\":%d,\"observed\":%d}")
                 .formatted(
                         rule.id(),
                         rule.userId(),
@@ -63,8 +63,8 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
                         rule.scope().dataCenterId(),
                         rule.hq() == null ? "null" : rule.hq(),
                         rule.kind().wire(),
-                        rule.thresholdPrice(),
-                        observedPrice);
+                        rule.threshold(),
+                        observed);
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(REQUEST_TIMEOUT)

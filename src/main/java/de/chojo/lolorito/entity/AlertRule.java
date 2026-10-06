@@ -10,8 +10,9 @@ import java.util.UUID;
 
 /**
  * A user-owned market-board alert. Watches a single item on either a world
- * or a data center; fires when the cheapest current listing crosses
- * {@link #thresholdPrice()} in the direction of {@link #kind()}. HQ can be
+ * or a data center; fires when the value {@link #kind()} measures (cheapest
+ * price, sales spike percent, or listing count) crosses {@link #threshold()}
+ * in that kind's direction. HQ can be
  * pinned to {@code true}, {@code false}, or left null for "either".
  *
  * <p>The scanner throttles re-fires by {@link #cooldownMinutes()} —
@@ -25,7 +26,7 @@ public record AlertRule(
         AlertScope scope,
         Boolean hq,
         AlertKind kind,
-        int thresholdPrice,
+        int threshold,
         boolean enabled,
         int cooldownMinutes,
         Instant lastTriggeredAt,
