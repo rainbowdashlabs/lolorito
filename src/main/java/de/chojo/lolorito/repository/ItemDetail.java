@@ -298,12 +298,7 @@ public class ItemDetail {
         return out;
     }
 
-    /**
-     * DC-scoped listings for an item, ordered by unit price. Kept
-     * separate from {@link #listingsForRegion} so callers who genuinely
-     * only want the home DC (the crafting sourcing lookup) don't pull
-     * unnecessary rows.
-     */
+    /** DC-scoped listings for an item, ordered by unit price. */
     public List<ListingRow> listings(int itemId, int dataCenterId, boolean hq, int cap) {
         return query("""
                 SELECT l.world, l.unit_price, l.quantity, l.hq, l.review_time
