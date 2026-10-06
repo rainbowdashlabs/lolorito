@@ -530,7 +530,7 @@ export default {
   },
   alerts: {
     title: 'Alert rules',
-    subtitle: 'Get a Discord DM when a listing crosses a price threshold.',
+    subtitle: 'Get a Discord DM when a price, sales volume, or listing count crosses your threshold.',
     newAlert: 'New alert',
     empty: 'No alerts yet. Fill in the form on the left and hit "Create alert".',
     item: 'Item',

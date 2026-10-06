@@ -530,7 +530,7 @@ export default {
   },
   alerts: {
     title: 'Benachrichtigungsregeln',
-    subtitle: 'Bekomme eine Discord-DM wenn ein Angebot eine Schwelle kreuzt.',
+    subtitle: 'Erhalte eine Discord-DM, wenn Preis, Verkaufsvolumen oder Angebotszahl deine Schwelle überschreitet.',
     newAlert: 'Neue Regel',
     empty: 'Noch keine Regeln. Fülle links das Formular und drücke "Regel erstellen".',
     item: 'Item',
