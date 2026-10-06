@@ -329,6 +329,8 @@ public final class PlannerEngine {
                 0.0,
                 List.of(), // desynths — filled by PlannerService.withDesynthSection
                 0L,
+                0.0,
+                0.0,
                 0.0);
     }
 
@@ -352,10 +354,12 @@ public final class PlannerEngine {
      */
     private static final double RETAINER_BUDGET_FRACTION = 0.4;
 
+    /** One-shot run share charged per retainer pick, matching the item-detail and planner services. */
+    private static final double RETAINER_RUN_SHARE_SECONDS = 30.0;
+
     private static RetainerPartition partitionRetainerPicks(List<Candidate> candidates, PlannerParams params) {
         if (params.retainerSlots() <= 0) return RetainerPartition.emptyFor(candidates);
 
-        double runShareSeconds = 30.0; // matches ItemDetailService / PlannerService defaults
         var eligible = new ArrayList<Candidate>();
         var retainerEv = new HashMap<Candidate, Double>();
         for (Candidate c : candidates) {
@@ -365,7 +369,7 @@ public final class PlannerEngine {
             if (c.action() != PlanAction.RESALE) continue;
             if (c.valuation() == null || c.valuation().evGross() <= 0) continue;
             if (c.valuation().expectedTimeOnShelfHours() < params.retainerShelfHoursThreshold()) continue;
-            double rEv = c.valuation().evPerHourAt(params.retainerAttentionFraction(), runShareSeconds);
+            double rEv = c.valuation().evPerHourAt(params.retainerAttentionFraction(), RETAINER_RUN_SHARE_SECONDS);
             if (rEv <= c.valuation().evPerHour()) continue; // active attention already wins
             eligible.add(c);
             retainerEv.put(c, rEv);
@@ -456,7 +460,10 @@ public final class PlannerEngine {
         int qty = 0;
         int slots = 0;
         double retainerEvGross = 0.0;
+        double retainerAttentionHours = 0.0;
         for (Candidate c : partition.retainerPicks()) {
+            retainerAttentionHours += RETAINER_RUN_SHARE_SECONDS / 3600.0
+                    + c.valuation().expectedTimeOnShelfHours() * params.retainerAttentionFraction();
             double rEv = partition.retainerEvPerHour().get(c);
             basket.add(new RetainerPick(
                     c.uniqueKey(),
@@ -505,7 +512,9 @@ public final class PlannerEngine {
                 hopPlan.craftEvGross(),
                 hopPlan.desynths(),
                 hopPlan.desynthBuyCost(),
-                hopPlan.desynthEvGross());
+                hopPlan.desynthEvGross(),
+                retainerAttentionHours,
+                retainerObjective);
     }
 
     private record RetainerPartition(

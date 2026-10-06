@@ -76,6 +76,8 @@ export interface PlanCraft {
   intermediates: PlanCraftStep[]
   materialsCost: number
   valuation: Valuation
+  /** True when deeper sub-crafts were not explored; those ingredients are priced as buys. */
+  depthCapped: boolean
 }
 
 /** One expected component of a desynth — avgQty is a probabilistic average. */
@@ -153,6 +155,10 @@ export interface Plan {
   desynths: PlanDesynth[]
   desynthBuyCost: number
   desynthEvGross: number
+  /** Attention hours of the retainer basket; `totalAttentionHours` covers the live route only. */
+  retainerAttentionHours: number
+  /** The retainer basket's share of `objective`. */
+  retainerObjective: number
 }
 
 export interface PlanRequest {

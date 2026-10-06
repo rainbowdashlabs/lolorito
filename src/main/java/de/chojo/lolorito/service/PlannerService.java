@@ -332,7 +332,8 @@ public class PlannerService {
                     bom.materials(),
                     bom.intermediates(),
                     bom.materialsCost(),
-                    v));
+                    v,
+                    s.chain().depthCapped()));
         }
 
         // 2. Aggregate every craft's materials by (world, item).
@@ -797,7 +798,8 @@ public class PlannerService {
                             bom.materials(),
                             bom.intermediates(),
                             bom.materialsCost(),
-                            v),
+                            v,
+                            chain.depthCapped()),
                     recipe,
                     chain,
                     book,

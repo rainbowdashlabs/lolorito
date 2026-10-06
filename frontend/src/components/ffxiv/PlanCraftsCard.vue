@@ -140,6 +140,9 @@ async function copyTeamcraft() {
             >
               {{ craft.craftClass }} L{{ craft.craftLevel }}<span v-if="!craft.craftVerified"> ?</span>
             </span>
+            <MutedText v-if="craft.depthCapped" size="sm" :title="t('item.depthCappedHint')">
+              {{ t('item.depthCapped') }}
+            </MutedText>
           </div>
           <div class="text-right">
             {{ t('planner.listAtPrefix') }} <GilAmount :value="listAtOf(craft)" />

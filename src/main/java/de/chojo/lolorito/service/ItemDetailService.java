@@ -391,7 +391,8 @@ public class ItemDetailService {
                 node.chosen().name().toLowerCase(),
                 children,
                 node.subRecipeClass() == null || node.subRecipeClass().isBlank() ? null : node.subRecipeClass(),
-                node.subRecipeLevel() > 0 ? node.subRecipeLevel() : null);
+                node.subRecipeLevel() > 0 ? node.subRecipeLevel() : null,
+                node.depthCapped());
     }
 
     private String nameOf(int itemId, Language language) {
@@ -493,5 +494,7 @@ public class ItemDetailService {
             /** Sub-recipe class name (carpenter, blacksmith, …) or null when buy-only. */
             String subRecipeClass,
             /** Sub-recipe level, or null when there's no sub-recipe. */
-            Integer subRecipeLevel) {}
+            Integer subRecipeLevel,
+            /** True when a sub-recipe exists but lies past the explored depth. */
+            boolean depthCapped) {}
 }

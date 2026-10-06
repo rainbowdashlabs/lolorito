@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,6 +128,30 @@ class CraftChainPlannerTest {
     }
 
     @Test
+    void depthCapIsFlaggedOnTheCutNodeAndThePlan() {
+        var subSub = recipe(3, 20, 1, List.of(ing(30, 1, null)));
+        var sub = recipe(2, 10, 1, List.of(ing(20, 1, subSub)));
+        var r = recipe(1, 100, 1, List.of(ing(10, 1, sub)));
+        Map<Integer, Integer> prices = Map.of(10, 999, 20, 100, 30, 10);
+
+        var capped = CraftChainPlanner.plan(r, prices::get, 1);
+        var topNode = capped.ingredients().getFirst();
+        assertFalse(topNode.depthCapped());
+        assertTrue(topNode.subIngredients().getFirst().depthCapped());
+        assertTrue(capped.depthCapped());
+
+        var full = CraftChainPlanner.plan(r, prices::get, 3);
+        assertFalse(full.depthCapped(), "a deep enough budget explores every sub-recipe");
+    }
+
+    @Test
+    void buyOnlyLeavesAreNeverFlaggedAsCapped() {
+        var r = recipe(1, 100, 1, List.of(ing(10, 1, null)));
+        var plan = CraftChainPlanner.plan(r, id -> 50, 0);
+        assertFalse(plan.depthCapped());
+    }
+
+    @Test
     void cycleGuardBreaksInfiniteRecursion() {
         // Fake a cycle: item 10 has a sub-recipe that itself lists item 10 as an ingredient.
         // materialiseChain would already null this out in the real repo; simulate it here.
@@ -144,11 +169,11 @@ class CraftChainPlannerTest {
     @Test
     void chainNodeUnitCostReturnsChosenSourcePrice() {
         var buyNode =
-                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.BUY, "", 0);
+                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.BUY, "", 0, false);
         var craftNode =
-                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.CRAFT, "", 0);
+                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.CRAFT, "", 0, false);
         var unknownNode = new CraftChainPlanner.ChainNode(
-                1, 1, null, null, null, null, CraftChainPlanner.SourceChoice.UNKNOWN, "", 0);
+                1, 1, null, null, null, null, CraftChainPlanner.SourceChoice.UNKNOWN, "", 0, false);
         assertEquals(100, buyNode.unitCost());
         assertEquals(50, craftNode.unitCost());
         assertNull(unknownNode.unitCost());

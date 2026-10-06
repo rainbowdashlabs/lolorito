@@ -36,7 +36,9 @@ import java.util.List;
  * @param totalEvGross         raw sum of candidate EV, ignoring hops
  * @param totalBuyCost         gil spent across all stops
  * @param totalQty             units bought across all stops
- * @param totalAttentionHours  attention hours consumed by all buys
+ * @param totalAttentionHours  attention hours consumed by the live route;
+ *                             retainer picks are counted separately in
+ *                             {@code retainerAttentionHours}
  * @param totalHopSeconds      wall-clock hop budget for the round trip
  * @param candidatesConsidered how many prescored candidates entered the ILP
  * @param subsetsConsidered    how many world subsets the solver evaluated
@@ -44,6 +46,10 @@ import java.util.List;
  * @param craftEvGross         expected profit (over materials) across {@link #crafts}
  * @param desynthBuyCost       gil spent on desynth sources
  * @param desynthEvGross       expected profit (over source cost) across {@link #desynths}
+ * @param retainerAttentionHours attention hours the retainer basket costs at
+ *                             the retainer attention fraction
+ * @param retainerObjective    the retainer basket's share of {@code objective}:
+ *                             its EV net of the extra hops it adds
  */
 public record Plan(
         int homeWorldId,
@@ -71,7 +77,9 @@ public record Plan(
         double craftEvGross,
         List<PlanDesynth> desynths,
         long desynthBuyCost,
-        double desynthEvGross) {
+        double desynthEvGross,
+        double retainerAttentionHours,
+        double retainerObjective) {
 
     public static Plan empty(int homeWorldId, String homeWorldName, int homeDataCenterId, String homeDataCenterName) {
         return new Plan(
@@ -100,6 +108,8 @@ public record Plan(
                 0.0,
                 List.of(),
                 0L,
+                0.0,
+                0.0,
                 0.0);
     }
 
@@ -158,7 +168,9 @@ public record Plan(
                 evGross,
                 desynths,
                 desynthBuyCost,
-                desynthEvGross);
+                desynthEvGross,
+                retainerAttentionHours,
+                retainerObjective);
     }
 
     /**
@@ -200,6 +212,8 @@ public record Plan(
                 craftEvGross,
                 desynths,
                 buyCost,
-                evGross);
+                evGross,
+                retainerAttentionHours,
+                retainerObjective);
     }
 }

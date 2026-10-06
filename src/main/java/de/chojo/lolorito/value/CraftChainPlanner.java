@@ -134,7 +134,8 @@ public final class CraftChainPlanner {
                     null,
                     choice,
                     sub == null ? "" : sub.craftClass(),
-                    sub == null ? 0 : sub.level());
+                    sub == null ? 0 : sub.level(),
+                    sub != null && !subGatedByClass && remainingDepth <= 0);
         }
 
         try {
@@ -163,7 +164,8 @@ public final class CraftChainPlanner {
                     children,
                     choice,
                     sub.craftClass(),
-                    sub.level());
+                    sub.level(),
+                    false);
         } finally {
             visited.remove(ing.itemId());
         }
@@ -186,7 +188,9 @@ public final class CraftChainPlanner {
     /**
      * One node in the sourcing plan. {@code unitCost()} returns the cost of
      * the chosen source per one unit of the ingredient, or {@code null}
-     * when the source is {@code UNKNOWN}.
+     * when the source is {@code UNKNOWN}. {@code depthCapped} is true when a
+     * craftable sub-recipe exists but was not explored because the depth
+     * budget ran out, so the node fell back to buying.
      */
     public record ChainNode(
             int itemId,
@@ -205,7 +209,14 @@ public final class CraftChainPlanner {
              */
             String subRecipeClass,
             /** Sub-recipe level, or 0 when the ingredient has no sub-recipe. */
-            int subRecipeLevel) {
+            int subRecipeLevel,
+            boolean depthCapped) {
+
+        /** True when this node or any node below it hit the depth cap. */
+        public boolean anyDepthCapped() {
+            if (depthCapped) return true;
+            return subIngredients != null && subIngredients.stream().anyMatch(ChainNode::anyDepthCapped);
+        }
 
         public Integer unitCost() {
             return switch (chosen) {
@@ -231,5 +242,11 @@ public final class CraftChainPlanner {
      *                       cheapest source is chosen. Null when at least one
      *                       ingredient couldn't be priced at all.
      */
-    public record ChainPlan(List<ChainNode> ingredients, Double perProductCost) {}
+    public record ChainPlan(List<ChainNode> ingredients, Double perProductCost) {
+
+        /** True when any ingredient's sub-tree was cut short by the depth cap. */
+        public boolean depthCapped() {
+            return ingredients.stream().anyMatch(ChainNode::anyDepthCapped);
+        }
+    }
 }

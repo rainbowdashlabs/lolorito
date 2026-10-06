@@ -78,6 +78,9 @@ const gated = computed(() => {
         </MutedText>
       </template>
       <MutedText v-else size="sm">· {{ t('item.noListingsShort') }}</MutedText>
+      <MutedText v-if="ingredient.depthCapped" size="sm" :title="t('item.depthCappedHint')">
+        · {{ t('item.depthCapped') }}
+      </MutedText>
       <MutedText v-if="gated" size="sm" class="text-(--color-warning)">
         · {{ t('item.needsClassLv', { class: ingredient.subRecipeClass, level: ingredient.subRecipeLevel }) }}
       </MutedText>

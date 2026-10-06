@@ -31,6 +31,8 @@ const hasRetainer = computed(() => props.plan.retainerBasket.length > 0)
 const liveEvGross = computed(() => props.plan.totalEvGross - props.plan.retainerEvGross)
 const liveSpend = computed(() => props.plan.totalBuyCost - props.plan.retainerSpend)
 const liveQty = computed(() => props.plan.totalQty - props.plan.retainerQty)
+const liveObjective = computed(() => props.plan.objective - props.plan.retainerObjective)
+const allAttentionHours = computed(() => props.plan.totalAttentionHours + props.plan.retainerAttentionHours)
 
 /**
  * Detects near-substitute picks — the same item id in different qualities,
@@ -171,6 +173,10 @@ const substituteClusters = computed<string[]>(() => {
           {{ hasRetainer ? t('planner.objectiveAll') : t('planner.objective') }}
         </MutedText>
         <div class="font-semibold text-success"><GilAmount :value="plan.objective" /></div>
+        <MutedText v-if="hasRetainer" size="xs" class="mt-0.5 block">
+          {{ t('planner.liveLabel') }} <GilAmount :value="Math.round(liveObjective)" /> ·
+          {{ t('planner.retainerLabel') }} <GilAmount :value="Math.round(plan.retainerObjective)" />
+        </MutedText>
       </div>
       <div>
         <MutedText size="sm">{{ t('planner.evGross') }}</MutedText>
@@ -202,8 +208,11 @@ const substituteClusters = computed<string[]>(() => {
       </div>
       <div>
         <MutedText size="sm">{{ t('planner.attentionCost') }}</MutedText>
-        <div class="font-semibold">{{ formatHours(plan.totalAttentionHours) }}</div>
-        <MutedText v-if="hasRetainer" size="xs" class="mt-0.5 block">{{ t('planner.liveRetainerBlended') }}</MutedText>
+        <div class="font-semibold">{{ formatHours(allAttentionHours) }}</div>
+        <MutedText v-if="hasRetainer" size="xs" class="mt-0.5 block">
+          {{ t('planner.liveLabel') }} {{ formatHours(plan.totalAttentionHours) }} ·
+          {{ t('planner.retainerLabel') }} {{ formatHours(plan.retainerAttentionHours) }}
+        </MutedText>
       </div>
       <div>
         <MutedText size="sm">{{ t('planner.estTotalRun') }}</MutedText>

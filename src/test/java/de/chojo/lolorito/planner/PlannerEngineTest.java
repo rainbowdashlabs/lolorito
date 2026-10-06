@@ -264,6 +264,17 @@ class PlannerEngineTest {
     }
 
     @Test
+    void retainerBasketReportsItsOwnAttentionAndObjective() {
+        var slow = cand("slow", 1, SIBLING_DC, 5, 100, 50_000, 20.0);
+        var plan = PlannerEngine.plan(HOME, List.of(slow), withRetainer(1_000_000, 100, 8.0, 20));
+        double expectedHours = 30.0 / 3600.0 + 20.0 * 0.05;
+        assertEquals(expectedHours, plan.retainerAttentionHours(), 1e-9);
+        assertEquals(0.0, plan.totalAttentionHours(), 1e-9, "live attention excludes the retainer basket");
+        assertEquals(plan.objective(), plan.retainerObjective(), 1e-9, "with no live stops the whole objective is retainer");
+        assertTrue(plan.retainerObjective() <= plan.retainerEvGross());
+    }
+
+    @Test
     void fastMoverStaysInHopBasket() {
         // Short shelf → active attention still wins → hop stop, not retainer.
         var fast = cand("fast", 1, SIBLING_DC, 5, 100, 50_000, 0.5);

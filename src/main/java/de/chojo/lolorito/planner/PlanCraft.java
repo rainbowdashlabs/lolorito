@@ -29,6 +29,8 @@ import java.util.List;
  * @param materialsCost total gil for the bill of materials
  * @param valuation     product valuation for {@code qty} units; {@code evGross}
  *                      is the expected profit over {@code materialsCost}
+ * @param depthCapped   true when deeper sub-crafts exist that the chain did
+ *                      not explore; those ingredients are priced as buys
  */
 public record PlanCraft(
         String uniqueKey,
@@ -41,4 +43,5 @@ public record PlanCraft(
         List<PlanCraftMaterial> materials,
         List<PlanCraftStep> intermediates,
         long materialsCost,
-        Valuation valuation) {}
+        Valuation valuation,
+        boolean depthCapped) {}

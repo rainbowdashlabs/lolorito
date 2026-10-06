@@ -14,12 +14,13 @@ import Spinner from '@/components/feedback/Spinner.vue'
 import Alert from '@/components/feedback/Alert.vue'
 import PlannerParamsPanel from '@/components/ffxiv/PlannerParamsPanel.vue'
 import PlanResults from '@/components/ffxiv/PlanResults.vue'
+import ReplanDiffNote from '@/components/ffxiv/ReplanDiffNote.vue'
 import { plannerApi } from '@/api'
 import type { Plan, PlanRequest } from '@/api/planner'
 import { loadPlannerParams, savePlannerParams } from '@/api/auth'
 import { useFilter } from '@/composables/useFilter'
-import { useWorlds } from '@/composables/useWorlds'
 import { pushToast } from '@/composables/useToasts'
+import { diffStops, type ReplanDiff } from '@/util/planDiff'
 
 // Params exposed in the form; `homeWorld` + `refreshHours` are optional so
 // the user can override them per-plan without touching their saved filter.
@@ -55,6 +56,7 @@ const form = ref<Params>({
 
 const replanning = ref(false)
 const replanNote = ref<string | null>(null)
+const replanDiff = ref<ReplanDiff | null>(null)
 
 async function planRun() {
   loading.value = true
@@ -66,6 +68,7 @@ async function planRun() {
   completedSpend.value = 0
   completedQty.value = 0
   replanNote.value = null
+  replanDiff.value = null
   try {
     plan.value = await plannerApi.plan({ ...form.value })
     // Fire-and-forget — a network hiccup here shouldn't fail the plan
@@ -137,38 +140,35 @@ async function toggleDone(index: number) {
 async function requestReplan() {
   if (!plan.value || completed.value.size === 0) {
     replanNote.value = null
+    replanDiff.value = null
     return
   }
   replanning.value = true
   try {
-    const previousObjective = plan.value.objective
-    const previousStops = plan.value.stops.map((s) => s.worldId).join(',')
+    const previous = plan.value
     const next = await plannerApi.replan({
       ...form.value,
       completedWorldIds: completedWorldIds(),
       spentBudget: spentBudget(),
       usedInventory: usedInventory(),
     })
-    const nextStops = next.stops.map((s) => s.worldId).join(',')
-    if (nextStops !== previousStops) {
-      const delta = Math.round(next.objective - previousObjective)
-      const previousWorldIds = new Set(plan.value.stops.map((s) => s.worldId))
-      const nextWorldIds = new Set(next.stops.map((s) => s.worldId))
-      const worlds = useWorlds()
-      const named = (id: number) => worlds.worldById(id).world?.name ?? t('planner.worldFallback', { id })
-      const dropped = [...previousWorldIds].filter((id) => !nextWorldIds.has(id)).map(named)
-      const added = [...nextWorldIds].filter((id) => !previousWorldIds.has(id)).map(named)
+    const changes = diffStops(previous.stops, next.stops, completedWorldSet.value)
+    replanNote.value = null
+    if (changes.length > 0) {
+      const delta = Math.round(next.objective - previous.objective)
+      replanDiff.value = { changes, objectiveDelta: delta }
+      const dropped = changes.filter((c) => c.kind === 'dropped').map((c) => c.worldName)
+      const added = changes.filter((c) => c.kind === 'added').map((c) => c.worldName)
       const parts: string[] = []
       if (dropped.length) parts.push(t('toasts.replanDropped', { names: dropped.join(', ') }))
       if (added.length) parts.push(t('toasts.replanAdded', { names: added.join(', ') }))
-      const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toLocaleString()}g`
       const detail = parts.length
-        ? `${parts.join(' · ')}`
-        : t('planner.stopsLeft', { count: next.stops.length }, next.stops.length)
-      replanNote.value = t('planner.planUpdated', { detail, delta: deltaLabel })
+        ? parts.join(' · ')
+        : t('replanDiff.stopsAdjusted', { count: changes.length }, changes.length)
+      const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toLocaleString()}g`
       pushToast(t('toasts.planReplan', { detail, delta: deltaLabel }), delta >= 0 ? 'success' : 'warning')
     } else {
-      replanNote.value = null
+      replanDiff.value = null
     }
     plan.value = next
     // Rebuild the visible checkmark set against the new plan's stop
@@ -180,6 +180,7 @@ async function requestReplan() {
     })
     completed.value = indexSet
   } catch (e: unknown) {
+    replanDiff.value = null
     replanNote.value = t('planner.replanFailed', { error: extractError(e) })
   } finally {
     replanning.value = false
@@ -217,6 +218,7 @@ onMounted(async () => {
     </aside>
 
     <section>
+      <ReplanDiffNote v-if="replanDiff" :changes="replanDiff.changes" :objective-delta="replanDiff.objectiveDelta" />
       <div v-if="replanNote" class="mb-3 rounded-(--radius-theme) border border-(--border) bg-(--bg-accent) px-3 py-2 print:hidden">
         <MutedText size="sm">{{ replanNote }}</MutedText>
       </div>

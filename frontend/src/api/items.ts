@@ -71,6 +71,8 @@ export interface CraftIngredientDto {
   subRecipeClass: string | null
   /** Sub-recipe level, or null when there's no sub-recipe. */
   subRecipeLevel: number | null
+  /** True when a sub-recipe exists past the explored depth, so the node is priced as a buy. */
+  depthCapped: boolean
 }
 
 export interface CraftBreakdown {
