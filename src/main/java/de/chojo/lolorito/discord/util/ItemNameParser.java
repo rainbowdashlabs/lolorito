@@ -1,3 +1,8 @@
+/*
+ *     SPDX-License-Identifier: AGPL-3.0-only
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package de.chojo.lolorito.discord.util;
 
 import de.chojo.universalis.entities.Language;
@@ -24,7 +29,8 @@ public class ItemNameParser {
         EnumMap<Language, Map<Token, Integer>> languageMap = new EnumMap<>(Language.class);
         for (Language lang : Language.values()) {
             Map<Token, Integer> language = nameSupplier.languageMap(lang).entrySet().stream()
-                    .collect(Collectors.toMap(e -> Token.create(nameSupplier.fromId(e.getValue()).get(lang)), Map.Entry::getValue));
+                    .collect(Collectors.toMap(
+                            e -> Token.create(nameSupplier.fromId(e.getValue()).get(lang)), Map.Entry::getValue));
             languageMap.put(lang, language);
         }
         return new ItemNameParser(languageMap, nameSupplier);
@@ -51,8 +57,7 @@ public class ItemNameParser {
         return token.get(language);
     }
 
-    private record WeightedToken(Integer id, Double score) {
-    }
+    private record WeightedToken(Integer id, Double score) {}
 
     public record Token(String name, String[] token) {
         public static Token create(String name) {
@@ -84,7 +89,8 @@ public class ItemNameParser {
                     currToken++;
                 }
                 if (currToken != token.length) {
-                    // score += Math.log10(token.length) - Math.log10(currToken) * (1 - ((double) currToken / token.length)) * t.length();
+                    // score += Math.log10(token.length) - Math.log10(currToken) * (1 - ((double) currToken /
+                    // token.length)) * t.length();
                     score += (token.length - currToken) * t.length();
                     match = true;
                 }

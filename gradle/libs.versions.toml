@@ -1,0 +1,90 @@
+[versions]
+sadu = "2.3.9"
+jackson = "3.2.0"
+log4j = "2.23.1"
+junit = "5.10.3"
+testcontainers = "2.0.5"
+guice = "7.0.0"
+javalin = "7.2.2"
+assertj = "3.26.3"
+caffeine = "3.1.8"
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
+spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
+
+[libraries]
+# Discord
+cjda-util = { group = "de.chojo", name = "cjda-util", version = "2.8.6+beta.11" }
+
+# FFXIV data
+universalis = { group = "de.chojo.universalis", name = "universalis", version = "2.0.2" }
+
+# Database
+postgresql = { group = "org.postgresql", name = "postgresql", version = "42.7.10" }
+sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
+sadu-mapper = { group = "de.chojo.sadu", name = "sadu-mapper", version.ref = "sadu" }
+sadu-updater = { group = "de.chojo.sadu", name = "sadu-updater", version.ref = "sadu" }
+sadu-postgresql = { group = "de.chojo.sadu", name = "sadu-postgresql", version.ref = "sadu" }
+sadu-datasource = { group = "de.chojo.sadu", name = "sadu-datasource", version.ref = "sadu" }
+
+# Configuration
+ocular = { group = "dev.chojo", name = "ocular", version = "2.2.1" }
+jackson-core = { group = "tools.jackson.core", name = "jackson-core", version.ref = "jackson" }
+jackson-databind = { group = "tools.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jackson-yaml = { group = "tools.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
+
+# Web
+javalin = { group = "io.javalin", name = "javalin", version.ref = "javalin" }
+javalin-testtools = { group = "io.javalin", name = "javalin-testtools", version.ref = "javalin" }
+
+# Dependency injection
+guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
+
+# Caching
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+
+# HTML scraping (Lodestone)
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.19.1" }
+
+# Logging
+slf4j = { group = "org.slf4j", name = "slf4j-api", version = "2.0.17" }
+log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+log4j-slf4j2 = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
+log-util = { group = "de.chojo", name = "log-util", version = "1.0.1" }
+
+# Testing
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
+testcontainers-core = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
+assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+
+[bundles]
+sadu = [
+    "sadu-queries",
+    "sadu-mapper",
+    "sadu-updater",
+    "sadu-postgresql",
+    "sadu-datasource"
+]
+config = [
+    "ocular",
+    "jackson-core",
+    "jackson-databind",
+    "jackson-yaml"
+]
+testcontainers = [
+    "testcontainers-core",
+    "testcontainers-junit",
+    "testcontainers-postgres"
+]
+# log-util is intentionally NOT in the bundle: it needs an exclusion on
+# log4j so it doesn't drag in an old transitive.
+logging = [
+    "slf4j",
+    "log4j-core",
+    "log4j-slf4j2"
+]

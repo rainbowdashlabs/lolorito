@@ -1,30 +1,32 @@
+/*
+ *     SPDX-License-Identifier: AGPL-3.0-only
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package de.chojo.lolorito;
 
-import de.chojo.lolorito.config.Configuration;
-import de.chojo.lolorito.core.Data;
-import de.chojo.lolorito.core.Discord;
+import com.google.inject.Guice;
+import de.chojo.lolorito.config.Conf;
+import de.chojo.lolorito.core.DatabaseBootstrap;
 import de.chojo.lolorito.core.Threading;
-import de.chojo.lolorito.core.Universalis;
+import de.chojo.lolorito.web.Web;
+import de.chojo.universalis.provider.items.Items;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class Lolorito {
-    private static Lolorito lolorito;
 
-    public static void main(String[] args) throws SQLException, IOException, InterruptedException {
-        lolorito = new Lolorito();
-        lolorito.start();
-    }
+    static void main(String[] args) throws SQLException, IOException, InterruptedException {
+        var conf = new Conf();
+        var config = conf.main();
+        conf.save();
+        var threading = new Threading();
 
-    private void start() throws SQLException, IOException, InterruptedException {
-        Configuration configuration = Configuration.create();
-        Threading threading = new Threading();
+        var itemNameSupplier = Items.create();
+        var dataSource = DatabaseBootstrap.bootstrap(threading, config);
 
-        Data data = Data.create(threading, configuration);
-
-        Universalis.create(threading, data);
-
-        Discord.create(data, threading, configuration);
+        var injector = Guice.createInjector(new LoloritoModule(config, threading, dataSource, itemNameSupplier, conf));
+        injector.getInstance(Web.class).start();
     }
 }

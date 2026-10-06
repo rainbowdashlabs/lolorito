@@ -1,3 +1,8 @@
+/*
+ *     SPDX-License-Identifier: AGPL-3.0-only
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package de.chojo.lolorito.discord.util;
 
 import de.chojo.lolorito.discord.util.ItemNameParser.Token;
@@ -15,22 +20,22 @@ class ItemNameParserTest {
     public void tokenSplitting() {
         Token abc = Token.create("ABC");
         Token a_b_c = Token.create("A B C");
-        Assertions.assertArrayEquals(new String[]{"a", "b", "c"}, abc.token());
-        Assertions.assertArrayEquals(new String[]{"a", "b", "c"}, a_b_c.token());
+        Assertions.assertArrayEquals(new String[] {"a", "b", "c"}, abc.token());
+        Assertions.assertArrayEquals(new String[] {"a", "b", "c"}, a_b_c.token());
 
         abc = Token.create("AbcDeFGh");
         a_b_c = Token.create("Abc De F Gh");
-        Assertions.assertArrayEquals(new String[]{"abc", "de", "f", "gh"}, abc.token());
-        Assertions.assertArrayEquals(new String[]{"abc", "de", "f", "gh"}, a_b_c.token());
+        Assertions.assertArrayEquals(new String[] {"abc", "de", "f", "gh"}, abc.token());
+        Assertions.assertArrayEquals(new String[] {"abc", "de", "f", "gh"}, a_b_c.token());
 
         a_b_c = Token.create("abc de f gh");
-        Assertions.assertArrayEquals(new String[]{"abc", "de", "f", "gh"}, a_b_c.token());
+        Assertions.assertArrayEquals(new String[] {"abc", "de", "f", "gh"}, a_b_c.token());
 
         a_b_c = Token.create("abcDe f gh");
-        Assertions.assertArrayEquals(new String[]{"abc", "de", "f", "gh"}, a_b_c.token());
+        Assertions.assertArrayEquals(new String[] {"abc", "de", "f", "gh"}, a_b_c.token());
 
         a_b_c = Token.create("ÄbcÖe f gh");
-        Assertions.assertArrayEquals(new String[]{"äbc", "öe", "f", "gh"}, a_b_c.token());
+        Assertions.assertArrayEquals(new String[] {"äbc", "öe", "f", "gh"}, a_b_c.token());
     }
 
     @Test
@@ -90,7 +95,6 @@ class ItemNameParserTest {
         double materiaX = token.score(Token.create("Materia X"));
         double materiaIX = token.score(Token.create("Materia IX"));
         Assertions.assertTrue(materiaX > materiaIX, "%s is not smaller than %s".formatted(materiaX, materiaIX));
-
     }
 
     @Test
@@ -114,8 +118,8 @@ class ItemNameParserTest {
         var results = itemNameParser.complete(Language.ENGLISH, "Materia IX");
         Assertions.assertFalse(results.isEmpty());
         for (String res : results) {
-            Assertions.assertTrue(res.toLowerCase().contains("materia ix"), "%s does not contain Materia IX".formatted(res));
+            Assertions.assertTrue(
+                    res.toLowerCase().contains("materia ix"), "%s does not contain Materia IX".formatted(res));
         }
-
     }
 }

@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: lolorito_dev_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lolorito
+      POSTGRES_PASSWORD: lolorito
+      POSTGRES_DB: lolorito
+    ports:
+      - "127.0.0.1:5442:5432"
+    volumes:
+      - lolorito_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lolorito -d lolorito"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  lolorito_pg:

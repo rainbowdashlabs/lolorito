@@ -1,15 +1,20 @@
+/*
+ *     SPDX-License-Identifier: AGPL-3.0-only
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 package de.chojo.lolorito.discord.commands.top.handler;
 
 import de.chojo.jdautil.interactions.slash.structure.handler.SlashHandler;
 import de.chojo.jdautil.pagination.bag.ListPageBag;
 import de.chojo.jdautil.util.Completion;
 import de.chojo.jdautil.wrapper.EventContext;
-import de.chojo.lolorito.core.Data;
-import de.chojo.lolorito.dao.BotUser;
-import de.chojo.lolorito.dao.SearchScope;
-import de.chojo.lolorito.dao.SortOrder;
-import de.chojo.lolorito.dao.TopFilter;
-import de.chojo.lolorito.dao.wrapper.ItemStat;
+import de.chojo.lolorito.entity.ItemStat;
+import de.chojo.lolorito.entity.SearchScope;
+import de.chojo.lolorito.entity.SortOrder;
+import de.chojo.lolorito.entity.TopFilter;
+import de.chojo.lolorito.service.ItemsService;
+import de.chojo.lolorito.service.UserService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -23,10 +28,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Show implements SlashHandler {
-    private final Data data;
+    private final UserService users;
+    private final ItemsService items;
 
-    public Show(Data data) {
-        this.data = data;
+    public Show(UserService users, ItemsService items) {
+        this.users = users;
+        this.items = items;
     }
 
     @Override
@@ -41,9 +48,10 @@ public class Show implements SlashHandler {
         var minPrice = event.getOption("min_price", null, OptionMapping::getAsDouble);
         var minAvgPrice = event.getOption("min_avg_price", null, OptionMapping::getAsDouble);
 
-        TopFilter topFilter = new TopFilter(scope, order, hq, minSales, minPopularity, minInterest, minMarketVolume, minPrice, minAvgPrice);
-        BotUser user = data.users().user(event.getUser());
-        List<ItemStat> itemStats = data.items().topItems(user, topFilter);
+        TopFilter topFilter = new TopFilter(
+                scope, order, hq, minSales, minPopularity, minInterest, minMarketVolume, minPrice, minAvgPrice);
+        var user = users.of(event.getUser());
+        List<ItemStat> itemStats = items.topFor(user, topFilter);
         context.registerPage(new ListPageBag<>(itemStats) {
             @Override
             public CompletableFuture<MessageEmbed> buildPage() {
@@ -51,7 +59,9 @@ public class Show implements SlashHandler {
                 if (currentElement().hq()) {
                     builder.setAuthor("HQ", null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
                 }
-                builder.setTitle(currentElement().item().name().english(), currentElement().universalisUrl());
+                builder.setTitle(
+                        currentElement().item().name().english(),
+                        currentElement().universalisUrl());
                 builder.setDescription(currentElement().prettyText());
                 return CompletableFuture.completedFuture(builder.build());
             }
@@ -63,12 +73,14 @@ public class Show implements SlashHandler {
         AutoCompleteQuery option = event.getFocusedOption();
         String name = option.getName();
         if (name.equalsIgnoreCase("order")) {
-            List<Command.Choice> complete = Completion.complete(option.getValue(), Arrays.asList(SortOrder.values()), SortOrder::name);
+            List<Command.Choice> complete =
+                    Completion.complete(option.getValue(), Arrays.asList(SortOrder.values()), SortOrder::name);
             event.replyChoices(complete).queue();
             return;
         }
         if (name.equalsIgnoreCase("scope")) {
-            List<Command.Choice> complete = Completion.complete(option.getValue(), Arrays.asList(SearchScope.values()), SearchScope::name);
+            List<Command.Choice> complete =
+                    Completion.complete(option.getValue(), Arrays.asList(SearchScope.values()), SearchScope::name);
             event.replyChoices(complete).queue();
             return;
         }
