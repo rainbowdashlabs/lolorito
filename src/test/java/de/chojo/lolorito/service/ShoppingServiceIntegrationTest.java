@@ -171,4 +171,29 @@ class ShoppingServiceIntegrationTest extends ServiceIntegrationTestBase {
         assertEquals(450L, plan.totalCost());
     }
 
+    @Test
+    void planListsEveryRecipeAndHonoursTheChosenOne() {
+        query("INSERT INTO recipe (id, product_item_id, craft_class, level, yield_qty) VALUES (5, 500, 'GSM', 40, 1)")
+                .single(call())
+                .insert();
+        query("INSERT INTO recipe_ingredient (recipe_id, item_id, quantity) VALUES (5, 20, 1)")
+                .single(call())
+                .insert();
+        query("INSERT INTO recipe (id, product_item_id, craft_class, level, yield_qty) VALUES (6, 500, 'ARM', 60, 3)")
+                .single(call())
+                .insert();
+        query("INSERT INTO recipe_ingredient (recipe_id, item_id, quantity) VALUES (6, 20, 2)")
+                .single(call())
+                .insert();
+        seedListing(66, 20, 50, 99, false);
+
+        var chosen = service.plan(66, 500, 6, 3, Set.of(), Map.of()).orElseThrow();
+
+        assertEquals(2, chosen.recipes().size());
+        assertEquals(Set.of(5, 6), Set.of(chosen.recipes().get(0).recipeId(), chosen.recipes().get(1).recipeId()));
+        assertEquals(6, chosen.recipeId());
+        assertEquals("ARM", chosen.craftClass());
+        assertEquals(1, chosen.runs());
+        assertEquals(100L, chosen.totalCost());
+    }
 }

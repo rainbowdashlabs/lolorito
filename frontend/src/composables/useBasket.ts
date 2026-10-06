@@ -83,6 +83,30 @@ function clear() {
   persist(items.value)
 }
 
+export type BasketLoadMode = 'replace' | 'merge'
+
+/**
+ * Load a saved or shared basket into the working basket. `replace` drops
+ * the current rows first; `merge` keeps them and sums quantities on rows
+ * that share a key.
+ */
+function load(saved: Omit<BasketItem, 'key' | 'addedAt'>[], mode: BasketLoadMode) {
+  if (mode === 'replace') clear()
+  for (const item of saved) {
+    add({
+      itemId: item.itemId,
+      itemName: item.itemName,
+      hq: item.hq,
+      sourceWorldId: item.sourceWorldId,
+      sourceWorldName: item.sourceWorldName,
+      quantity: item.quantity,
+      buyPrice: item.buyPrice,
+      action: item.action,
+      evPerHour: item.evPerHour,
+    })
+  }
+}
+
 export function useBasket() {
   return {
     items,
@@ -93,5 +117,6 @@ export function useBasket() {
     remove,
     setQuantity,
     clear,
+    load,
   }
 }

@@ -14,6 +14,7 @@ import Alert from '@/components/feedback/Alert.vue'
 import Spinner from '@/components/feedback/Spinner.vue'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import NumberInput from '@/components/input/text/NumberInput.vue'
+import SelectInput from '@/components/input/select/SelectInput.vue'
 import ItemPicker from '@/components/ffxiv/ItemPicker.vue'
 import ShoppingPlanResult from '@/components/ffxiv/ShoppingPlanResult.vue'
 import { shoppingApi } from '@/api'
@@ -24,6 +25,7 @@ const { t } = useI18n()
 
 const pickedItem = ref<ItemSearchHit | null>(null)
 const count = ref<number | undefined>(1)
+const recipeId = ref<number | undefined>(undefined)
 const overrides = ref<Record<number, ShoppingDecision>>({})
 const hqItemIds = ref<Set<number>>(new Set())
 
@@ -41,6 +43,7 @@ async function replan() {
   try {
     plan.value = await shoppingApi.plan({
       itemId: item.itemId,
+      recipeId: recipeId.value,
       count: Math.max(1, Math.round(count.value ?? 1)),
       overrides: overrides.value,
       hqItemIds: [...hqItemIds.value],
@@ -59,6 +62,7 @@ async function replan() {
 watch(pickedItem, () => {
   overrides.value = {}
   hqItemIds.value = new Set()
+  recipeId.value = undefined
   plan.value = null
   void replan()
 })
@@ -71,6 +75,13 @@ watch(count, () => {
 
 function toggleDecision(itemId: number, decision: ShoppingDecision) {
   overrides.value = { ...overrides.value, [itemId]: decision }
+  void replan()
+}
+
+function selectRecipe(value: string | number | null | undefined) {
+  recipeId.value = Number(value) || undefined
+  overrides.value = {}
+  hqItemIds.value = new Set()
   void replan()
 }
 
@@ -96,6 +107,14 @@ function toggleHq(itemId: number, hq: boolean) {
         <FieldLabel class="mb-1">{{ t('shopping.countLabel') }}</FieldLabel>
         <NumberInput v-model="count" :min="1" step="1" />
         <MutedText size="xs" class="mt-1 block">{{ t('shopping.countHint') }}</MutedText>
+      </div>
+      <div v-if="plan && plan.recipes.length > 1" class="min-w-56">
+        <FieldLabel class="mb-1">{{ t('shopping.recipeLabel') }}</FieldLabel>
+        <SelectInput :model-value="String(plan.recipeId)" @update:model-value="selectRecipe">
+          <option v-for="r in plan.recipes" :key="r.recipeId" :value="String(r.recipeId)">
+            {{ t('shopping.recipeOption', { class: r.craftClass, level: r.level, yield: r.yield }) }}
+          </option>
+        </SelectInput>
       </div>
     </div>
   </NeutralContainer>

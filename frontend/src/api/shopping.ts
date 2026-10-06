@@ -66,6 +66,14 @@ export interface ShoppingNode {
  * `count` products: `expectedNet` is PER UNIT net of tax; `evGross` is the
  * expected profit over `totalCost`.
  */
+/** One recipe that produces the requested item. */
+export interface ShoppingRecipeOption {
+  recipeId: number
+  craftClass: string
+  level: number
+  yield: number
+}
+
 export interface ShoppingPlan {
   itemId: number
   itemName: string
@@ -76,6 +84,8 @@ export interface ShoppingPlan {
   craftClass: string
   craftLevel: number
   productCanBeHq: boolean
+  /** Every recipe for the product; more than one means the caller can switch. */
+  recipes: ShoppingRecipeOption[]
   stops: ShoppingStop[]
   preCrafts: ShoppingPreCraft[]
   tree: ShoppingNode[]

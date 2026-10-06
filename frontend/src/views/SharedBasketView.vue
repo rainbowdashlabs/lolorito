@@ -12,13 +12,14 @@ import MutedText from '@/components/typography/MutedText.vue'
 import Spinner from '@/components/feedback/Spinner.vue'
 import Alert from '@/components/feedback/Alert.vue'
 import PrimaryButton from '@/components/button/PrimaryButton.vue'
+import SecondaryButton from '@/components/button/SecondaryButton.vue'
 import HQMark from '@/components/ffxiv/HQMark.vue'
 import GilAmount from '@/components/ffxiv/GilAmount.vue'
 import WorldBadge from '@/components/ffxiv/WorldBadge.vue'
 import ItemIcon from '@/components/ffxiv/ItemIcon.vue'
 import { basketsApi } from '@/api'
 import type { SharedBasket } from '@/api/baskets'
-import { useBasket } from '@/composables/useBasket'
+import { useBasket, type BasketLoadMode } from '@/composables/useBasket'
 import { useSession } from '@/composables/useSession'
 
 const { t } = useI18n()
@@ -50,22 +51,9 @@ async function refresh() {
   }
 }
 
-function loadIntoLocal() {
+function loadIntoLocal(mode: BasketLoadMode) {
   if (!shared.value) return
-  basket.clear()
-  for (const item of shared.value.items) {
-    basket.add({
-      itemId: item.itemId,
-      itemName: item.itemName,
-      hq: item.hq,
-      sourceWorldId: item.sourceWorldId,
-      sourceWorldName: item.sourceWorldName,
-      quantity: item.quantity,
-      buyPrice: item.buyPrice,
-      action: item.action,
-      evPerHour: item.evPerHour,
-    })
-  }
+  basket.load(shared.value.items, mode)
   router.push({ name: 'planner' })
 }
 
@@ -93,10 +81,15 @@ onMounted(refresh)
             {{ t('baskets.itemCount', { count: shared.items.length }, shared.items.length) }} · {{ t('baskets.updatedUtc', { when: shared.updatedAt.slice(0, 16).replace('T', ' ') }) }}
           </MutedText>
         </div>
-        <PrimaryButton @click="loadIntoLocal">
-          <FontAwesomeIcon :icon="['fas', 'basket-shopping']" class="mr-2" />
-          {{ t('baskets.loadIntoBasket') }}
-        </PrimaryButton>
+        <div class="flex flex-wrap gap-2">
+          <PrimaryButton @click="loadIntoLocal('replace')">
+            <FontAwesomeIcon :icon="['fas', 'basket-shopping']" class="mr-2" />
+            {{ basket.count.value > 0 ? t('baskets.loadReplace') : t('baskets.loadIntoBasket') }}
+          </PrimaryButton>
+          <SecondaryButton v-if="basket.count.value > 0" @click="loadIntoLocal('merge')">
+            {{ t('baskets.loadMerge') }}
+          </SecondaryButton>
+        </div>
       </div>
     </div>
 

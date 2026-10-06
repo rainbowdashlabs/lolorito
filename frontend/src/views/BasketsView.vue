@@ -13,10 +13,11 @@ import EmptyState from '@/components/feedback/EmptyState.vue'
 import Spinner from '@/components/feedback/Spinner.vue'
 import Alert from '@/components/feedback/Alert.vue'
 import PrimaryButton from '@/components/button/PrimaryButton.vue'
+import SecondaryButton from '@/components/button/SecondaryButton.vue'
 import DeleteButton from '@/components/button/DeleteButton.vue'
 import { basketsApi } from '@/api'
 import type { Basket } from '@/api/baskets'
-import { useBasket } from '@/composables/useBasket'
+import { useBasket, type BasketLoadMode } from '@/composables/useBasket'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -54,22 +55,9 @@ async function copyShare(token: string) {
   }
 }
 
-/** Replace the local basket with the saved one and open the drawer. */
-function loadIntoLocal(b: Basket) {
-  basket.clear()
-  for (const item of b.items) {
-    basket.add({
-      itemId: item.itemId,
-      itemName: item.itemName,
-      hq: item.hq,
-      sourceWorldId: item.sourceWorldId,
-      sourceWorldName: item.sourceWorldName,
-      quantity: item.quantity,
-      buyPrice: item.buyPrice,
-      action: item.action,
-      evPerHour: item.evPerHour,
-    })
-  }
+/** Load the saved basket into the working one and open the planner. */
+function loadIntoLocal(b: Basket, mode: BasketLoadMode) {
+  basket.load(b.items, mode)
   router.push({ name: 'planner' })
 }
 
@@ -123,7 +111,11 @@ onMounted(refresh)
           </div>
         </div>
         <div class="flex gap-2">
-          <PrimaryButton compact @click="loadIntoLocal(b)">{{ t('baskets.load') }}</PrimaryButton>
+          <template v-if="basket.count.value > 0">
+            <PrimaryButton compact @click="loadIntoLocal(b, 'replace')">{{ t('baskets.loadReplace') }}</PrimaryButton>
+            <SecondaryButton compact @click="loadIntoLocal(b, 'merge')">{{ t('baskets.loadMerge') }}</SecondaryButton>
+          </template>
+          <PrimaryButton v-else compact @click="loadIntoLocal(b, 'replace')">{{ t('baskets.load') }}</PrimaryButton>
           <DeleteButton @click="remove(b.id)" />
         </div>
       </div>

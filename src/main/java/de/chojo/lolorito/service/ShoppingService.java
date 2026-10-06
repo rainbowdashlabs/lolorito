@@ -124,7 +124,14 @@ public class ShoppingService {
             List<ShoppingNode> children) {}
 
     /**
-     * The full response. {@code valuation} (always-HQ, over {@code count}
+     * One recipe that produces the requested item, offered so the caller
+     * can switch between recipes for the same product.
+     */
+    public record RecipeOption(int recipeId, String craftClass, int level, int yield) {}
+
+    /**
+     * The full response. {@code recipes} lists every recipe for the
+     * product, in repository order. {@code valuation} (always-HQ, over {@code count}
      * products at {@code totalCost / count} apiece) is null when the
      * product has no sufficient home model — the shopping list still
      * works, the spread simply can't be shown.
@@ -139,6 +146,7 @@ public class ShoppingService {
             String craftClass,
             int craftLevel,
             boolean productCanBeHq,
+            List<RecipeOption> recipes,
             List<ShoppingStop> stops,
             List<ShoppingStep> preCrafts,
             List<ShoppingNode> tree,
@@ -278,6 +286,9 @@ public class ShoppingService {
                 recipe.craftClass(),
                 recipe.level(),
                 itemCatalog.canBeHq(productItemId),
+                candidates.stream()
+                        .map(r -> new RecipeOption(r.id(), r.craftClass(), r.level(), r.yield()))
+                        .toList(),
                 List.copyOf(stops),
                 List.copyOf(steps),
                 List.copyOf(tree),

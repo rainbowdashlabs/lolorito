@@ -26,7 +26,7 @@ import SellPriceCard from '@/components/ffxiv/SellPriceCard.vue'
 import ItemActionsPanel from '@/components/ffxiv/ItemActionsPanel.vue'
 import ItemIcon from '@/components/ffxiv/ItemIcon.vue'
 import SecondaryBadge from '@/components/badge/SecondaryBadge.vue'
-import ToggleSwitch from '@/components/input/toggle/ToggleSwitch.vue'
+import TabBar from '@/components/input/tabs/TabBar.vue'
 import { itemsApi } from '@/api'
 import type { ItemDetailDto } from '@/api/items'
 import { useValuationRefresh } from '@/composables/useValuationRefresh'
@@ -101,10 +101,16 @@ useValuationRefresh(
           </p>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <ToggleSwitch v-model="hqMode" option-a="nq" option-b="hq" label-a="NQ" label-b="HQ" />
-        <HQMark :hq="item.hq" />
-      </div>
+      <TabBar
+        :model-value="hqMode"
+        :options="[{ value: 'nq', label: 'NQ' }, { value: 'hq', label: 'HQ' }]"
+        :aria-label="t('item.qualityTabs')"
+        @update:model-value="hqMode = $event as 'nq' | 'hq'"
+      >
+        <template #tab="{ option }">
+          {{ option.label }}<HQMark v-if="option.value === 'hq'" :hq="true" class="ml-1" />
+        </template>
+      </TabBar>
     </div>
 
     <div class="mb-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
