@@ -139,7 +139,7 @@ onMounted(async () => {
 <template>
   <PageHeader :title="t('alerts.title')" :subtitle="t('alerts.subtitle')" />
 
-  <div class="grid gap-6 lg:grid-cols-[360px_1fr]">
+  <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
     <AlertRuleForm :submitting="submitting" :error="submitError" @submit="submit" />
 
     <section>

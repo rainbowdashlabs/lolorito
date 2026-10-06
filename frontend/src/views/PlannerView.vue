@@ -212,7 +212,7 @@ onMounted(async () => {
     :subtitle="t('planner.subtitle')"
   />
 
-  <div class="grid gap-6 lg:grid-cols-[320px_1fr] print:block">
+  <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[320px_minmax(0,1fr)] print:block">
     <aside class="print:hidden">
       <PlannerParamsPanel v-model:params="form" :loading="loading" @plan="planRun" />
     </aside>

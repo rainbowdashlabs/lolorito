@@ -6,11 +6,11 @@
 import { expect, test } from '@playwright/test'
 import { NOW, mockApi } from './mockApi'
 
-const WIDTHS = [360, 768, 1280] as const
+const WIDTHS = [360, 768, 1280] as { name: string; path: string; ready: string; signedIn?: boolean }[]
 const THEMES = ['light', 'dark'] as const
 
 const VIEWS = [
-  { name: 'login', path: '/login', ready: 'main' },
+  { name: 'login', path: '/login', ready: 'main', signedIn: false },
   { name: 'dashboard', path: '/', ready: 'text=Darksteel Ingot' },
   { name: 'offers', path: '/offers', ready: 'table' },
   { name: 'item', path: '/item/5057', ready: 'text=Listings on' },
@@ -28,15 +28,19 @@ for (const view of VIEWS) {
           window.localStorage.setItem('lolorito_theme_v1', t)
           window.localStorage.setItem('lolorito_locale_v1', 'en')
         }, theme)
-        await mockApi(page, unknown)
+        await mockApi(page, unknown, view.signedIn ?? true)
         await page.setViewportSize({ width, height: 900 })
-
         await page.goto(view.path)
+        await expect(page, 'the view must not redirect').toHaveURL((url) => url.pathname === view.path)
         await page.locator(view.ready).first().waitFor()
         await page.waitForLoadState('networkidle')
         await page.evaluate(() => document.fonts.ready)
 
         expect(unknown, 'every API call must be mocked').toEqual([])
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        )
+        expect(overflow, 'page must not scroll horizontally').toBe(0)
         await expect(page).toHaveScreenshot(`${view.name}-${theme}-${width}.png`, {
           fullPage: true,
           mask: [page.locator('canvas')],

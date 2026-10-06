@@ -242,14 +242,16 @@ const missingIcon = /^\/item-icon\/\d+$/
 /**
  * Serve every API call from the fixtures above and block everything that
  * would leave the machine (CDN icons, fonts from elsewhere), so screenshots
- * depend on nothing but the SPA. Unknown API paths fail the test.
+ * depend on nothing but the SPA. Unknown API paths fail the test. With
+ * `signedIn` false, `/me` answers 401 so the SPA shows the signed-out flow.
  */
-export async function mockApi(page: Page, unknown: string[]): Promise<void> {
+export async function mockApi(page: Page, unknown: string[], signedIn = true): Promise<void> {
   await page.routeWebSocket(/\/api\/v1\/ws\//, () => {})
   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort())
   await page.route(/\/(api\/v1|auth)\//, (route: Route) => {
     const url = new URL(route.request().url())
     const path = url.pathname.replace(/^\/api\/v1/, '')
+    if (!signedIn && path === '/me') return route.fulfill({ status: 401 })
     if (noContent.has(path)) return route.fulfill({ status: 204 })
     if (missingIcon.test(path)) return route.fulfill({ status: 404 })
     if (route.request().method() === 'GET' && path in routes) {

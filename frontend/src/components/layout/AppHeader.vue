@@ -30,7 +30,7 @@ async function handleLogout() {
         <FontAwesomeIcon :icon="['fas', 'coins']" class="text-(--color-primary) text-xl" />
         <SubHeader>Lolorito</SubHeader>
       </RouterLink>
-      <nav v-if="session.isAuthenticated.value" class="ml-4 hidden md:flex items-center gap-3 text-sm">
+      <nav v-if="session.isAuthenticated.value" class="ml-4 hidden min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm md:flex">
         <RouterLink :to="{ name: 'dashboard' }" class="text-(--text-muted) hover:text-(--text)" active-class="text-(--text) font-semibold">{{ t('nav.dashboard') }}</RouterLink>
         <RouterLink :to="{ name: 'offers' }" class="text-(--text-muted) hover:text-(--text)" active-class="text-(--text) font-semibold">{{ t('nav.offers') }}</RouterLink>
         <RouterLink :to="{ name: 'planner' }" class="text-(--text-muted) hover:text-(--text)" active-class="text-(--text) font-semibold">{{ t('nav.planner') }}</RouterLink>
@@ -40,7 +40,7 @@ async function handleLogout() {
         <RouterLink :to="{ name: 'shopping' }" class="text-(--text-muted) hover:text-(--text)" active-class="text-(--text) font-semibold">{{ t('nav.shopping') }}</RouterLink>
       </nav>
 
-      <div class="ml-auto flex items-center gap-3">
+      <div class="ml-auto flex shrink-0 items-center gap-3">
         <template v-if="session.isAuthenticated.value && session.user.value">
           <BasketButton @open="$emit('openBasket')" />
           <RouterLink :to="{ name: 'settings' }" class="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-(--bg)">
@@ -50,7 +50,7 @@ async function handleLogout() {
               :alt="session.user.value.displayName"
               class="h-7 w-7 rounded-full"
             />
-            <span class="hidden text-sm font-medium sm:block">{{ session.user.value.displayName }}</span>
+            <span class="hidden text-sm font-medium lg:block">{{ session.user.value.displayName }}</span>
           </RouterLink>
           <button
             type="button"

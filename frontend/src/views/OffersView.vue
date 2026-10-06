@@ -214,7 +214,7 @@ useValuationRefresh(
     :subtitle="t('offers.subtitle', { where: `${homeWorldName || t('offers.noWorldSet')}${dataCenter ? ` · ${dataCenter}` : ''}` })"
   />
 
-  <div class="grid gap-6 md:grid-cols-[240px_1fr]">
+  <div class="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
     <aside>
       <OffersFilterPanel
         v-model:client-filter="clientFilter"

@@ -51,7 +51,7 @@ function clearBasket() {
     </button>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
+  <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
     <section>
       <EmptyState v-if="basket.count.value === 0">
         {{ $t('basket.empty') }}
