@@ -48,8 +48,22 @@ public record OfferFilterRow(
             int profit,
             int effectiveProfit,
             String target) {
-        this(worldId, offerLimit, unitPrice, factor, refreshHours, popularity, marketVolume, interest, sales, views,
-                profit, effectiveProfit, target, 0, 0);
+        this(
+                worldId,
+                offerLimit,
+                unitPrice,
+                factor,
+                refreshHours,
+                popularity,
+                marketVolume,
+                interest,
+                sales,
+                views,
+                profit,
+                effectiveProfit,
+                target,
+                0,
+                0);
     }
 
     /**

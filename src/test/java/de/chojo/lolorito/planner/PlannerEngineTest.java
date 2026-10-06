@@ -270,7 +270,8 @@ class PlannerEngineTest {
         double expectedHours = 30.0 / 3600.0 + 20.0 * 0.05;
         assertEquals(expectedHours, plan.retainerAttentionHours(), 1e-9);
         assertEquals(0.0, plan.totalAttentionHours(), 1e-9, "live attention excludes the retainer basket");
-        assertEquals(plan.objective(), plan.retainerObjective(), 1e-9, "with no live stops the whole objective is retainer");
+        assertEquals(
+                plan.objective(), plan.retainerObjective(), 1e-9, "with no live stops the whole objective is retainer");
         assertTrue(plan.retainerObjective() <= plan.retainerEvGross());
     }
 

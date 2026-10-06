@@ -279,7 +279,7 @@ public class DesynthExplorerService {
 
     /**
      * One desynth candidate — the top-N list on the /desynth page renders
-     * these. {@code pricedComponentFraction} < 1 means some components had
+     * these. {@code pricedComponentFraction < 1} means some components had
      * no sufficient model and contributed zero — the EV is a lower bound,
      * not a verdict; the UI shows partial pricing instead of hiding it.
      */

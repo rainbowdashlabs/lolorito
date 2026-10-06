@@ -80,7 +80,9 @@ class CheapestByKeysIntegrationTest extends RepositoryTestBase {
         seedListing(66, 100, 250, 3, false);
         seedListing(66, 100, 400, 1, true);
         seedListing(66, 101, 900, 1, false);
-        query("DELETE FROM listings WHERE world = 66 AND item = 101").single(call()).delete();
+        query("DELETE FROM listings WHERE world = 66 AND item = 101")
+                .single(call())
+                .delete();
 
         var out = repo.listingCountByKeys(List.of(100, 101, 102), 66, null, false, 24);
 

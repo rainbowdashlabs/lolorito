@@ -100,7 +100,12 @@ class AlertScannerTest {
     @Test
     void emptyEnabledListIsANoop() {
         var scanner = new AlertScanner(
-                new Threading(), new File(), new StubRules(), new StubListings(), new StubSales(), new StubDispatcher());
+                new Threading(),
+                new File(),
+                new StubRules(),
+                new StubListings(),
+                new StubSales(),
+                new StubDispatcher());
         scanner.run(); // must not throw
     }
 

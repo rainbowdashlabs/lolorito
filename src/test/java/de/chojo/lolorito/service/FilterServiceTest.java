@@ -89,7 +89,21 @@ class FilterServiceTest {
         var dc = service.update(
                 1,
                 new FilterService.FilterPatch(
-                        null, null, null, null, null, null, null, null, null, null, null, null, "data_center", null, null));
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "data_center",
+                        null,
+                        null));
         assertEquals("DATA_CENTER", dc.target());
     }
 
@@ -151,13 +165,17 @@ class FilterServiceTest {
 
     @Test
     void updateStoresAndClearsQuantityBounds() {
-        var set = service.update(42, new FilterService.FilterPatch(
-                null, null, null, null, null, null, null, null, null, null, null, null, null, 250_000, 500));
+        var set = service.update(
+                42,
+                new FilterService.FilterPatch(
+                        null, null, null, null, null, null, null, null, null, null, null, null, null, 250_000, 500));
         assertEquals(250_000, set.budget());
         assertEquals(140, set.inventorySlots(), "inventory_slots clamps to the 140-slot inventory");
 
-        var cleared = service.update(42, new FilterService.FilterPatch(
-                null, null, null, null, null, null, null, null, null, null, null, null, null, 0, null));
+        var cleared = service.update(
+                42,
+                new FilterService.FilterPatch(
+                        null, null, null, null, null, null, null, null, null, null, null, null, null, 0, null));
         assertEquals(0, cleared.budget(), "0 clears the budget bound");
         assertEquals(140, cleared.inventorySlots(), "null leaves the slot bound alone");
     }

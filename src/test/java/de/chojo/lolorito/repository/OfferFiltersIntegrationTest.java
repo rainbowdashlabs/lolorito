@@ -56,7 +56,8 @@ class OfferFiltersIntegrationTest extends RepositoryTestBase {
 
     @Test
     void findReturnsExactlyWhatWasWritten() {
-        var row = new OfferFilterRow(80, 750, 1500, 3.25, 24, 12.5, 34.5, 56.5, 100, 200, 500, 9999, "REGION", 120_000, 35);
+        var row = new OfferFilterRow(
+                80, 750, 1500, 3.25, 24, 12.5, 34.5, 56.5, 100, 200, 500, 9999, "REGION", 120_000, 35);
         repo.upsert(1234L, row);
         var found = repo.find(1234L).orElseThrow();
         assertEquals(row, found);

@@ -89,8 +89,9 @@ public class AlertDmDispatcher implements AlertDispatcher {
         return switch (kind) {
             case PRICE_BELOW -> "Cheapest listing on **%s** dropped to **%,d gil**.".formatted(scope, observed);
             case PRICE_ABOVE -> "Cheapest listing on **%s** climbed to **%,d gil**.".formatted(scope, observed);
-            case SALE_VOLUME_SPIKE -> "Sales on **%s** in the last 24 h are at **%,d %%** of the usual daily volume."
-                    .formatted(scope, observed);
+            case SALE_VOLUME_SPIKE ->
+                "Sales on **%s** in the last 24 h are at **%,d %%** of the usual daily volume."
+                        .formatted(scope, observed);
             case LISTING_COUNT_DROP -> "Only **%,d** listing(s) left on **%s**.".formatted(observed, scope);
         };
     }

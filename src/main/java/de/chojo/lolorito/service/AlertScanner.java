@@ -117,7 +117,8 @@ public class AlertScanner implements Runnable {
         Map<String, Integer> out = new HashMap<>();
         for (var group : byGroup.values()) {
             AlertRule sample = group.getFirst();
-            List<Integer> items = group.stream().map(AlertRule::itemId).distinct().toList();
+            List<Integer> items =
+                    group.stream().map(AlertRule::itemId).distinct().toList();
             for (var measured : measure(Metric.of(sample.kind()), sample, items).entrySet()) {
                 out.put(cacheKey(sample, measured.getKey()), measured.getValue());
             }
@@ -144,8 +145,8 @@ public class AlertScanner implements Runnable {
     }
 
     private static String groupKey(AlertRule rule) {
-        return Metric.of(rule.kind()) + "|" + rule.scope().worldId() + "|" + rule.scope().dataCenterId() + "|"
-                + rule.hq();
+        return Metric.of(rule.kind()) + "|" + rule.scope().worldId() + "|"
+                + rule.scope().dataCenterId() + "|" + rule.hq();
     }
 
     private static String cacheKey(AlertRule rule) {

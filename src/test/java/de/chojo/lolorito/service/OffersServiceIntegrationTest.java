@@ -6,17 +6,17 @@
 package de.chojo.lolorito.service;
 
 import de.chojo.lolorito.config.file.File;
+import de.chojo.lolorito.entity.OfferFilterTarget;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.Offers;
 import de.chojo.lolorito.value.MarketModel;
+import de.chojo.lolorito.value.OfferBounds;
 import de.chojo.lolorito.value.PriceDistribution;
 import de.chojo.lolorito.value.SaleRate;
 import de.chojo.lolorito.value.UserPrefs;
+import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
 import org.junit.jupiter.api.BeforeEach;
-import de.chojo.lolorito.entity.OfferFilterTarget;
-import de.chojo.lolorito.value.OfferBounds;
-import de.chojo.universalis.entities.Language;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -24,8 +24,8 @@ import java.time.Instant;
 import static de.chojo.sadu.queries.api.call.Call.call;
 import static de.chojo.sadu.queries.api.query.Query.query;
 import static de.chojo.sadu.queries.converter.StandardValueConverter.INSTANT_TIMESTAMP;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OffersServiceIntegrationTest extends ServiceIntegrationTestBase {
@@ -155,7 +155,15 @@ class OffersServiceIntegrationTest extends ServiceIntegrationTestBase {
         var prefs = new UserPrefs(0.05, 0.25, 30.0);
 
         var clamped = service.topOffers(
-                66, 7, "Europe", OfferFilterTarget.DATA_CENTER, 6, prefs, new OfferBounds(350, 0), 10, Language.ENGLISH);
+                66,
+                7,
+                "Europe",
+                OfferFilterTarget.DATA_CENTER,
+                6,
+                prefs,
+                new OfferBounds(350, 0),
+                10,
+                Language.ENGLISH);
         assertEquals(1, clamped.size());
         assertEquals(3, clamped.getFirst().quantity());
         assertNotNull(clamped.getFirst().confidence());

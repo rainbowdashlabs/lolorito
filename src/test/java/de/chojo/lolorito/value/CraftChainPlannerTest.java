@@ -168,10 +168,10 @@ class CraftChainPlannerTest {
 
     @Test
     void chainNodeUnitCostReturnsChosenSourcePrice() {
-        var buyNode =
-                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.BUY, "", 0, false);
-        var craftNode =
-                new CraftChainPlanner.ChainNode(1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.CRAFT, "", 0, false);
+        var buyNode = new CraftChainPlanner.ChainNode(
+                1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.BUY, "", 0, false);
+        var craftNode = new CraftChainPlanner.ChainNode(
+                1, 1, 100, 50, 50.0, null, CraftChainPlanner.SourceChoice.CRAFT, "", 0, false);
         var unknownNode = new CraftChainPlanner.ChainNode(
                 1, 1, null, null, null, null, CraftChainPlanner.SourceChoice.UNKNOWN, "", 0, false);
         assertEquals(100, buyNode.unitCost());

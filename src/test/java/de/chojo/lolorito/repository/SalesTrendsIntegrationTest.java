@@ -134,7 +134,8 @@ class SalesTrendsIntegrationTest extends RepositoryTestBase {
         assertThat(hours.getLast().units()).isEqualTo(6);
         assertThat(hours.getLast().gil()).isEqualTo(400);
         assertThat(hours.get(20).units()).isEqualTo(1);
-        assertThat(hours.stream().mapToLong(SalesTrends.HourBucket::units).sum()).isEqualTo(7);
+        assertThat(hours.stream().mapToLong(SalesTrends.HourBucket::units).sum())
+                .isEqualTo(7);
         assertThat(hours.getFirst().hourStart()).isBefore(hours.getLast().hourStart());
     }
 

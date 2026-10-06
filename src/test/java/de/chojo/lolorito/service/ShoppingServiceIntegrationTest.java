@@ -190,7 +190,11 @@ class ShoppingServiceIntegrationTest extends ServiceIntegrationTestBase {
         var chosen = service.plan(66, 500, 6, 3, Set.of(), Map.of()).orElseThrow();
 
         assertEquals(2, chosen.recipes().size());
-        assertEquals(Set.of(5, 6), Set.of(chosen.recipes().get(0).recipeId(), chosen.recipes().get(1).recipeId()));
+        assertEquals(
+                Set.of(5, 6),
+                Set.of(
+                        chosen.recipes().get(0).recipeId(),
+                        chosen.recipes().get(1).recipeId()));
         assertEquals(6, chosen.recipeId());
         assertEquals("ARM", chosen.craftClass());
         assertEquals(1, chosen.runs());

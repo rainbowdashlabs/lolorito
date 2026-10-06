@@ -55,7 +55,8 @@ public class TrendService {
     public WorldActivity last24h(int worldId) {
         return activityCache.get(worldId, id -> {
             var buckets = repo.hourly(id, ACTIVITY_HOURS);
-            long units = buckets.stream().mapToLong(SalesTrends.HourBucket::units).sum();
+            long units =
+                    buckets.stream().mapToLong(SalesTrends.HourBucket::units).sum();
             long gil = buckets.stream().mapToLong(SalesTrends.HourBucket::gil).sum();
             return new WorldActivity(id, units, gil, buckets);
         });
