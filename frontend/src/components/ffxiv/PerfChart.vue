@@ -37,7 +37,7 @@ function render() {
     xAxis: {
       type: 'time',
       axisLine: { lineStyle: { color: border } },
-      axisLabel: labelStyle,
+      axisLabel: { ...labelStyle, hideOverlap: true },
       splitLine: { show: true, lineStyle: { color: border, opacity: 0.35 } },
     },
     yAxis: {

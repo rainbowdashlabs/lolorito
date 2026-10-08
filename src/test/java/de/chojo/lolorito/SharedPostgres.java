@@ -15,7 +15,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  */
 public final class SharedPostgres {
 
-    private static final PostgreSQLContainer CONTAINER = new PostgreSQLContainer("postgres:17")
+    private static final PostgreSQLContainer CONTAINER = new PostgreSQLContainer("postgres:18")
             .withDatabaseName("lolorito_test")
             .withUsername("test")
             .withPassword("test");

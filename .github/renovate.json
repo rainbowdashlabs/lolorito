@@ -11,6 +11,19 @@
   "internalChecksFilter": "strict",
   "packageRules": [
     {
+      "description": "Resolve Maven artifacts through the eldonexus Maven Central proxy to avoid Central rate limits",
+      "matchDatasources": ["maven"],
+      "registryUrls": [
+        "https://eldonexus.de/repository/maven-central",
+        "https://eldonexus.de/repository/maven-public"
+      ]
+    },
+    {
+      "description": "Hold TypeScript below 7 until vue-tsc supports the native compiler",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    },
+    {
       "description": "Auto-merge minor and patch updates (non-major)",
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
