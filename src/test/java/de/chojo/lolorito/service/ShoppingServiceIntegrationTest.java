@@ -5,6 +5,7 @@
  */
 package de.chojo.lolorito.service;
 
+import de.chojo.lolorito.catalog.ItemSheetEntry;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.Recipes;
@@ -30,11 +31,13 @@ class ShoppingServiceIntegrationTest extends ServiceIntegrationTestBase {
 
     @BeforeEach
     void setUp() {
+        var catalog = new ItemCatalog();
+        catalog.ingest(Map.of(HQABLE, new ItemSheetEntry(HQABLE, 0, 0, 0, null, null, true)));
         service = new ShoppingService(
                 new de.chojo.lolorito.config.file.File(),
                 new Recipes(dataSource),
                 new ItemDetail(),
-                new ItemCatalog(),
+                catalog,
                 NameSupplier.EMPTY,
                 new MarketModels(dataSource));
         query("DELETE FROM listings").single(call()).delete();
@@ -132,7 +135,6 @@ class ShoppingServiceIntegrationTest extends ServiceIntegrationTestBase {
 
     @Test
     void hqMarkBuysFromTheHqBoard() {
-        // Product 300 = 1× HQABLE (which the real catalog says can be HQ).
         query("INSERT INTO recipe (id, product_item_id, craft_class, level, yield_qty) VALUES (3, 300, 'CRP', 10, 1)")
                 .single(call())
                 .insert();
