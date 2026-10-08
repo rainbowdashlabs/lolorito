@@ -58,6 +58,14 @@ public class Listings {
                 """).single(call().bind("world", worldId).bind("item", itemId)).insert();
     }
 
+    /** Drops view counters older than {@code retentionDays}. Returns rows removed. */
+    public int cleanViews(int retentionDays) {
+        return query("DELETE FROM listings_viewed WHERE day < current_date - :days")
+                .single(call().bind("days", Math.max(1, retentionDays)))
+                .delete()
+                .rows();
+    }
+
     public void clearListings(Item item, World world) {
         query("DELETE FROM listings WHERE item = :item AND world = :world")
                 .single(call().bind("item", item.id()).bind("world", world.id()))

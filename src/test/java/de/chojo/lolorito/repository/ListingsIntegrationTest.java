@@ -103,4 +103,23 @@ class ListingsIntegrationTest extends RepositoryTestBase {
                 .orElseThrow();
         assertEquals(2, count);
     }
+
+    @Test
+    void cleanViewsDropsOnlyCountersPastRetention() {
+        query("""
+                INSERT INTO listings_viewed (world, item, day, count)
+                VALUES (:w, :i, current_date, 1),
+                       (:w, :i, current_date - 8, 1),
+                       (:w, :i, current_date - 9, 1),
+                       (:w, :i, current_date - 400, 1)
+                """).single(call().bind("w", WORLD.id()).bind("i", ITEM.id())).insert();
+        int removed = repo.cleanViews(8);
+        assertEquals(2, removed);
+        int left = query("SELECT count(*) AS n FROM listings_viewed")
+                .single(call())
+                .map(row -> row.getInt("n"))
+                .first()
+                .orElseThrow();
+        assertEquals(2, left);
+    }
 }

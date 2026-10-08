@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.chojo.lolorito.core.Threading;
 import de.chojo.lolorito.repository.ListingEpisodes;
+import de.chojo.lolorito.repository.Listings;
 import de.chojo.lolorito.repository.PerfMetrics;
 import de.chojo.lolorito.repository.Sales;
 import org.slf4j.Logger;
@@ -41,14 +42,20 @@ public class DataRefreshWorker implements Runnable {
     /** Ended episodes older than this feed neither calibration nor detectors — match the sales retention. */
     private static final int EPISODE_RETENTION_DAYS = 60;
 
+    /** View counters only feed the 7-day {@code world_item_views} window; one spare day covers the boundary. */
+    private static final int VIEW_RETENTION_DAYS = 8;
+
     private final Sales sales;
     private final ListingEpisodes episodes;
+    private final Listings listings;
     private final PerfMetrics perfMetrics;
 
     @Inject
-    public DataRefreshWorker(Threading threading, Sales sales, ListingEpisodes episodes, PerfMetrics perfMetrics) {
+    public DataRefreshWorker(Threading threading, Sales sales, ListingEpisodes episodes, Listings listings,
+                             PerfMetrics perfMetrics) {
         this.sales = sales;
         this.episodes = episodes;
+        this.listings = listings;
         this.perfMetrics = perfMetrics;
         threading.botWorker().scheduleAtFixedRate(this, 1, 5, TimeUnit.MINUTES);
     }
@@ -59,6 +66,8 @@ public class DataRefreshWorker implements Runnable {
         log.debug("Deleted {} sales", clean);
         int episodeClean = episodes.clean(EPISODE_RETENTION_DAYS);
         log.debug("Deleted {} ended listing episodes / undercut events", episodeClean);
+        int viewClean = listings.cleanViews(VIEW_RETENTION_DAYS);
+        log.debug("Deleted {} listing view counters", viewClean);
         log.debug("Refreshing views");
         long totalStart = System.currentTimeMillis();
         for (String view : VIEWS) {
