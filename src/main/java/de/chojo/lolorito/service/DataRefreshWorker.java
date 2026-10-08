@@ -51,8 +51,8 @@ public class DataRefreshWorker implements Runnable {
     private final PerfMetrics perfMetrics;
 
     @Inject
-    public DataRefreshWorker(Threading threading, Sales sales, ListingEpisodes episodes, Listings listings,
-                             PerfMetrics perfMetrics) {
+    public DataRefreshWorker(
+            Threading threading, Sales sales, ListingEpisodes episodes, Listings listings, PerfMetrics perfMetrics) {
         this.sales = sales;
         this.episodes = episodes;
         this.listings = listings;
