@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: lolorito_dev_db
     restart: unless-stopped
     environment:
@@ -10,7 +10,7 @@ services:
     ports:
       - "127.0.0.1:5442:5432"
     volumes:
-      - lolorito_pg:/var/lib/postgresql/data
+      - lolorito_pg:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lolorito -d lolorito"]
       interval: 5s
