@@ -50,6 +50,23 @@ class ItemCatalogTest {
     }
 
     @Test
+    void catalogReadsBundledItemsJson() {
+        var catalog = new ItemCatalog();
+        assertEquals(20001, catalog.iconIdFor(5057));
+        assertEquals(1, catalog.ilvlFor(5057));
+        assertEquals("Lumber", catalog.categoryFor(5057));
+        assertEquals("Rough lumber.", catalog.descriptionFor(5057));
+        assertTrue(catalog.canBeHq(5057));
+        assertFalse(catalog.canBeHq(5058));
+        assertEquals(
+                new ItemCatalog.CatalogEntry(20001, 1, 999),
+                catalog.allEntries().get(5057));
+        assertEquals(
+                new ItemCatalog.CatalogEntry(20002, 0, 999),
+                catalog.allEntries().get(5058));
+    }
+
+    @Test
     void ingestMergesEntriesAndCountsOnlyNewStackSizes() {
         var catalog = new ItemCatalog();
         int before = catalog.size();
