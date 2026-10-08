@@ -16,7 +16,7 @@ application {
 }
 
 repositories {
-    mavenCentral()
+    maven("https://eldonexus.de/repository/maven-central")
     maven("https://eldonexus.de/repository/maven-public")
     maven("https://eldonexus.de/repository/maven-proxies")
 }
