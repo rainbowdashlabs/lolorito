@@ -75,7 +75,7 @@ public class AlertDmDispatcher implements AlertDispatcher {
         String itemName = nameOf(rule.itemId());
         String scope = rule.scope().isWorld()
                 ? WorldNames.nameOf(rule.scope().worldId())
-                : "DC " + rule.scope().dataCenterId();
+                : WorldNames.dataCenterNameOf(rule.scope().dataCenterId());
         return new EmbedBuilder()
                 .setTitle("Market alert: " + itemName)
                 .setDescription(describe(rule.kind(), scope, observed))

@@ -106,7 +106,7 @@ a direct message. It has the item name in the title and one of these lines:
 | Listings drop | Only *count* listing(s) left on *world*. |
 
 The message also shows the threshold, the quality (`high`, `normal` or `either`) and the rule id. For a rule on a
-whole data center, the message names the data center by its id.
+whole data center, *world* is the name of the data center.
 
 :::tip
 The bot can only send you a DM if your privacy settings allow direct messages from members of the server. Use the

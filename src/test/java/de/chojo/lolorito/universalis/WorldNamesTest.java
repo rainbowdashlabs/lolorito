@@ -20,4 +20,14 @@ class WorldNamesTest {
     void unknownWorldsFallBackToTheId() {
         assertEquals("9999", WorldNames.nameOf(9999));
     }
+
+    @Test
+    void knownDataCentersUseTheirName() {
+        assertEquals("Light", WorldNames.dataCenterNameOf(7));
+    }
+
+    @Test
+    void unknownDataCentersFallBackToTheId() {
+        assertEquals("DC 9999", WorldNames.dataCenterNameOf(9999));
+    }
 }
