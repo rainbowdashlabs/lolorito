@@ -12,6 +12,7 @@ import de.chojo.lolorito.entity.OfferFilterTarget;
 import de.chojo.lolorito.repository.DesynthResults;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.ComponentPricing;
 import de.chojo.lolorito.value.CraftChainPlanner;
@@ -392,13 +393,7 @@ public class ItemDetailService {
     }
 
     private String nameOf(int itemId, Language language) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        if (name == null) return String.valueOf(itemId);
-        String localised = name.get(language);
-        if (localised != null && !localised.isBlank()) return localised;
-        String english = name.get(Language.ENGLISH);
-        return english == null ? String.valueOf(itemId) : english;
+        return ItemNames.nameOf(itemNames, itemId, language);
     }
 
     /**

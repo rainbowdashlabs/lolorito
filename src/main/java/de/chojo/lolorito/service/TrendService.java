@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.repository.SalesTrends;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
 
@@ -119,13 +120,7 @@ public class TrendService {
     }
 
     private String itemNameOf(int itemId, Language language) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        if (name == null) return String.valueOf(itemId);
-        String localised = name.get(language);
-        if (localised != null && !localised.isBlank()) return localised;
-        String english = name.get(Language.ENGLISH);
-        return english == null ? String.valueOf(itemId) : english;
+        return ItemNames.nameOf(itemNames, itemId, language);
     }
 
     /**

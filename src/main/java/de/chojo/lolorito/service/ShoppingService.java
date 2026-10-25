@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.CraftChainPlanner;
 import de.chojo.lolorito.value.ListingBook;
@@ -17,7 +18,6 @@ import de.chojo.lolorito.value.MarketModel;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.lolorito.value.Valuation;
 import de.chojo.lolorito.value.ValueEngine;
-import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
 import de.chojo.universalis.worlds.Worlds;
 
@@ -443,8 +443,6 @@ public class ShoppingService {
     }
 
     private String nameOf(int itemId) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        return name == null ? String.valueOf(itemId) : name.get(Language.ENGLISH);
+        return ItemNames.nameOf(itemNames, itemId);
     }
 }
