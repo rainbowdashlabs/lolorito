@@ -10,6 +10,7 @@ import de.chojo.lolorito.value.MarketModel;
 import de.chojo.lolorito.value.PriceDistribution;
 import de.chojo.lolorito.value.SaleRate;
 import de.chojo.sadu.mapper.wrapper.Row;
+import de.chojo.sadu.postgresql.types.PostgreSqlTypes;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -85,24 +86,23 @@ public class ItemDetail {
             return Map.of();
         }
         int scopeValue = worldId != null ? worldId : dataCenterId;
-        // The id list is caller-supplied but always Integer, so inlining the
-        // values in the SQL is safe from injection and avoids sadu's
-        // array-binding limitations.
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         String sql = """
                 SELECT l.item AS item_id, min(l.unit_price) AS cheapest
                   FROM listings l
                   JOIN worlds w ON l.world = w.world
                   JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                 WHERE l.item IN (%s)
+                 WHERE l.item = ANY(:items)
                    AND (:hq IS NULL OR l.hq = :hq)
                    AND %s
                    AND lu.updated >= now() - (:hours || ' hours')::INTERVAL
                  GROUP BY l.item
-                """.formatted(inList, scopeClause);
+                """.formatted(scopeClause);
         Map<Integer, Integer> out = new HashMap<>();
         query(sql)
-                .single(call().bind("hq", hq).bind("scope", scopeValue).bind("hours", String.valueOf(maxAgeHours)))
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
+                        .bind("scope", scopeValue)
+                        .bind("hours", String.valueOf(maxAgeHours)))
                 .map(row -> {
                     Integer price = row.getObject("cheapest") == null ? null : row.getInt("cheapest");
                     if (price != null) out.put(row.getInt("item_id"), price);
@@ -123,21 +123,23 @@ public class ItemDetail {
         if (itemIds.isEmpty() || (worldId == null && dataCenterId == null)) return Map.of();
         String scopeClause = worldId != null ? "lu.world = :scope" : "w.data_center = :scope";
         int scopeValue = worldId != null ? worldId : dataCenterId;
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         String sql = """
                 SELECT lu.item AS item_id, count(l.item) AS listings
                   FROM listings_updated lu
                   JOIN worlds w ON lu.world = w.world
                   LEFT JOIN listings l
                     ON l.world = lu.world AND l.item = lu.item AND (:hq IS NULL OR l.hq = :hq)
-                 WHERE lu.item IN (%s)
+                 WHERE lu.item = ANY(:items)
                    AND %s
                    AND lu.updated >= now() - (:hours || ' hours')::INTERVAL
                  GROUP BY lu.item
-                """.formatted(inList, scopeClause);
+                """.formatted(scopeClause);
         Map<Integer, Integer> out = new HashMap<>();
         query(sql)
-                .single(call().bind("hq", hq).bind("scope", scopeValue).bind("hours", String.valueOf(maxAgeHours)))
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
+                        .bind("scope", scopeValue)
+                        .bind("hours", String.valueOf(maxAgeHours)))
                 .map(row -> {
                     out.put(row.getInt("item_id"), row.getInt("listings"));
                     return null;
@@ -187,20 +189,22 @@ public class ItemDetail {
      */
     public Map<Integer, Integer> cheapestByItem(int dataCenterId, List<Integer> itemIds, boolean hq, int maxAgeHours) {
         if (itemIds.isEmpty()) return Map.of();
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         Map<Integer, Integer> out = new HashMap<>();
         query("""
                 SELECT l.item AS item_id, min(l.unit_price) AS cheapest
                   FROM listings l
                   JOIN worlds w ON l.world = w.world
                   JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                 WHERE l.item IN (%s)
+                 WHERE l.item = ANY(:items)
                    AND l.hq = :hq
                    AND w.data_center = :dc
                    AND lu.updated >= now() - (:hours || ' hours')::INTERVAL
                  GROUP BY l.item
-                """.formatted(inList))
-                .single(call().bind("hq", hq).bind("dc", dataCenterId).bind("hours", String.valueOf(maxAgeHours)))
+                """)
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
+                        .bind("dc", dataCenterId)
+                        .bind("hours", String.valueOf(maxAgeHours)))
                 .map(row -> {
                     Integer price = row.getObject("cheapest") == null ? null : row.getInt("cheapest");
                     if (price != null) out.put(row.getInt("item_id"), price);
@@ -238,7 +242,6 @@ public class ItemDetail {
             return Map.of();
         }
         String scopeValue = dataCenterId != null ? String.valueOf(dataCenterId) : regionName;
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         Map<Integer, List<PriceLevel>> out = new HashMap<>();
         query("""
                 SELECT item_id, unit_price, quantity, world_id
@@ -247,14 +250,15 @@ public class ItemDetail {
                           FROM listings l
                           JOIN worlds w ON l.world = w.world
                           JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                         WHERE l.item IN (%s)
+                         WHERE l.item = ANY(:items)
                            AND l.hq = :hq
                            AND %s
                            AND lu.updated >= now() - (:hours || ' hours')::INTERVAL) x
                  WHERE rn <= :levels
                  ORDER BY item_id, unit_price
-                """.formatted(inList, scopeClause))
-                .single(call().bind("hq", hq)
+                """.formatted(scopeClause))
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
                         .bind("scope", scopeValue)
                         .bind("hours", String.valueOf(maxAgeHours))
                         .bind("levels", levelsPerItem))
@@ -275,20 +279,22 @@ public class ItemDetail {
     public Map<Integer, Integer> cheapestByItemRegion(
             String regionName, List<Integer> itemIds, boolean hq, int maxAgeHours) {
         if (itemIds.isEmpty()) return Map.of();
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         Map<Integer, Integer> out = new HashMap<>();
         query("""
                 SELECT l.item AS item_id, min(l.unit_price) AS cheapest
                   FROM listings l
                   JOIN worlds w ON l.world = w.world
                   JOIN listings_updated lu ON l.world = lu.world AND l.item = lu.item
-                 WHERE l.item IN (%s)
+                 WHERE l.item = ANY(:items)
                    AND l.hq = :hq
                    AND w.region_name = :region
                    AND lu.updated >= now() - (:hours || ' hours')::INTERVAL
                  GROUP BY l.item
-                """.formatted(inList))
-                .single(call().bind("hq", hq).bind("region", regionName).bind("hours", String.valueOf(maxAgeHours)))
+                """)
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
+                        .bind("region", regionName)
+                        .bind("hours", String.valueOf(maxAgeHours)))
                 .map(row -> {
                     Integer price = row.getObject("cheapest") == null ? null : row.getInt("cheapest");
                     if (price != null) out.put(row.getInt("item_id"), price);
