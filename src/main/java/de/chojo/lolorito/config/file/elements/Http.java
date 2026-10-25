@@ -54,8 +54,9 @@ public class Http {
     private int sessionMaxAgeDays = 90;
 
     /**
-     * Base64-encoded 32-byte AES key. Empty until an operator provides one; the
-     * app refuses to boot with a blank value.
+     * Base64-encoded 32-byte AES key for the stored Discord tokens. When blank,
+     * the app generates a key on start and saves it to the config file; changing
+     * it later logs every user out.
      */
     @Overwrite(env = @Env)
     private String tokenEncryptionKey = "";

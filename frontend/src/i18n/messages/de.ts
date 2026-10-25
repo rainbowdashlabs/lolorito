@@ -160,7 +160,7 @@ export default {
   },
   character: {
     title: 'Lodestone-Charakter',
-    hint: 'Verknüpfe deinen Lodestone-Charakter, um Heimatwelt und Handwerks-/Sammler-Level automatisch zu übernehmen — der Planer schlägt dir dann nur Rezepte vor, die du tatsächlich craften kannst.',
+    hint: 'Verknüpfe deinen Lodestone-Charakter, um deine Handwerks- und Sammler-Level zu übernehmen. Der Planer schlägt dir dann nur Rezepte vor, die du tatsächlich craften kannst.',
     idOrUrl: 'Lodestone-Charakter-ID oder URL',
     placeholder: '12345678 oder https://…/lodestone/character/12345678/',
     linkAction: 'Charakter verknüpfen',
@@ -183,7 +183,7 @@ export default {
   },
   retainers: {
     title: 'Meine Gehilfen',
-    hint: 'Trage alle deine Gehilfen-Namen ein (mindestens ein aktives Angebot nötig, damit sie sichtbar sind). Schaltet die Seite "Meine Angebote" frei und lässt den Planer dein eigenes Inventar aus der Adversar-Erkennung ausschließen.',
+    hint: 'Trage alle deine Gehilfen-Namen ein. Ein Gehilfe gilt als gesehen, sobald Universalis mindestens ein Angebot von ihm gesehen hat.',
     nameLabel: 'Gehilfen-Name',
     namePlaceholder: 'Zum Suchen tippen…',
     worldLabel: 'Welt',
@@ -247,7 +247,7 @@ export default {
   },
   webhook: {
     title: 'Alarm-Webhook',
-    hint: 'Sende Alarme an deinen eigenen Webhook — Discord-Kanal-Webhook, Slack oder generisches HTTP. Leer lassen, um Alarme nur per DM zu erhalten.',
+    hint: 'Sende Alarme zusätzlich an deinen eigenen Webhook. Ein Discord-Kanal-Webhook bekommt den Alarm als Nachricht, jede andere URL als JSON. Leer lassen, um Alarme nur per DM zu erhalten.',
     urlLabel: 'Webhook-URL (http/https)',
     placeholder: 'https://discord.com/api/webhooks/…',
     clear: 'Löschen',
@@ -456,7 +456,7 @@ export default {
       buy: 'Kaufpreis',
       qty: 'Menge',
       expectedNet: 'Erw. Verkauf (netto)',
-      expectedNetHint: 'Gefitteter Verkaufspreis pro Einheit nach MB-Steuer (5 %). Vergleiche mit der Spalte "Kaufpreis" — Differenz × Menge = Gesamtgewinn.',
+      expectedNetHint: 'Gefitteter Verkaufspreis pro Einheit nach MB-Steuer ({tax} %). Vergleiche mit der Spalte "Kaufpreis" — Differenz × Menge = Gesamtgewinn.',
       totalProfit: 'Gesamtgewinn',
       totalProfitHint: 'Gewinn der gesamten Listung beim gefitteten Verkaufspreis: Menge × (Verkauf netto − Kauf).',
       sigma: 'σ',

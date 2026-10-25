@@ -92,7 +92,7 @@ class CompositeAlertDispatcherTest {
         private final AtomicInteger calls;
 
         StubWebhook(AtomicInteger calls) {
-            super(new File(), null);
+            super(new File(), null, null);
             this.calls = calls;
         }
 
@@ -104,7 +104,7 @@ class CompositeAlertDispatcherTest {
 
     private static final class ThrowingWebhook extends WebhookAlertDispatcher {
         ThrowingWebhook() {
-            super(new File(), null);
+            super(new File(), null, null);
         }
 
         @Override

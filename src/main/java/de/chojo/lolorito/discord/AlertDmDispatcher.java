@@ -8,11 +8,9 @@ package de.chojo.lolorito.discord;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.chojo.lolorito.core.Discord;
-import de.chojo.lolorito.entity.AlertKind;
 import de.chojo.lolorito.entity.AlertRule;
 import de.chojo.lolorito.service.AlertDispatcher;
-import de.chojo.lolorito.universalis.ItemNames;
-import de.chojo.lolorito.universalis.WorldNames;
+import de.chojo.lolorito.service.AlertMessage;
 import de.chojo.universalis.provider.NameSupplier;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -72,39 +70,13 @@ public class AlertDmDispatcher implements AlertDispatcher {
     }
 
     private MessageEmbed buildEmbed(AlertRule rule, int observed) {
-        String itemName = nameOf(rule.itemId());
-        String scope = rule.scope().isWorld()
-                ? WorldNames.nameOf(rule.scope().worldId())
-                : "DC " + rule.scope().dataCenterId();
+        var message = AlertMessage.of(rule, observed, nameSupplier);
         return new EmbedBuilder()
-                .setTitle("Market alert: " + itemName)
-                .setDescription(describe(rule.kind(), scope, observed))
-                .addField("Threshold", thresholdLabel(rule.kind(), rule.threshold()), true)
-                .addField("HQ", rule.hq() == null ? "either" : (rule.hq() ? "high" : "normal"), true)
-                .setFooter("Rule " + rule.id())
+                .setTitle(message.title())
+                .setDescription(message.description())
+                .addField("Threshold", message.threshold(), true)
+                .addField("HQ", message.quality(), true)
+                .setFooter(message.footer())
                 .build();
-    }
-
-    private static String describe(AlertKind kind, String scope, int observed) {
-        return switch (kind) {
-            case PRICE_BELOW -> "Cheapest listing on **%s** dropped to **%,d gil**.".formatted(scope, observed);
-            case PRICE_ABOVE -> "Cheapest listing on **%s** climbed to **%,d gil**.".formatted(scope, observed);
-            case SALE_VOLUME_SPIKE ->
-                "Sales on **%s** in the last 24 h are at **%,d %%** of the usual daily volume."
-                        .formatted(scope, observed);
-            case LISTING_COUNT_DROP -> "Only **%,d** listing(s) left on **%s**.".formatted(observed, scope);
-        };
-    }
-
-    private static String thresholdLabel(AlertKind kind, int threshold) {
-        return switch (kind) {
-            case PRICE_BELOW, PRICE_ABOVE -> "%,d gil".formatted(threshold);
-            case SALE_VOLUME_SPIKE -> "%,d %% of usual".formatted(threshold);
-            case LISTING_COUNT_DROP -> "%,d listings".formatted(threshold);
-        };
-    }
-
-    private String nameOf(int itemId) {
-        return ItemNames.nameOf(nameSupplier, itemId);
     }
 }

@@ -11,8 +11,8 @@ import dev.chojo.ocular.override.OverwritePrefix;
 
 /**
  * OAuth application credentials for the Discord "identify + guilds" login flow.
- * Redirect URI is derived from {@code http.publicBaseUrl} + {@code /auth/callback}
- * and does not live here.
+ * Redirect URI is derived from {@code http.frontendBaseUrl} (falling back to
+ * {@code http.publicBaseUrl}) + {@code /auth/callback} and does not live here.
  */
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "CanBeFinal"})
 @OverwritePrefix("DISCORD_OAUTH")

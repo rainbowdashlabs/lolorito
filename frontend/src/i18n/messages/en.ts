@@ -160,7 +160,7 @@ export default {
   },
   character: {
     title: 'Lodestone character',
-    hint: 'Link your Lodestone character to auto-fill your home world and crafter/gatherer levels — the planner then only suggests crafts you can actually make.',
+    hint: 'Link your Lodestone character to import your crafter and gatherer levels. The planner then only suggests crafts you can actually make.',
     idOrUrl: 'Lodestone character id or URL',
     placeholder: '12345678 or https://…/lodestone/character/12345678/',
     linkAction: 'Link character',
@@ -183,7 +183,7 @@ export default {
   },
   retainers: {
     title: 'My retainers',
-    hint: 'Add each of your retainer names (needs at least one active listing to be seen). Unlocks the "My listings" page and lets the planner exclude your own inventory from adversary detection.',
+    hint: 'Add each of your retainer names. A retainer shows as seen once Universalis has seen at least one of its listings.',
     nameLabel: 'Retainer name',
     namePlaceholder: 'Type to search…',
     worldLabel: 'World',
@@ -247,7 +247,7 @@ export default {
   },
   webhook: {
     title: 'Alert webhook',
-    hint: 'Post alerts to your own webhook — Discord channel webhook, Slack, or generic HTTP. Leave blank to receive alerts via DM only.',
+    hint: 'Also post alerts to your own webhook. A Discord channel webhook gets the alert as a message, any other URL gets it as JSON. Leave blank to receive alerts via DM only.',
     urlLabel: 'Webhook URL (http/https)',
     placeholder: 'https://discord.com/api/webhooks/…',
     clear: 'Clear',
@@ -456,7 +456,7 @@ export default {
       buy: 'Buy price',
       qty: 'Qty',
       expectedNet: 'Est. net sell',
-      expectedNetHint: 'Fitted expected sell price per unit after the MB tax (5 %). Compare against the Buy price column — the gap × Qty is the Total profit.',
+      expectedNetHint: 'Fitted expected sell price per unit after the MB tax ({tax} %). Compare against the Buy price column — the gap × Qty is the Total profit.',
       totalProfit: 'Total profit',
       totalProfitHint: 'Whole-listing profit at the fitted expected sell: qty × (est. net sell − buy).',
       sigma: 'σ',

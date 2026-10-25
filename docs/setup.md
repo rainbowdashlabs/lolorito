@@ -85,7 +85,8 @@ The container runs from `/app`. These folders matter:
    ```
 
    On the first start Lolorito writes `config/config.yaml` with every setting at its default, before it connects to
-   the database. The defaults can't reach your database, so stop it again:
+   the database. The defaults can't reach your database, so Lolorito stops with a connection error and Docker keeps
+   restarting it. Stop it:
 
    ```bash
    docker compose down
@@ -143,7 +144,8 @@ Put a reverse proxy with HTTPS in front of port 8080:
 - Session cookies are sent with the `Secure` flag by default (`http.secureCookies: true`), so browsers only accept
   them over HTTPS. If you test on plain HTTP, set `http.secureCookies` to `false`.
 - The proxy must pass WebSocket connections. The web app uses one on `/api/v1/ws/valuations` to refresh prices.
-- Lolorito reads the `X-Forwarded-For` header to rate limit login attempts per client.
+- Lolorito rate limits login attempts per client. It reads the client address from the `X-Forwarded-For` header,
+  but only when the proxy connects from a private or loopback address, for example over a Docker network.
 
 ## Upgrading
 

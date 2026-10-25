@@ -15,12 +15,7 @@ web app share. Set it in one of these places:
   [Offers](./web-app.md#offers) page,
 - with `/offers filter world:<your world>`.
 
-Without a home world, `/check` shows no listings and `/offers get` shows "No match".
-
-:::warning
-When `/top` finds no items, for example because you have no home world yet, the bot does not answer and Discord
-shows that the application did not respond.
-:::
+Without a home world, `/check` shows no listings, `/offers get` shows "No match" and `/top` shows "No items match".
 
 ## /check
 
@@ -61,16 +56,12 @@ market volume, interest, popularity, sales, views, minimum and average price, so
 | `min_price` | Minimum price. |
 | `min_avg_price` | Minimum average price. |
 
-`scope` and `order` suggest their values while you type. All options are optional.
+`scope` and `order` suggest their values while you type. Any other value gets a reply with the allowed ones. All
+options are optional.
 
 ## /offers
 
 Finds items that are cheaper on another world than they sell for on your home world. `/offers` has two subcommands.
-
-:::note
-`/offers` is for server administrators by default. Server admins can allow it for other members or roles under
-**Server Settings > Integrations**.
-:::
 
 ### /offers filter
 
@@ -115,7 +106,7 @@ a direct message. It has the item name in the title and one of these lines:
 | Listings drop | Only *count* listing(s) left on *world*. |
 
 The message also shows the threshold, the quality (`high`, `normal` or `either`) and the rule id. For a rule on a
-whole data center, the message names the data center by its id.
+whole data center, *world* is the name of the data center.
 
 :::tip
 The bot can only send you a DM if your privacy settings allow direct messages from members of the server. Use the

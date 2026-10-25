@@ -129,7 +129,9 @@ Lolorito checks the rules every few minutes (`value.alertScanIntervalMinutes`). 
 [direct message](./discord.md#alert-messages). You can pause, resume, test and delete each rule. **Test** sends the
 alert right away with a made-up value past the threshold.
 
-Under [Settings](#settings) you can also add your own webhook. Then every alert is also sent there as JSON:
+Under [Settings](#settings) you can also add your own webhook. Then every alert is also sent there. A Discord
+channel webhook (`https://discord.com/api/webhooks/…`) gets the same message as the DM. Any other URL gets the alert as
+JSON:
 
 ```json
 {
@@ -147,10 +149,6 @@ Under [Settings](#settings) you can also add your own webhook. Then every alert 
 
 `kind` is `price_below`, `price_above`, `sale_volume_spike` or `listing_count_drop`. One of `worldId` and
 `dataCenterId` is set.
-
-:::warning
-The webhook body is plain JSON, not a Discord message. A Discord channel webhook does not accept it.
-:::
 
 ## Settings
 

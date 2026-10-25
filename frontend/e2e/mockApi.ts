@@ -78,6 +78,7 @@ function offer(itemId: number, name: string, world: number, buy: number, net: nu
 const offers: OffersResponse = {
   homeWorld: 'Odin',
   dataCenter: 'Light',
+  mbTax: 0.05,
   count: 6,
   offers: [
     offer(5057, 'Darksteel Ingot', 402, 1200, 2900, 'HIGH'),

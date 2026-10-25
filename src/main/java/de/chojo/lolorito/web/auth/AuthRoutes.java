@@ -249,14 +249,9 @@ public class AuthRoutes implements Routes {
 
     // -- cookie helpers ------------------------------------------------------
 
-    /** Pick a reasonable per-caller key — trust {@code X-Forwarded-For} when set, otherwise remote IP. */
+    /** The per-caller rate limit key, see {@link ClientAddress}. */
     private static String clientKey(Context ctx) {
-        String xff = ctx.header("X-Forwarded-For");
-        if (xff != null && !xff.isBlank()) {
-            int comma = xff.indexOf(',');
-            return (comma > 0 ? xff.substring(0, comma) : xff).trim();
-        }
-        return ctx.ip();
+        return ClientAddress.of(ctx.ip(), ctx.header("X-Forwarded-For"));
     }
 
     private void setStateCookie(Context ctx, String value, Duration ttl) {
