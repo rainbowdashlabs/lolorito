@@ -133,7 +133,7 @@ public class Planner {
      * gives up and treats the intermediate as buy-only. 3 catches the
      * common "flour → dough → bread" chains; going higher hits the
      * combinatorial wall on tiered crafts.
-     * Runtime override via env {@code BOT_PLANNER_CRAFT_CHAIN_MAX_DEPTH}.
+     * Runtime override via env {@code PLANNER_CRAFTCHAINMAXDEPTH}.
      */
     @Overwrite(env = @Env)
     private int craftChainMaxDepth = 3;
