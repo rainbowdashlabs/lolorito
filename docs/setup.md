@@ -85,7 +85,8 @@ The container runs from `/app`. These folders matter:
    ```
 
    On the first start Lolorito writes `config/config.yaml` with every setting at its default, before it connects to
-   the database. The defaults can't reach your database, so stop it again:
+   the database. The defaults can't reach your database, so Lolorito stops with a connection error and Docker keeps
+   restarting it. Stop it:
 
    ```bash
    docker compose down
