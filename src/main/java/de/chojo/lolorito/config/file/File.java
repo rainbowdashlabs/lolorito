@@ -10,7 +10,6 @@ import de.chojo.lolorito.config.file.elements.Catalog;
 import de.chojo.lolorito.config.file.elements.Database;
 import de.chojo.lolorito.config.file.elements.DiscordOauth;
 import de.chojo.lolorito.config.file.elements.Http;
-import de.chojo.lolorito.config.file.elements.Links;
 import de.chojo.lolorito.config.file.elements.Planner;
 import de.chojo.lolorito.config.file.elements.Universalis;
 import de.chojo.lolorito.config.file.elements.Value;
@@ -19,7 +18,6 @@ import de.chojo.lolorito.config.file.elements.Value;
 public class File {
     private BaseSettings baseSettings = new BaseSettings();
     private Database database = new Database();
-    private Links links = new Links();
     private Http http = new Http();
     private DiscordOauth discordOauth = new DiscordOauth();
     private Value value = new Value();
@@ -33,10 +31,6 @@ public class File {
 
     public Database database() {
         return database;
-    }
-
-    public Links links() {
-        return links;
     }
 
     public Http http() {

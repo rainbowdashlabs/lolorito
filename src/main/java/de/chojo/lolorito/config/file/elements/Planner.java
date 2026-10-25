@@ -129,18 +129,6 @@ public class Planner {
     private double retainerShelfHoursThreshold = 6.0;
 
     /**
-     * Cap on how much of the total budget + inventory the retainer
-     * partition is allowed to eat before the hop plan gets its turn.
-     * Without this the greedy loop happily allocates the full budget to
-     * high-EV retainer picks and starves the hop planner — the SPA then
-     * shows "no plan today" even though the retainer basket is full.
-     * 0.40 = up to 40 % goes to retainers, the rest stays available for
-     * hop-run purchases.
-     */
-    @Overwrite(env = @Env)
-    private double retainerBudgetFraction = 0.4;
-
-    /**
      * How deep the craft-chain planner walks recipe DAGs before it
      * gives up and treats the intermediate as buy-only. 3 catches the
      * common "flour → dough → bread" chains; going higher hits the
@@ -208,10 +196,6 @@ public class Planner {
 
     public double retainerAttentionFraction() {
         return retainerAttentionFraction;
-    }
-
-    public double retainerBudgetFraction() {
-        return retainerBudgetFraction;
     }
 
     public double retainerShelfHoursThreshold() {

@@ -61,14 +61,6 @@ public class Value {
     private int rateWindowDays = 14;
 
     /**
-     * Below this median seconds-to-undercut a world/item is flagged as
-     * bot-undercut. Used later once listing history is tracked; kept in
-     * config now so downstream code can read a stable value.
-     */
-    @Overwrite(env = @Env)
-    private int undercutBotThresholdSeconds = 60;
-
-    /**
      * Owners without a listing in this many days are counted as ghosts.
      * Read by future listing-history-based analysis; kept here for parity.
      */
@@ -187,10 +179,6 @@ public class Value {
 
     public int rateWindowDays() {
         return rateWindowDays;
-    }
-
-    public int undercutBotThresholdSeconds() {
-        return undercutBotThresholdSeconds;
     }
 
     public int ghostListingWindowDays() {

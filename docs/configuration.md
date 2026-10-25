@@ -43,12 +43,6 @@ http:
   sessionMaxAgeDays: 90
   sweeperIntervalMinutes: 15
   tokenEncryptionKey: ""
-links:
-  faq: "https://rainbowdashlabs.github.io/lolorito/faq"
-  invite: "https://discord.com/oauth2/authorize?client_id=868279025251012639&scope=bot&permissions=1342532672"
-  support: ""
-  tos: ""
-  website: "https://rainbowdashlabs.github.io/lolorito/"
 planner:
   attentionBudgetHours: 8.0
   attentionFraction: 0.25
@@ -60,7 +54,6 @@ planner:
   inventorySlots: 140
   maxWorlds: 5
   retainerAttentionFraction: 0.05
-  retainerBudgetFraction: 0.4
   retainerListingSlots: 40
   retainerListingStackTarget: 20
   retainerShelfHoursThreshold: 6.0
@@ -91,7 +84,6 @@ value:
   residualWindowDays: 14
   responseCacheMaxSize: 1000
   responseCacheSeconds: 30
-  undercutBotThresholdSeconds: 60
 ```
 
 ## baseSettings
@@ -176,7 +168,6 @@ Settings of the market models and the price math.
 | `residualWindowDays` | number | `14` | Days of past prediction errors used to correct the next fit. |
 | `residualShrinkagePriorK` | number | `20` | How strongly past prediction errors correct the model. A smaller value corrects faster. |
 | `ghostListingWindowDays` | number | `14` | Window in days for spotting ghost listings. |
-| `undercutBotThresholdSeconds` | number | `60` | Not used by the current version. |
 | `craftSecondsPerUnit` | decimal | `5.0` | Seconds of your time one craft takes. It is counted as time spent when crafts are rated. |
 | `listingFreshnessHours` | number | `24` | Listings older than this are ignored when the cheapest price for a craft ingredient or a desynth source is looked up. |
 | `responseCacheSeconds` | number | `30` | How long answers for offers, plans and item details are cached. `0` turns the cache off. |
@@ -206,20 +197,7 @@ are missing from a request.
 | `retainerListingStackTarget` | number | `20` | Units per listing when a retainer pick is split into stacks. |
 | `retainerAttentionFraction` | decimal | `0.05` | Share of your attention for retainer picks. |
 | `retainerShelfHoursThreshold` | decimal | `6.0` | Items expected to sit on the market at least this many hours go to the retainer basket. |
-| `retainerBudgetFraction` | decimal | `0.4` | Not used by the current version. |
 | `craftChainMaxDepth` | number | `3` | How many recipe levels deep the planner looks for crafts. Deeper ingredients are priced as buys. |
-
-## links
-
-| Key | Type | Default |
-|---|---|---|
-| `tos` | text | `""` |
-| `invite` | text | see the full file above |
-| `support` | text | `""` |
-| `website` | text | `"https://rainbowdashlabs.github.io/lolorito/"` |
-| `faq` | text | `"https://rainbowdashlabs.github.io/lolorito/faq"` |
-
-These links are not used by the current version.
 
 ## Environment variables
 
@@ -235,7 +213,6 @@ with no extra underscores inside the key:
 | `catalog` | `CATALOG_` | `CATALOG_ENABLED` |
 | `value` | `VALUE_` | `VALUE_MBTAX`, `VALUE_ALERTWEBHOOKURL` |
 | `planner` | `PLANNER_` | `PLANNER_MAXWORLDS`, `PLANNER_TDCSECONDS` |
-| `links` | `LINKS_` | `LINKS_SUPPORT` |
 
 A set variable wins over the value in the file. These keys have no variable and can only be set in the file:
 `baseSettings.botOwner`, `universalis.regions` and `value.mbTaxByDataCenter`.
