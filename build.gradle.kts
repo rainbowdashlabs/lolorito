@@ -353,31 +353,6 @@ tasks {
         }
     }
 
-    register("checkLicenseBackend") {
-        group = "verification"
-        description = "Checks license headers for backend Java files"
-        dependsOn("spotlessJavaCheck")
-    }
-
-    register("checkLicenseFrontend") {
-        group = "verification"
-        description = "Checks license headers for frontend TS/JS/Vue files"
-        dependsOn("spotlessJavascriptCheck", "spotlessVueCheck")
-    }
-
-    register("verify") {
-        group = "verification"
-        description = "Runs the full verification suite"
-        dependsOn(
-            "testRepositories",
-            "testServices",
-            "testOther",
-            "jacocoCoverageCheck",
-            "checkLicenseBackend",
-            "checkLicenseFrontend",
-        )
-    }
-
     shadowJar {
         mergeServiceFiles()
     }
