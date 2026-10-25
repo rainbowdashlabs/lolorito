@@ -1,3 +1,8 @@
+/*
+ *     SPDX-License-Identifier: AGPL-3.0-only
+ *
+ *     Copyright (C) RainbowDashLabs and Contributor
+ */
 plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.spotless)
@@ -169,10 +174,14 @@ val refreshCatalog by tasks.registering(JavaExec::class) {
 tasks {
     processResources {
         dependsOn(frontendBuild)
-        from(sourceSets.main.get().resources.srcDirs) {
+        from(
+            sourceSets.main
+                .get()
+                .resources.srcDirs,
+        ) {
             filesMatching("version") {
                 expand(
-                    "version" to project.version
+                    "version" to project.version,
                 )
             }
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -213,7 +222,10 @@ tasks {
     register<Test>("testRepositories") {
         group = "verification"
         description = "Runs tests under de.chojo.lolorito.repository (spawns Postgres per class)"
-        testClassesDirs = sourceSets.test.get().output.classesDirs
+        testClassesDirs =
+            sourceSets.test
+                .get()
+                .output.classesDirs
         classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform()
         testLogging { events("passed", "skipped", "failed") }
@@ -227,7 +239,10 @@ tasks {
     register<Test>("testServices") {
         group = "verification"
         description = "Runs tests under de.chojo.lolorito.service + value + planner"
-        testClassesDirs = sourceSets.test.get().output.classesDirs
+        testClassesDirs =
+            sourceSets.test
+                .get()
+                .output.classesDirs
         classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform()
         testLogging { events("passed", "skipped", "failed") }
@@ -243,7 +258,10 @@ tasks {
     register<Test>("testOther") {
         group = "verification"
         description = "Runs the rest of the test suite (non-repo, non-service, non-value, non-planner)"
-        testClassesDirs = sourceSets.test.get().output.classesDirs
+        testClassesDirs =
+            sourceSets.test
+                .get()
+                .output.classesDirs
         classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform()
         testLogging { events("passed", "skipped", "failed") }
@@ -264,7 +282,7 @@ tasks {
 
     withType<Test> {
         extensions.configure<JacocoTaskExtension> {
-            destinationFile = file("${layout.buildDirectory.get()}/jacoco/${name}.exec")
+            destinationFile = file("${layout.buildDirectory.get()}/jacoco/$name.exec")
         }
     }
 
@@ -292,10 +310,11 @@ tasks {
             rule {
                 element = "CLASS"
                 includes = listOf("*.repository.*")
-                excludes = listOf(
-                    // Empty shell until the users table grows real columns.
-                    "*.repository.Users",
-                )
+                excludes =
+                    listOf(
+                        // Empty shell until the users table grows real columns.
+                        "*.repository.Users",
+                    )
                 limit {
                     counter = "LINE"
                     minimum = "0.95".toBigDecimal()
@@ -305,11 +324,12 @@ tasks {
             rule {
                 element = "CLASS"
                 includes = listOf("*.service.*")
-                excludes = listOf(
-                    // Startup-only workers and scheduled fan-outs, exercised in prod not tests.
-                    "*.CraftDesynthLoader",
-                    "*.DataRefreshWorker",
-                )
+                excludes =
+                    listOf(
+                        // Startup-only workers and scheduled fan-outs, exercised in prod not tests.
+                        "*.CraftDesynthLoader",
+                        "*.DataRefreshWorker",
+                    )
                 limit {
                     counter = "LINE"
                     minimum = "0.80".toBigDecimal()
@@ -321,12 +341,13 @@ tasks {
             // Javalin routes — driven by JavalinTest under de.chojo.lolorito.web.
             rule {
                 element = "CLASS"
-                includes = listOf(
-                    "*.web.api.*",
-                    "*.web.Web",
-                    "*.web.auth.AuthRoutes",
-                    "*.web.auth.SessionResolver",
-                )
+                includes =
+                    listOf(
+                        "*.web.api.*",
+                        "*.web.Web",
+                        "*.web.auth.AuthRoutes",
+                        "*.web.auth.SessionResolver",
+                    )
                 limit {
                     counter = "LINE"
                     minimum = "0.80".toBigDecimal()
@@ -356,7 +377,7 @@ tasks {
             "testOther",
             "jacocoCoverageCheck",
             "checkLicenseBackend",
-            "checkLicenseFrontend"
+            "checkLicenseFrontend",
         )
     }
 
