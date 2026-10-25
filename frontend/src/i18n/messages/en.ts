@@ -160,7 +160,7 @@ export default {
   },
   character: {
     title: 'Lodestone character',
-    hint: 'Link your Lodestone character to auto-fill your home world and crafter/gatherer levels — the planner then only suggests crafts you can actually make.',
+    hint: 'Link your Lodestone character to import your crafter and gatherer levels. The planner then only suggests crafts you can actually make.',
     idOrUrl: 'Lodestone character id or URL',
     placeholder: '12345678 or https://…/lodestone/character/12345678/',
     linkAction: 'Link character',
@@ -183,7 +183,7 @@ export default {
   },
   retainers: {
     title: 'My retainers',
-    hint: 'Add each of your retainer names (needs at least one active listing to be seen). Unlocks the "My listings" page and lets the planner exclude your own inventory from adversary detection.',
+    hint: 'Add each of your retainer names. A retainer shows as seen once Universalis has seen at least one of its listings.',
     nameLabel: 'Retainer name',
     namePlaceholder: 'Type to search…',
     worldLabel: 'World',
