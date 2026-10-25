@@ -93,6 +93,7 @@ public class OffersRoutes implements Routes {
                 "dataCenter", world.dataCenter().name(),
                 "region", regionName,
                 "scope", scope.name(),
+                "mbTax", userPrefs.mbTax(),
                 "count", rows.size(),
                 "offers", rows));
     }

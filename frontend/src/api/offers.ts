@@ -51,6 +51,8 @@ export interface ScoredOffer {
 export interface OffersResponse {
   homeWorld: string
   dataCenter: string
+  /** Market board tax of the home data center, as a fraction (0.05 = 5 %). */
+  mbTax: number
   count: number
   offers: ScoredOffer[]
 }

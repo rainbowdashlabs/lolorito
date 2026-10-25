@@ -27,6 +27,7 @@ const { t } = useI18n()
 defineProps<{
   offers: ScoredOffer[]
   homeWorldId: number | null
+  taxPercent: number
 }>()
 
 defineEmits<{ open: [row: ScoredOffer] }>()
@@ -65,7 +66,7 @@ function toggle(row: ScoredOffer) {
           {{ t('offers.col.qty') }}
         </Th>
         <Th align="right" class="uppercase text-xs tracking-wider text-(--text-muted)">
-          <span :title="t('offers.col.expectedNetHint')" class="border-b border-dotted border-(--text-muted)">
+          <span :title="t('offers.col.expectedNetHint', { tax: taxPercent })" class="border-b border-dotted border-(--text-muted)">
             {{ t('offers.col.expectedNet') }}
           </span>
         </Th>

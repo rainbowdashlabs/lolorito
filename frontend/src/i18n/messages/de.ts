@@ -456,7 +456,7 @@ export default {
       buy: 'Kaufpreis',
       qty: 'Menge',
       expectedNet: 'Erw. Verkauf (netto)',
-      expectedNetHint: 'Gefitteter Verkaufspreis pro Einheit nach MB-Steuer (5 %). Vergleiche mit der Spalte "Kaufpreis" — Differenz × Menge = Gesamtgewinn.',
+      expectedNetHint: 'Gefitteter Verkaufspreis pro Einheit nach MB-Steuer ({tax} %). Vergleiche mit der Spalte "Kaufpreis" — Differenz × Menge = Gesamtgewinn.',
       totalProfit: 'Gesamtgewinn',
       totalProfitHint: 'Gewinn der gesamten Listung beim gefitteten Verkaufspreis: Menge × (Verkauf netto − Kauf).',
       sigma: 'σ',

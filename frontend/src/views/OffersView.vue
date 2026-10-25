@@ -32,6 +32,7 @@ const worlds = useWorlds()
 const offers = ref<ScoredOffer[]>([])
 const homeWorldName = ref<string>('')
 const dataCenter = ref<string>('')
+const taxPercent = ref<number>(5)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -141,6 +142,7 @@ async function refresh() {
     offers.value = res.offers
     homeWorldName.value = res.homeWorld
     dataCenter.value = res.dataCenter
+    taxPercent.value = Math.round(res.mbTax * 1000) / 10
   } catch (e: unknown) {
     error.value = extractError(e)
   } finally {
@@ -247,7 +249,7 @@ useValuationRefresh(
           <div class="grid gap-2 md:grid-cols-3">
             <div>
               <span class="font-semibold">{{ $t('offers.col.expectedNet') }}</span>:
-              <span class="text-(--text-muted)">{{ $t('offers.col.expectedNetHint') }}</span>
+              <span class="text-(--text-muted)">{{ $t('offers.col.expectedNetHint', { tax: taxPercent }) }}</span>
             </div>
             <div>
               <span class="font-semibold">{{ $t('offers.col.expectedShelf') }}</span>:
@@ -262,6 +264,7 @@ useValuationRefresh(
         <OffersTable
           :offers="shownOffers"
           :home-world-id="filter.current.value?.worldId ?? null"
+          :tax-percent="taxPercent"
           @open="openItem"
         />
       </div>

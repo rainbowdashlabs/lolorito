@@ -456,7 +456,7 @@ export default {
       buy: 'Buy price',
       qty: 'Qty',
       expectedNet: 'Est. net sell',
-      expectedNetHint: 'Fitted expected sell price per unit after the MB tax (5 %). Compare against the Buy price column — the gap × Qty is the Total profit.',
+      expectedNetHint: 'Fitted expected sell price per unit after the MB tax ({tax} %). Compare against the Buy price column — the gap × Qty is the Total profit.',
       totalProfit: 'Total profit',
       totalProfitHint: 'Whole-listing profit at the fitted expected sell: qty × (est. net sell − buy).',
       sigma: 'σ',
