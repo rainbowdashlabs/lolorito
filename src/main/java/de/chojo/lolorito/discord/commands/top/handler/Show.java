@@ -64,6 +64,15 @@ public class Show implements SlashHandler {
                 builder.setDescription(currentElement().prettyText());
                 return MessageEditData.fromEmbeds(builder.build());
             }
+
+            @Override
+            public MessageEditData buildEmptyPage() {
+                return MessageEditData.fromEmbeds(new EmbedBuilder()
+                        .setTitle("No items match")
+                        .setDescription(
+                                "Loosen the filters, or set your home world first with `/offers filter world:`.")
+                        .build());
+            }
         });
     }
 

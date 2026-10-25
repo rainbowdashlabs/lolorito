@@ -15,12 +15,7 @@ web app share. Set it in one of these places:
   [Offers](./web-app.md#offers) page,
 - with `/offers filter world:<your world>`.
 
-Without a home world, `/check` shows no listings and `/offers get` shows "No match".
-
-:::warning
-When `/top` finds no items, for example because you have no home world yet, the bot does not answer and Discord
-shows that the application did not respond.
-:::
+Without a home world, `/check` shows no listings, `/offers get` shows "No match" and `/top` shows "No items match".
 
 ## /check
 
