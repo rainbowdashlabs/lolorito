@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <ThresholdFilter level="WARN"/>
+            <PatternLayout pattern="[%d{HH:mm:ss]}[%p{length=3}][%c] %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="de.chojo.lolorito" level="TRACE"/>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
