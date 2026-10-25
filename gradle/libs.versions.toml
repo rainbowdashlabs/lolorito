@@ -1,27 +1,27 @@
 [versions]
 sadu = "2.3.9"
-jackson = "3.2.0"
-log4j = "2.23.1"
+jackson = "3.2.3"
+log4j = "2.26.1"
 junit = "6.1.3"
 testcontainers = "2.0.5"
 guice = "7.0.0"
-javalin = "7.2.2"
-assertj = "3.26.3"
-caffeine = "3.1.8"
+javalin = "7.2.3"
+assertj = "3.27.7"
+caffeine = "3.3.0"
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
-spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
+shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
 
 [libraries]
 # Discord
-cjda-util = { group = "de.chojo", name = "cjda-util", version = "2.8.6+beta.11" }
+cjda-util = { group = "de.chojo", name = "cjda-util", version = "2.14.5+jda-6.3.0" }
 
 # FFXIV data
 universalis = { group = "de.chojo.universalis", name = "universalis", version = "2.1.1" }
 
 # Database
-postgresql = { group = "org.postgresql", name = "postgresql", version = "42.7.10" }
+postgresql = { group = "org.postgresql", name = "postgresql", version = "42.7.14" }
 sadu-queries = { group = "de.chojo.sadu", name = "sadu-queries", version.ref = "sadu" }
 sadu-mapper = { group = "de.chojo.sadu", name = "sadu-mapper", version.ref = "sadu" }
 sadu-updater = { group = "de.chojo.sadu", name = "sadu-updater", version.ref = "sadu" }
@@ -45,10 +45,10 @@ guice = { group = "com.google.inject", name = "guice", version.ref = "guice" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 
 # HTML scraping (Lodestone)
-jsoup = { group = "org.jsoup", name = "jsoup", version = "1.19.1" }
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.23.2" }
 
 # Logging
-slf4j = { group = "org.slf4j", name = "slf4j-api", version = "2.0.17" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version = "2.0.20" }
 log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
 log4j-slf4j2 = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
 log-util = { group = "de.chojo", name = "log-util", version = "1.0.1" }

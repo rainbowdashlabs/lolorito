@@ -65,7 +65,7 @@ dependencies {
     testImplementation(libs.postgresql)
     testImplementation(libs.javalin.testtools)
     testImplementation(libs.assertj)
-    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito:mockito-core:5.24.0")
 }
 
 java {
