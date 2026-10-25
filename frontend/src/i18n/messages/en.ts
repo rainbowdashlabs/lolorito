@@ -247,7 +247,7 @@ export default {
   },
   webhook: {
     title: 'Alert webhook',
-    hint: 'Post alerts to your own webhook — Discord channel webhook, Slack, or generic HTTP. Leave blank to receive alerts via DM only.',
+    hint: 'Also post alerts to your own webhook. A Discord channel webhook gets the alert as a message, any other URL gets it as JSON. Leave blank to receive alerts via DM only.',
     urlLabel: 'Webhook URL (http/https)',
     placeholder: 'https://discord.com/api/webhooks/…',
     clear: 'Clear',

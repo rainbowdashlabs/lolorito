@@ -247,7 +247,7 @@ export default {
   },
   webhook: {
     title: 'Alarm-Webhook',
-    hint: 'Sende Alarme an deinen eigenen Webhook — Discord-Kanal-Webhook, Slack oder generisches HTTP. Leer lassen, um Alarme nur per DM zu erhalten.',
+    hint: 'Sende Alarme zusätzlich an deinen eigenen Webhook. Ein Discord-Kanal-Webhook bekommt den Alarm als Nachricht, jede andere URL als JSON. Leer lassen, um Alarme nur per DM zu erhalten.',
     urlLabel: 'Webhook-URL (http/https)',
     placeholder: 'https://discord.com/api/webhooks/…',
     clear: 'Löschen',

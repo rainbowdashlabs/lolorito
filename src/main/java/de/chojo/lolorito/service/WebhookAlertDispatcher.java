@@ -9,20 +9,32 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.entity.AlertRule;
+import de.chojo.universalis.provider.NameSupplier;
 import org.slf4j.Logger;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Optional secondary sink for alerts: POST a compact JSON body to the
- * URL configured via {@code value.alertWebhookUrl}. Does nothing when the
- * URL is blank, so operators can leave it off without wiring changes.
+ * Optional secondary sink for alerts: POST to the user's webhook URL, or the
+ * one configured via {@code value.alertWebhookUrl}. Does nothing when both are
+ * blank, so operators can leave it off without wiring changes.
+ *
+ * <p>A Discord webhook URL gets a Discord message with the same embed as the
+ * DM, because Discord rejects a body without {@code content} or
+ * {@code embeds}. Any other URL gets a compact JSON body with the raw rule
+ * fields, for automation tools.
  *
  * <p>Not registered as the primary {@link AlertDispatcher} — the module
  * fans out via {@link CompositeAlertDispatcher} so Discord DMs and
@@ -34,14 +46,20 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
     private static final Logger log = getLogger(WebhookAlertDispatcher.class);
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(5);
 
+    private static final JsonMapper JSON = JsonMapper.builder().build();
+    private static final Set<String> DISCORD_HOSTS =
+            Set.of("discord.com", "discordapp.com", "ptb.discord.com", "canary.discord.com");
+
     private final File config;
     private final UserPreferencesService preferences;
+    private final NameSupplier names;
     private final HttpClient http;
 
     @Inject
-    public WebhookAlertDispatcher(File config, UserPreferencesService preferences) {
+    public WebhookAlertDispatcher(File config, UserPreferencesService preferences, NameSupplier names) {
         this.config = config;
         this.preferences = preferences;
+        this.names = names;
         this.http = HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build();
     }
 
@@ -52,19 +70,7 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
         String url = preferences.alertWebhookUrlFor(rule.userId());
         if (url == null || url.isBlank()) url = config.value().alertWebhookUrl();
         if (url == null || url.isBlank()) return;
-        String body = ("{\"ruleId\":\"%s\",\"userId\":%d,\"itemId\":%d,"
-                        + "\"worldId\":%s,\"dataCenterId\":%s,\"hq\":%s,"
-                        + "\"kind\":\"%s\",\"threshold\":%d,\"observed\":%d}")
-                .formatted(
-                        rule.id(),
-                        rule.userId(),
-                        rule.itemId(),
-                        rule.scope().worldId(),
-                        rule.scope().dataCenterId(),
-                        rule.hq() == null ? "null" : rule.hq(),
-                        rule.kind().wire(),
-                        rule.threshold(),
-                        observed);
+        String body = bodyFor(url, rule, observed);
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(REQUEST_TIMEOUT)
@@ -79,5 +85,49 @@ public class WebhookAlertDispatcher implements AlertDispatcher {
         } catch (Exception e) {
             log.warn("Webhook alert for rule {} failed", rule.id(), e);
         }
+    }
+
+    String bodyFor(String url, AlertRule rule, int observed) {
+        return isDiscordWebhook(url) ? discordBody(rule, observed) : plainBody(rule, observed);
+    }
+
+    static boolean isDiscordWebhook(String url) {
+        try {
+            var uri = URI.create(url.trim());
+            return uri.getHost() != null
+                    && DISCORD_HOSTS.contains(uri.getHost().toLowerCase(Locale.ROOT))
+                    && uri.getPath() != null
+                    && uri.getPath().startsWith("/api/webhooks/");
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private String discordBody(AlertRule rule, int observed) {
+        var message = AlertMessage.of(rule, observed, names);
+        var embed = new LinkedHashMap<String, Object>();
+        embed.put("title", message.title());
+        embed.put("description", message.description());
+        embed.put(
+                "fields",
+                List.of(
+                        Map.of("name", "Threshold", "value", message.threshold(), "inline", true),
+                        Map.of("name", "HQ", "value", message.quality(), "inline", true)));
+        embed.put("footer", Map.of("text", message.footer()));
+        return JSON.writeValueAsString(Map.of("embeds", List.of(embed)));
+    }
+
+    private static String plainBody(AlertRule rule, int observed) {
+        var body = new LinkedHashMap<String, Object>();
+        body.put("ruleId", rule.id().toString());
+        body.put("userId", rule.userId());
+        body.put("itemId", rule.itemId());
+        body.put("worldId", rule.scope().worldId());
+        body.put("dataCenterId", rule.scope().dataCenterId());
+        body.put("hq", rule.hq());
+        body.put("kind", rule.kind().wire());
+        body.put("threshold", rule.threshold());
+        body.put("observed", observed);
+        return JSON.writeValueAsString(body);
     }
 }
