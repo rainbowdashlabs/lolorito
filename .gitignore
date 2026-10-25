@@ -2,6 +2,7 @@
 **/build/
 !src/**/build/
 .idea/
+.kotlin/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -32,6 +33,7 @@ buildNumber.properties
 
 # Bot internal generated data
 /config/
+/data/
 /logs/
 /out/
 .direnv
@@ -44,4 +46,3 @@ buildNumber.properties
 /src/main/resources/recipe/
 /src/main/resources/desynth/
 .concept/
-data
