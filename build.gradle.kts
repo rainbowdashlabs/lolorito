@@ -65,7 +65,7 @@ dependencies {
     testImplementation(libs.postgresql)
     testImplementation(libs.javalin.testtools)
     testImplementation(libs.assertj)
-    testImplementation("org.mockito:mockito-core:5.24.0")
+    testImplementation(libs.mockito)
 }
 
 java {
@@ -86,7 +86,7 @@ spotless {
         licenseHeaderFile(rootProject.file("HEADER.txt"))
         trimTrailingWhitespace()
         endWithNewline()
-        palantirJavaFormat("2.84.0")
+        palantirJavaFormat(libs.versions.palantir.get())
             .formatJavadoc(false)
         removeUnusedImports()
         importOrder("", "java", "javax", "\\#")

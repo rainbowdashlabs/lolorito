@@ -8,6 +8,9 @@ guice = "7.0.0"
 javalin = "7.2.3"
 assertj = "3.27.7"
 caffeine = "3.3.0"
+mockito = "5.24.0"
+palantir = "2.84.0"
+ktlint = "1.8.0"
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version = "9.2.2" }
@@ -61,6 +64,7 @@ testcontainers-core = { group = "org.testcontainers", name = "testcontainers", v
 testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
 testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
 assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 
 [bundles]
 sadu = [
