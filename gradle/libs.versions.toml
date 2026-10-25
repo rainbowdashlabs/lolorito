@@ -15,7 +15,7 @@ spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
 
 [libraries]
 # Discord
-cjda-util = { group = "de.chojo", name = "cjda-util", version = "2.8.6+beta.11" }
+cjda-util = { group = "de.chojo", name = "cjda-util", version = "2.14.5+jda-6.3.0" }
 
 # FFXIV data
 universalis = { group = "de.chojo.universalis", name = "universalis", version = "2.1.1" }

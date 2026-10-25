@@ -16,16 +16,15 @@ import de.chojo.lolorito.entity.TopFilter;
 import de.chojo.lolorito.service.ItemsService;
 import de.chojo.lolorito.service.UserService;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class Show implements SlashHandler {
     private final UserService users;
@@ -54,7 +53,7 @@ public class Show implements SlashHandler {
         List<ItemStat> itemStats = items.topFor(user, topFilter);
         context.registerPage(new ListPageBag<>(itemStats) {
             @Override
-            public CompletableFuture<MessageEmbed> buildPage() {
+            public MessageEditData buildPage() {
                 EmbedBuilder builder = new EmbedBuilder();
                 if (currentElement().hq()) {
                     builder.setAuthor("HQ", null, "https://cdn.discordapp.com/emojis/1043942491512131634.png");
@@ -63,7 +62,7 @@ public class Show implements SlashHandler {
                         currentElement().item().name().english(),
                         currentElement().universalisUrl());
                 builder.setDescription(currentElement().prettyText());
-                return CompletableFuture.completedFuture(builder.build());
+                return MessageEditData.fromEmbeds(builder.build());
             }
         });
     }

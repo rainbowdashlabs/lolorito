@@ -12,11 +12,10 @@ import de.chojo.lolorito.entity.Offer;
 import de.chojo.lolorito.service.ItemsService;
 import de.chojo.lolorito.service.UserService;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class Get implements SlashHandler {
     private final UserService users;
@@ -34,13 +33,13 @@ public class Get implements SlashHandler {
         List<Offer> offers = items.bestOffersFor(user);
         ListPageBag<Offer> bag = new ListPageBag<>(offers) {
             @Override
-            public CompletableFuture<MessageEmbed> buildPage() {
-                return CompletableFuture.completedFuture(currentElement().embed());
+            public MessageEditData buildPage() {
+                return MessageEditData.fromEmbeds(currentElement().embed());
             }
 
             @Override
-            public CompletableFuture<MessageEmbed> buildEmptyPage() {
-                return CompletableFuture.completedFuture(
+            public MessageEditData buildEmptyPage() {
+                return MessageEditData.fromEmbeds(
                         new EmbedBuilder().setTitle("No match").build());
             }
         };
