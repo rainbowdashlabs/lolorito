@@ -56,7 +56,8 @@ market volume, interest, popularity, sales, views, minimum and average price, so
 | `min_price` | Minimum price. |
 | `min_avg_price` | Minimum average price. |
 
-`scope` and `order` suggest their values while you type. All options are optional.
+`scope` and `order` suggest their values while you type. Any other value gets a reply with the allowed ones. All
+options are optional.
 
 ## /offers
 

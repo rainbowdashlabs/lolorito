@@ -25,6 +25,8 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Show implements SlashHandler {
     private final UserService users;
@@ -37,8 +39,16 @@ public class Show implements SlashHandler {
 
     @Override
     public void onSlashCommand(SlashCommandInteractionEvent event, EventContext context) {
-        var scope = event.getOption("scope", SearchScope.WORLD, s -> SearchScope.valueOf(s.getAsString()));
-        var order = event.getOption("order", SortOrder.MARKET_VOLUME, s -> SortOrder.valueOf(s.getAsString()));
+        var scope = enumOption(event, "scope", SearchScope.class, SearchScope.WORLD);
+        var order = enumOption(event, "order", SortOrder.class, SortOrder.MARKET_VOLUME);
+        if (scope.isEmpty()) {
+            replyInvalid(event, "scope", SearchScope.values());
+            return;
+        }
+        if (order.isEmpty()) {
+            replyInvalid(event, "order", SortOrder.values());
+            return;
+        }
         var hq = event.getOption("hq", null, OptionMapping::getAsBoolean);
         var minSales = event.getOption("min_sales", null, OptionMapping::getAsInt);
         var minPopularity = event.getOption("min_popularity", null, OptionMapping::getAsDouble);
@@ -48,7 +58,15 @@ public class Show implements SlashHandler {
         var minAvgPrice = event.getOption("min_avg_price", null, OptionMapping::getAsDouble);
 
         TopFilter topFilter = new TopFilter(
-                scope, order, hq, minSales, minPopularity, minInterest, minMarketVolume, minPrice, minAvgPrice);
+                scope.get(),
+                order.get(),
+                hq,
+                minSales,
+                minPopularity,
+                minInterest,
+                minMarketVolume,
+                minPrice,
+                minAvgPrice);
         var user = users.of(event.getUser());
         List<ItemStat> itemStats = items.topFor(user, topFilter);
         context.registerPage(new ListPageBag<>(itemStats) {
@@ -74,6 +92,27 @@ public class Show implements SlashHandler {
                         .build());
             }
         });
+    }
+
+    /**
+     * Read an enum option by its constant name, ignoring case. A missing option gives the fallback; a value that names
+     * no constant gives an empty result, because autocomplete only suggests values and Discord accepts any text.
+     */
+    private static <E extends Enum<E>> Optional<E> enumOption(
+            SlashCommandInteractionEvent event, String name, Class<E> type, E fallback) {
+        var option = event.getOption(name);
+        if (option == null) return Optional.of(fallback);
+        String value = option.getAsString().trim();
+        return Arrays.stream(type.getEnumConstants())
+                .filter(constant -> constant.name().equalsIgnoreCase(value))
+                .findFirst();
+    }
+
+    private static void replyInvalid(SlashCommandInteractionEvent event, String name, Enum<?>[] allowed) {
+        String values = Arrays.stream(allowed).map(e -> "`" + e.name() + "`").collect(Collectors.joining(", "));
+        event.reply("Unknown `%s`. Use one of %s.".formatted(name, values))
+                .setEphemeral(true)
+                .queue();
     }
 
     @Override
