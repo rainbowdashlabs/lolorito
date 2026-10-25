@@ -11,9 +11,6 @@ plugins {
     jacoco
 }
 
-group = "de.chojo"
-version = "1.0.0"
-
 application {
     mainClass = "de.chojo.lolorito.Lolorito"
     // log4j2.xml is on the classpath under src/main/resources; log4j auto-discovers it.
