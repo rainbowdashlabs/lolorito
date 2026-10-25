@@ -93,6 +93,12 @@ spotless {
         encoding("UTF-8")
     }
 
+    kotlinGradle {
+        target("*.gradle.kts")
+        licenseHeaderFile(rootProject.file("HEADER.txt"), "(plugins|rootProject|pluginManagement|dependencyResolutionManagement)")
+        ktlint(libs.versions.ktlint.get())
+    }
+
     format("javascript") {
         licenseHeaderFile(
             rootProject.file("HEADER.txt"),
