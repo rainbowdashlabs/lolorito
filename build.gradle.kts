@@ -4,7 +4,6 @@
  *     Copyright (C) RainbowDashLabs and Contributor
  */
 plugins {
-    alias(libs.plugins.shadow)
     alias(libs.plugins.spotless)
     java
     application
@@ -351,9 +350,5 @@ tasks {
                 }
             }
         }
-    }
-
-    shadowJar {
-        mergeServiceFiles()
     }
 }
