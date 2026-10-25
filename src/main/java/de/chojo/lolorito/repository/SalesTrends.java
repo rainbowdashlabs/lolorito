@@ -7,6 +7,7 @@ package de.chojo.lolorito.repository;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.chojo.sadu.postgresql.types.PostgreSqlTypes;
 
 import java.time.Instant;
 import java.util.List;
@@ -173,22 +174,24 @@ public class SalesTrends {
         if (itemIds.isEmpty() || (worldId == null && dataCenterId == null)) return java.util.Map.of();
         String scopeClause = worldId != null ? "s.world = :scope" : "w.data_center = :scope";
         int scopeValue = worldId != null ? worldId : dataCenterId;
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         String sql = """
                 SELECT s.item AS item_id,
                        coalesce(sum(s.quantity) FILTER (WHERE s.sold >= now() - INTERVAL '24 hours'), 0)::bigint AS recent,
                        coalesce(sum(s.quantity) FILTER (WHERE s.sold <  now() - INTERVAL '24 hours'), 0)::bigint AS baseline
                   FROM sales s
                   JOIN worlds w ON s.world = w.world
-                 WHERE s.item IN (%s)
+                 WHERE s.item = ANY(:items)
                    AND (:hq::boolean IS NULL OR s.hq = :hq::boolean)
                    AND %s
                    AND s.sold >= now() - ((:days::int + 1) || ' days')::INTERVAL
                  GROUP BY s.item
-                """.formatted(inList, scopeClause);
+                """.formatted(scopeClause);
         var out = new java.util.HashMap<Integer, VolumeWindow>();
         query(sql)
-                .single(call().bind("hq", hq).bind("scope", scopeValue).bind("days", String.valueOf(baselineDays)))
+                .single(call().bind("items", itemIds, PostgreSqlTypes.INTEGER)
+                        .bind("hq", hq)
+                        .bind("scope", scopeValue)
+                        .bind("days", String.valueOf(baselineDays)))
                 .map(row -> {
                     out.put(row.getInt("item_id"), new VolumeWindow(row.getLong("recent"), row.getLong("baseline")));
                     return null;

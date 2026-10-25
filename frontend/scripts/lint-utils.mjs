@@ -4,10 +4,11 @@
 
 import {readdirSync, readFileSync} from 'fs'
 import {join, relative, sep} from 'path'
+import {fileURLToPath} from 'url'
 
 // ── Paths ───────────────────────────────────────────────────────────
 
-export const SRC = new URL('../src', import.meta.url).pathname
+export const SRC = fileURLToPath(new URL('../src', import.meta.url))
 export const ROUTER_FILE = join(SRC, 'router', 'index.ts')
 
 // ── Colors ──────────────────────────────────────────────────────────

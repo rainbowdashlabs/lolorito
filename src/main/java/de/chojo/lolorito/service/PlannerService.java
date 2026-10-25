@@ -24,13 +24,13 @@ import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.Offers;
 import de.chojo.lolorito.repository.Recipes;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.universalis.WorldNames;
 import de.chojo.lolorito.value.ComponentPricing;
 import de.chojo.lolorito.value.CraftChainPlanner;
 import de.chojo.lolorito.value.MarketModel;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.lolorito.value.ValueEngine;
-import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
 import de.chojo.universalis.worlds.DataCenter;
 import de.chojo.universalis.worlds.World;
@@ -1055,9 +1055,7 @@ public class PlannerService {
     }
 
     private String nameOf(int itemId) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        return name == null ? String.valueOf(itemId) : name.get(Language.ENGLISH);
+        return ItemNames.nameOf(itemNames, itemId);
     }
 
     /**

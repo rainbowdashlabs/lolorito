@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.entity.OfferFilterTarget;
 import de.chojo.lolorito.repository.Offers;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.value.Confidence;
 import de.chojo.lolorito.value.OfferBounds;
 import de.chojo.lolorito.value.UserPrefs;
@@ -201,13 +202,7 @@ public class OffersService {
     }
 
     private String itemNameOf(int itemId, Language language) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        if (name == null) return String.valueOf(itemId);
-        String localised = name.get(language);
-        if (localised != null && !localised.isBlank()) return localised;
-        String english = name.get(Language.ENGLISH);
-        return english == null ? String.valueOf(itemId) : english;
+        return ItemNames.nameOf(itemNames, itemId, language);
     }
 
     /**

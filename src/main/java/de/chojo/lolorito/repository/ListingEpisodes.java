@@ -7,11 +7,11 @@ package de.chojo.lolorito.repository;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.chojo.sadu.postgresql.types.PostgreSqlTypes;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -80,8 +80,8 @@ public class ListingEpisodes {
 
     public void touch(Collection<Long> ids, Instant now) {
         if (ids.isEmpty()) return;
-        query("UPDATE listing_episode SET last_seen = :now WHERE id IN (%s)".formatted(inList(ids)))
-                .single(call().bind("now", now, INSTANT_TIMESTAMP))
+        query("UPDATE listing_episode SET last_seen = :now WHERE id = ANY(:ids)")
+                .single(call().bind("now", now, INSTANT_TIMESTAMP).bind("ids", ids, PostgreSqlTypes.BIGINT))
                 .update();
     }
 
@@ -103,9 +103,10 @@ public class ListingEpisodes {
                                   AND s.unit_price = e.unit_price AND s.quantity = e.quantity
                                   AND s.sold >= e.first_seen)
                            THEN 'SOLD' ELSE 'DELISTED' END
-                 WHERE e.id IN (%s)
-                """.formatted(inList(ids)))
+                 WHERE e.id = ANY(:ids)
+                """)
                 .single(call().bind("now", now, INSTANT_TIMESTAMP)
+                        .bind("ids", ids, PostgreSqlTypes.BIGINT)
                         .bind("world", world)
                         .bind("item", item))
                 .update();
@@ -232,10 +233,5 @@ public class ListingEpisodes {
                 .delete()
                 .rows();
         return episodes + undercuts;
-    }
-
-    private static String inList(Collection<Long> ids) {
-        // Always numeric — safe to inline; avoids sadu's array-binding limitations.
-        return ids.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 }

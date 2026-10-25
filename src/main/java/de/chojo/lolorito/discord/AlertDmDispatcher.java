@@ -11,8 +11,8 @@ import de.chojo.lolorito.core.Discord;
 import de.chojo.lolorito.entity.AlertKind;
 import de.chojo.lolorito.entity.AlertRule;
 import de.chojo.lolorito.service.AlertDispatcher;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.universalis.WorldNames;
-import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.provider.NameSupplier;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -105,8 +105,6 @@ public class AlertDmDispatcher implements AlertDispatcher {
     }
 
     private String nameOf(int itemId) {
-        if (nameSupplier == null) return String.valueOf(itemId);
-        var name = nameSupplier.fromId(itemId);
-        return name == null ? String.valueOf(itemId) : name.get(Language.ENGLISH);
+        return ItemNames.nameOf(nameSupplier, itemId);
     }
 }

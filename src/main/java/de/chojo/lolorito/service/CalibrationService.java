@@ -11,6 +11,7 @@ import de.chojo.lolorito.repository.ListingEpisodes;
 import de.chojo.lolorito.repository.MarketModelResiduals;
 import de.chojo.lolorito.repository.MarketModels;
 import de.chojo.lolorito.repository.PerfMetrics;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.universalis.WorldNames;
 
 import java.time.Duration;
@@ -85,11 +86,7 @@ public class CalibrationService {
     private static final int MIN_DRILLDOWN_OBSERVATIONS = 5;
 
     private String itemNameOf(int itemId) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var name = itemNames.fromId(itemId);
-        if (name == null) return String.valueOf(itemId);
-        String english = name.get(de.chojo.universalis.entities.Language.ENGLISH);
-        return english == null || english.isBlank() ? String.valueOf(itemId) : english;
+        return ItemNames.nameOf(itemNames, itemId);
     }
 
     /**

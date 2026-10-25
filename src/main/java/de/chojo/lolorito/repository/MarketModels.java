@@ -11,6 +11,7 @@ import de.chojo.lolorito.value.MarketModel;
 import de.chojo.lolorito.value.PriceDistribution;
 import de.chojo.lolorito.value.SaleRate;
 import de.chojo.sadu.mapper.wrapper.Row;
+import de.chojo.sadu.postgresql.types.PostgreSqlTypes;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -106,13 +107,12 @@ public class MarketModels {
      */
     public java.util.Map<Integer, MarketModel> findAll(int worldId, java.util.Collection<Integer> itemIds, boolean hq) {
         if (itemIds.isEmpty()) return java.util.Map.of();
-        String inList = itemIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
         var out = new java.util.HashMap<Integer, MarketModel>();
         query("""
                 SELECT * FROM market_model
-                 WHERE world_id = :world AND hq = :hq AND item_id IN (%s)
-                """.formatted(inList))
-                .single(call().bind("world", worldId).bind("hq", hq))
+                 WHERE world_id = :world AND hq = :hq AND item_id = ANY(:items)
+                """)
+                .single(call().bind("world", worldId).bind("hq", hq).bind("items", itemIds, PostgreSqlTypes.INTEGER))
                 .map(MarketModels::readRow)
                 .all()
                 .forEach(m -> out.put(m.itemId(), m));

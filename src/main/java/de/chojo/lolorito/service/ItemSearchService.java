@@ -7,6 +7,7 @@ package de.chojo.lolorito.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.universalis.entities.Language;
 import de.chojo.universalis.entities.Name;
 import de.chojo.universalis.provider.NameSupplier;
@@ -81,10 +82,7 @@ public class ItemSearchService {
     }
 
     private String displayName(int itemId, Language language) {
-        Name name = nameSupplier.fromId(itemId);
-        if (name == null) return String.valueOf(itemId);
-        String localised = name.get(language);
-        return localised == null || localised.isBlank() ? name.get(Language.ENGLISH) : localised;
+        return ItemNames.nameOf(nameSupplier, itemId, language);
     }
 
     /**

@@ -11,6 +11,7 @@ import de.chojo.lolorito.config.file.File;
 import de.chojo.lolorito.repository.DesynthResults;
 import de.chojo.lolorito.repository.ItemDetail;
 import de.chojo.lolorito.repository.MarketModels;
+import de.chojo.lolorito.universalis.ItemNames;
 import de.chojo.lolorito.value.UserPrefs;
 import de.chojo.lolorito.value.ValueEngine;
 import de.chojo.universalis.entities.Language;
@@ -268,13 +269,7 @@ public class DesynthExplorerService {
     }
 
     private String itemNameOf(int itemId, Language language) {
-        if (itemNames == null) return String.valueOf(itemId);
-        var n = itemNames.fromId(itemId);
-        if (n == null) return String.valueOf(itemId);
-        String localised = n.get(language);
-        if (localised != null && !localised.isBlank()) return localised;
-        String english = n.get(Language.ENGLISH);
-        return english == null ? String.valueOf(itemId) : english;
+        return ItemNames.nameOf(itemNames, itemId, language);
     }
 
     /**
