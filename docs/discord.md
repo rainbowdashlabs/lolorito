@@ -63,11 +63,6 @@ options are optional.
 
 Finds items that are cheaper on another world than they sell for on your home world. `/offers` has two subcommands.
 
-:::note
-`/offers` is for server administrators by default. Server admins can allow it for other members or roles under
-**Server Settings > Integrations**.
-:::
-
 ### /offers filter
 
 Changes your saved offer filter and shows it. Every option is optional. Options you leave out keep their current

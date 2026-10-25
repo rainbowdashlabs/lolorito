@@ -21,7 +21,6 @@ public class Offers extends SlashCommand {
     public Offers(FilterService filters, UserService users, ItemsService items) {
         super(Slash.of("offers", "The best offers for your world")
                 .unlocalized()
-                .adminCommand()
                 .subCommand(SubCommand.of("filter", "Configure the filter")
                         .handler(new Filter(filters))
                         .argument(Argument.text("world", "Your home world").withAutoComplete())
