@@ -31,7 +31,7 @@ sadu-postgresql = { group = "de.chojo.sadu", name = "sadu-postgresql", version.r
 sadu-datasource = { group = "de.chojo.sadu", name = "sadu-datasource", version.ref = "sadu" }
 
 # Configuration
-ocular = { group = "dev.chojo", name = "ocular", version = "2.2.1" }
+ocular = { group = "dev.chojo", name = "ocular", version = "2.3.0" }
 jackson-core = { group = "tools.jackson.core", name = "jackson-core", version.ref = "jackson" }
 jackson-databind = { group = "tools.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-yaml = { group = "tools.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
