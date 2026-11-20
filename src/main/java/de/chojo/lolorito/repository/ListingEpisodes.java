@@ -221,13 +221,24 @@ public class ListingEpisodes {
                 .all();
     }
 
-    /** Retention: drop ended episodes + undercut events past the horizon. Returns rows removed. */
-    public int clean(int retentionDays) {
+    /**
+     * Retention: drop ended episodes + undercut events past the horizon. Returns rows removed.
+     *
+     * <p>DELISTED episodes get their own, shorter horizon: nothing reads them once
+     * {@link #reclassifySold(int, int, boolean, int, int, Instant)} can no longer flip
+     * them to SOLD, and they make up most of the table.
+     */
+    public int clean(int retentionDays, int delistedRetentionDays) {
         String days = String.valueOf(Math.max(1, retentionDays));
+        String delistedDays = String.valueOf(Math.max(1, delistedRetentionDays));
         int episodes = query("""
                 DELETE FROM listing_episode
-                 WHERE ended_at IS NOT NULL AND ended_at < now() - (:days || ' days')::INTERVAL
-                """).single(call().bind("days", days)).delete().rows();
+                 WHERE (end_reason = 'DELISTED' AND ended_at < now() - (:delisted_days || ' days')::INTERVAL)
+                    OR (end_reason = 'SOLD' AND ended_at < now() - (:days || ' days')::INTERVAL)
+                """)
+                .single(call().bind("days", days).bind("delisted_days", delistedDays))
+                .delete()
+                .rows();
         int undercuts = query("DELETE FROM undercut_event WHERE at < now() - (:days || ' days')::INTERVAL")
                 .single(call().bind("days", days))
                 .delete()

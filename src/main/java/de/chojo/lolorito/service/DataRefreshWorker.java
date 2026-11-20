@@ -42,6 +42,9 @@ public class DataRefreshWorker implements Runnable {
     /** Ended episodes older than this feed neither calibration nor detectors — match the sales retention. */
     private static final int EPISODE_RETENTION_DAYS = 60;
 
+    /** DELISTED episodes are only read by the 2-hour late-sale reclassify; one day leaves margin. */
+    private static final int DELISTED_EPISODE_RETENTION_DAYS = 1;
+
     /** View counters only feed the 7-day {@code world_item_views} window; one spare day covers the boundary. */
     private static final int VIEW_RETENTION_DAYS = 8;
 
@@ -64,7 +67,7 @@ public class DataRefreshWorker implements Runnable {
     public void run() {
         int clean = sales.clean();
         log.debug("Deleted {} sales", clean);
-        int episodeClean = episodes.clean(EPISODE_RETENTION_DAYS);
+        int episodeClean = episodes.clean(EPISODE_RETENTION_DAYS, DELISTED_EPISODE_RETENTION_DAYS);
         log.debug("Deleted {} ended listing episodes / undercut events", episodeClean);
         int viewClean = listings.cleanViews(VIEW_RETENTION_DAYS);
         log.debug("Deleted {} listing view counters", viewClean);

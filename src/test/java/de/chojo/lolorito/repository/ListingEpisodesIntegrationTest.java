@@ -145,8 +145,25 @@ class ListingEpisodesIntegrationTest extends RepositoryTestBase {
         differ.onSnapshot(WORLD, ITEM, List.of(), ancient.plus(Duration.ofHours(1)));
         differ.onSnapshot(WORLD, ITEM, List.of(listing("r2", 1000, 1, false)), Instant.now());
 
-        int removed = episodes.clean(60);
+        int removed = episodes.clean(60, 1);
         assertEquals(1, removed);
         assertEquals(1, episodes.openFor(WORLD.id(), ITEM.id()).size(), "Open episodes never expire via clean");
+    }
+
+    @Test
+    void cleanDropsDelistedEpisodesOnShorterHorizonThanSold() {
+        var posted = Instant.now().minus(Duration.ofDays(3));
+        differ.onSnapshot(WORLD, ITEM, List.of(listing("r1", 1000, 2, false), listing("r2", 1500, 1, false)), posted);
+        sales.addSales(
+                WORLD,
+                ITEM,
+                List.of(new Sale(
+                        false, new Price(1000, 2, 2000), posted.plus(Duration.ofHours(1)), false, WORLD, null)));
+        differ.onSnapshot(WORLD, ITEM, List.of(), posted.plus(Duration.ofHours(2)));
+
+        int removed = episodes.clean(60, 1);
+
+        assertEquals(1, removed, "Only the DELISTED episode is past its horizon");
+        assertEquals(1, episodes.recentSold(7, 10).size(), "SOLD episodes keep the long horizon");
     }
 }
